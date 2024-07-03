@@ -1,0 +1,5 @@
+ant.lifecycleLogLevel = "INFO"
+ant.failOnError = true
+ant.importBuild('build.xml') { antTargetName ->
+  'a-' + antTargetName
+}
