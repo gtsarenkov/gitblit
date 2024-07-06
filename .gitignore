@@ -36,3 +36,4 @@ tags
 
 # Ignore Gradle build output directory
 build
+*.log
