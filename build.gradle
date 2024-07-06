@@ -22,7 +22,7 @@ sourceSets {
 }
 
 project('gitblit-bom') {
-    apply from: "${rootProject.layout.projectDirectory}/build-bom.gradle"
+    apply from: "build-bom.gradle"
 }
 
 ant.lifecycleLogLevel = "INFO"
