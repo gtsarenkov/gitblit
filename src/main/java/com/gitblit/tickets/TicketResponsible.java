@@ -17,7 +17,7 @@ package com.gitblit.tickets;
 
 import java.io.Serializable;
 
-import org.parboiled.common.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.gitblit.models.UserModel;
 

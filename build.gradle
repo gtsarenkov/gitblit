@@ -1,5 +1,119 @@
+plugins {
+    id 'java'
+    id 'idea'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/bugtraq'
+        }
+    }
+    test {
+        java {
+            srcDir 'src/test/bugtraq'
+            srcDir 'src/test/generated'
+        }
+    }
+}
+
+project('gitblit-bom') {
+    apply from: "${rootProject.layout.projectDirectory}/build-bom.gradle"
+}
+
 ant.lifecycleLogLevel = "INFO"
 ant.failOnError = true
 ant.importBuild('build.xml') { antTargetName ->
-  'a-' + antTargetName
+    'a-' + antTargetName
+}
+
+group = "com.gitblit"
+version = "0.10.0-JDisc"
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+ext['selenium.version'] = '2.28.0'
+
+dependencies {
+    implementation(platform(project(':gitblit-bom')))
+    implementation("org.slf4j:slf4j-api")
+    implementation('org.eclipse.jgit:org.eclipse.jgit')
+    implementation('org.eclipse.jgit:org.eclipse.jgit.http.server')
+    implementation('org.kohsuke.args4j:args4j-maven-plugin')
+    implementation('com.google.inject:guice')
+    implementation('com.unboundid:unboundid-ldapsdk')
+    implementation('commons-io:commons-io')
+    implementation('com.google.code.gson:gson')
+    implementation('org.kohsuke:libpam4j')
+    implementation('com.github.dblock.waffle:waffle-jna')
+    implementation('com.force.api:force-partner-api')
+    implementation("org.bouncycastle:bcprov-jdk18on")
+    implementation("org.bouncycastle:bcmail-jdk18on")
+    implementation("org.bouncycastle:bcpkix-jdk18on")
+    implementation('com.toedter:jcalendar')
+    implementation('org.apache.sshd:sshd-core')
+    implementation('org.apache.lucene:lucene-core')
+    implementation('org.apache.lucene:lucene-analyzers-common')
+    implementation('org.apache.lucene:lucene-highlighter')
+    implementation('org.apache.lucene:lucene-memory')
+    implementation('org.apache.lucene:lucene-queryparser')
+    implementation('org.codehaus.groovy:groovy-all')
+    implementation('org.jetbrains:annotations')
+    runtimeOnly('ch.qos.reload4j:reload4j')
+    implementation('org.slf4j:slf4j-reload4j')
+    implementation('net.i2p.crypto:eddsa')
+    implementation('org.apache.mina:mina-core')
+    implementation('org.apache.tika:tika-core')
+    implementation('org.apache.commons:commons-compress')
+    implementation('redis.clients:jedis')
+    implementation('org.jsoup:jsoup')
+    implementation('org.pegdown:pegdown')
+
+    implementation('org.fusesource.wikitext:wikitext-core')
+    implementation('org.fusesource.wikitext:twiki-core')
+    implementation('org.fusesource.wikitext:textile-core')
+    implementation('org.fusesource.wikitext:tracwiki-core')
+    implementation('org.fusesource.wikitext:mediawiki-core')
+    implementation('org.fusesource.wikitext:confluence-core')
+
+    implementation('rome:rome')
+    implementation('org.freemarker:freemarker')
+
+//    implementation('com.sun.mail:javax.mail')
+
+    implementation('com.google.inject.extensions:guice-servlet')
+
+    implementation('org.eclipse.jetty:jetty-servlet')
+    implementation('org.eclipse.jetty:jetty-security')
+    implementation('org.eclipse.jetty:jetty-server')
+    implementation('org.eclipse.jetty:jetty-continuation')
+    implementation('org.eclipse.jetty:jetty-http')
+    implementation('org.eclipse.jetty:jetty-io')
+    implementation('org.eclipse.jetty:jetty-util')
+    implementation('org.eclipse.jetty:jetty-webapp')
+    implementation('org.eclipse.jetty:jetty-xml')
+
+    implementation('org.apache.wicket:wicket')
+    implementation('org.apache.wicket:wicket-auth-roles')
+    implementation('org.apache.wicket:wicket-extensions')
+    implementation('ro.fortsoft.pf4j:pf4j')
+    implementation('javax.mail:mail:latest.release')
+    implementation 'javax.servlet:javax.servlet-api'
+
+    testImplementation('org.mockito:mockito-core:2.28.2')
+    testImplementation("org.seleniumhq.selenium:selenium-java:${property('selenium.version')}")
+    testImplementation("org.seleniumhq.selenium:selenium-support:${property('selenium.version')}")
+    testImplementation("org.seleniumhq.selenium:selenium-firefox-driver:${property('selenium.version')}")
 }
