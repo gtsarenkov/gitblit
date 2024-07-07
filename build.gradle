@@ -53,7 +53,7 @@ tasks.register("processResourcesFromJavaSources", Copy) {
         }
         into sourceSets.main.output.classesDirs.asPath
         filter ReplaceTokens, tokens: [
-                'gb.version': project.property('gb.version')
+                'gb.version': project.property('gb.version').toString()
         ]
     }
 }
