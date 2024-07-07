@@ -429,13 +429,13 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library name="pegdown-1.5.0.jar">
+      <library name="pegdown-1.6.0.jar">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/ext/pegdown-1.5.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/ext/pegdown-1.6.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/ext/src/pegdown-1.5.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/ext/src/pegdown-1.6.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -841,6 +841,17 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$MODULE_DIR$/ext/src/commons-io-2.11.0.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="commons-lang3-3.14.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/ext/commons-lang3-3.14.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/ext/src/commons-lang3-3.14.0.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

@@ -159,7 +159,7 @@ dependencies:
 - compile 'org.apache.lucene:lucene-highlighter:${lucene.version}' :war :fedclient !org.apache.lucene:lucene-join
 - compile 'org.apache.lucene:lucene-memory:${lucene.version}' :war :fedclient
 - compile 'org.apache.lucene:lucene-queryparser:${lucene.version}' :war :fedclient !org.apache.lucene:lucene-spatial
-- compile 'org.pegdown:pegdown:1.5.0' :war
+- compile 'org.pegdown:pegdown:1.6.0' :war
 - compile 'org.fusesource.wikitext:wikitext-core:${wikitext.version}' :war
 - compile 'org.fusesource.wikitext:twiki-core:${wikitext.version}' :war
 - compile 'org.fusesource.wikitext:textile-core:${wikitext.version}' :war
@@ -182,6 +182,7 @@ dependencies:
 - compile 'com.toedter:jcalendar:1.3.2' :authority
 - compile 'org.apache.commons:commons-compress:1.24.0' :war
 - compile 'commons-io:commons-io:2.11.0' :war
+- compile 'org.apache.commons:commons-lang3:3.14.0' :war
 - compile 'com.force.api:force-partner-api:24.0.0' :war
 - compile 'org.freemarker:freemarker:2.3.22' :war
 - compile 'com.github.dblock.waffle:waffle-jna:1.7.3' :war
