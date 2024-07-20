@@ -56,7 +56,7 @@ ext.minaVersionDef = {
 }
 ext.jgitVersionDef = {
     version {
-        strictly '[4.0.0,5.0.0['
+        strictly '[4.0.0,7.0.0['
         //prefer 'latest.version'
     }
 }
@@ -135,6 +135,7 @@ dependencies {
 
         api('org.eclipse.jgit:org.eclipse.jgit', jgitVersionDef)
         api('org.eclipse.jgit:org.eclipse.jgit.http.server', jgitVersionDef)
+        api('org.eclipse.jgit:org.eclipse.jgit.ssh.jsch', jgitVersionDef)
 
         api("org.apache.wicket:wicket", wicketVersionDef)
         api("org.apache.wicket:wicket-auth-roles", wicketVersionDef)

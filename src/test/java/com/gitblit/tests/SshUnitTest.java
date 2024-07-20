@@ -95,6 +95,12 @@ public abstract class SshUnitTest extends GitblitUnitTest {
 			}
 
 			@Override
+			public FileBasedConfig openJGitConfig(Config parent, FS fs)
+			{
+				return defaultsr.openJGitConfig(parent, fs);
+			}
+
+			@Override
 			public FileBasedConfig openUserConfig(Config parent, FS fs)
 			{
 				return defaultsr.openUserConfig(parent, fs);
