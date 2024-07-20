@@ -77,7 +77,15 @@ jar {
 
 application {
     mainClass = 'com.gitblit.GitBlitServer'
-    applicationDefaultJvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED"]
+    applicationDefaultJvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED", "--add-opens", "java.base/java.net=ALL-UNNAMED"]
+}
+
+tasks.register('runDebug', JavaExec) {
+    dependsOn classes
+    group = "application"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.gitblit.GitBlitServer'
+    jvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED", "--add-opens", "java.base/java.net=ALL-UNNAMED", "-Djavax.net.debug=all", "-Djavax.net.ssl=all"]
 }
 
 ext['selenium.version'] = '2.28.0'

@@ -35,7 +35,7 @@ import com.gitblit.utils.StringUtils;
  *
  * @author James Moger
  */
-public class GitblitSslContextFactory extends SslContextFactory {
+public class GitblitSslContextFactory extends SslContextFactory.Server {
 
 	private static final Logger logger = LoggerFactory.getLogger(GitblitSslContextFactory.class);
 
@@ -43,7 +43,8 @@ public class GitblitSslContextFactory extends SslContextFactory {
 
 	public GitblitSslContextFactory(String certAlias, File keyStore, File clientTrustStore,
 			String storePassword, File caRevocationList) {
-		super(keyStore.getAbsolutePath());
+		super();
+		setKeyStorePath(keyStore.getAbsolutePath());
 
 		this.caRevocationList = caRevocationList;
 

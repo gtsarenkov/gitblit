@@ -7,7 +7,7 @@ ext['lucene.version'] = 'latest.release' // '5.5.2'
 ext['sshd.version'] = 'latest.release' // 1.7.0 // TODO
 ext['mina.version'] = 'latest.release' // 2.0.25
 ext['groovy.version'] = 'latest.release' // 2.4.4
-ext['jetty.version'] = '9.4.49.v20220914' // TODO 'latest.release' // 9.4.49.v20220914
+ext['jetty.version'] = '9.4.55.v20240627' // TODO 'latest.release' // 9.4.49.v20220914
 ext['guice-servlet.version'] = 'latest.release' // 5.1.0-gb2
 ext['wikitext.version'] = 'latest.release' // 1.4
 
