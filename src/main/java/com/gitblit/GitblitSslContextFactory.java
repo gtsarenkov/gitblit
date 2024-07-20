@@ -17,11 +17,11 @@ package com.gitblit;
 
 import java.io.File;
 import java.security.KeyStore;
+import java.security.SecureRandom;
 import java.security.cert.CRL;
 import java.util.Collection;
 
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.*;
 
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
@@ -65,12 +65,21 @@ public class GitblitSslContextFactory extends SslContextFactory.Server {
 	@Override
 	protected TrustManager[] getTrustManagers(KeyStore trustStore, Collection<? extends CRL> crls)
 			throws Exception {
+		final TrustManagerFactory trustManagerFactoryDefault = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+		trustManagerFactoryDefault.init((KeyStore) null);
+		final TrustManager[] trustManagersGitblit = trustManagerFactoryDefault.getTrustManagers();
 		TrustManager[] managers = super.getTrustManagers(trustStore, crls);
-		X509TrustManager delegate = (X509TrustManager) managers[0];
-		GitblitTrustManager root = new GitblitTrustManager(delegate, caRevocationList);
 
-		// replace first manager with the GitblitTrustManager
-		managers[0] = root;
-		return managers;
+		GitblitTrustManager rootTrustManager = new GitblitTrustManager(caRevocationList, trustManagersGitblit, managers);
+
+		KeyManager[] keyManagers = getKeyManagers(trustStore);
+
+		final SSLContext sslContext = SSLContext.getInstance("TLS");
+		sslContext.init(keyManagers, new TrustManager[]{rootTrustManager}, SecureRandom.getInstanceStrong());
+		final SSLContext sslContext2 = SSLContext.getInstance("SSL");
+		sslContext2.init(keyManagers, new TrustManager[]{rootTrustManager}, SecureRandom.getInstanceStrong());
+		SSLContext.setDefault(sslContext);
+
+		return new TrustManager[]{rootTrustManager};
 	}
 }

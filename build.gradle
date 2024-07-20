@@ -85,7 +85,8 @@ tasks.register('runDebug', JavaExec) {
     group = "application"
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'com.gitblit.GitBlitServer'
-    jvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED", "--add-opens", "java.base/java.net=ALL-UNNAMED", "-Djavax.net.debug=all", "-Djavax.net.ssl=all"]
+    //jvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED", "--add-opens", "java.base/java.net=ALL-UNNAMED", "-Djavax.net.debug=all", "-Djavax.net.ssl=all"]
+    jvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED", "--add-opens", "java.base/java.net=ALL-UNNAMED", "-Djavax.net.debug=all", "-Djava.security.debug=all", "-Djavax.net.ssl=trustmanager"]
 }
 
 ext['selenium.version'] = '2.28.0'
