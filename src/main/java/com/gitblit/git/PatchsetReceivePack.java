@@ -247,7 +247,7 @@ public class PatchsetReceivePack extends GitblitReceivePack {
 		ticketNotifier.sendAll();
 	}
 
-	@Override
+	/*@Override
 	protected void validateCommands() {
 		// workaround for JGit's awful scoping choices
 		//
@@ -261,7 +261,7 @@ public class PatchsetReceivePack extends GitblitReceivePack {
 		}
 
 		super.validateCommands();
-	}
+	}*/
 
 	/** Execute commands to update references. */
 	@Override
@@ -295,9 +295,9 @@ public class PatchsetReceivePack extends GitblitReceivePack {
 		}
 
 		ProgressMonitor updating = NullProgressMonitor.INSTANCE;
-		boolean sideBand = isCapabilityEnabled(CAPABILITY_SIDE_BAND_64K);
+		boolean sideBand = isSideBand();
 		if (sideBand) {
-			SideBandProgressMonitor pm = new SideBandProgressMonitor(msgOut);
+			SideBandProgressMonitor pm = new SideBandProgressMonitor(getMessageOutputStream());
 			pm.setDelayStart(250, TimeUnit.MILLISECONDS);
 			updating = pm;
 		}
@@ -422,8 +422,12 @@ public class PatchsetReceivePack extends GitblitReceivePack {
 				}
 
 				patchsetRefCmd = cmd;
-				patchsetCmd = preparePatchset(cmd);
-				if (patchsetCmd != null) {
+                try {
+                    patchsetCmd = preparePatchset(cmd);
+                } catch (IOException e) {
+                    throw new IllegalStateException("Cannot prepare patchset for command " + cmd, e);
+                }
+                if (patchsetCmd != null) {
 					batch.addCommand(patchsetCmd);
 				}
 				continue;
@@ -535,7 +539,7 @@ public class PatchsetReceivePack extends GitblitReceivePack {
 	 * @param cmd
 	 * @return the patchset command
 	 */
-	private PatchsetCommand preparePatchset(ReceiveCommand cmd) {
+	private PatchsetCommand preparePatchset(ReceiveCommand cmd) throws IOException {
 		String branch = getIntegrationBranch(cmd.getRefName());
 		long number = getTicketId(cmd.getRefName());
 
@@ -1272,7 +1276,7 @@ public class PatchsetReceivePack extends GitblitReceivePack {
 		String message = MessageFormat.format("Merged #{0,number,0} \"{1}\"", ticket.number, ticket.title);
 		Ref oldRef = null;
 		try {
-			oldRef = getRepository().getRef(ticket.mergeTo);
+			oldRef = getRepository().findRef(ticket.mergeTo);
 		} catch (IOException e) {
 			LOGGER.error("failed to get ref for " + ticket.mergeTo, e);
 		}
