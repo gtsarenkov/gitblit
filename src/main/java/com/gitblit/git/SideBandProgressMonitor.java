@@ -45,6 +45,7 @@ package com.gitblit.git;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.Duration;
 
 import org.eclipse.jgit.lib.BatchingProgressMonitor;
 import org.eclipse.jgit.lib.Constants;
@@ -61,45 +62,47 @@ class SideBandProgressMonitor extends BatchingProgressMonitor {
 	}
 
 	@Override
-	protected void onUpdate(String taskName, int workCurr) {
+	protected void onUpdate(String taskName, int workCurr, Duration duration) {
 		StringBuilder s = new StringBuilder();
-		format(s, taskName, workCurr);
+		format(s, taskName, workCurr, duration);
 		s.append("   \r"); //$NON-NLS-1$
 		send(s);
 	}
 
 	@Override
-	protected void onEndTask(String taskName, int workCurr) {
+	protected void onEndTask(String taskName, int workCurr, Duration duration) {
 		StringBuilder s = new StringBuilder();
-		format(s, taskName, workCurr);
+		format(s, taskName, workCurr, duration);
 		s.append(", done\n"); //$NON-NLS-1$
 		send(s);
 	}
 
-	private void format(StringBuilder s, String taskName, int workCurr) {
+	private void format(StringBuilder s, String taskName, int workCurr, Duration duration) {
 		s.append(taskName);
 		s.append(": "); //$NON-NLS-1$
 		s.append(workCurr);
+		s.append(" "); //$NON-NLS-1$
+		s.append(duration);
 	}
 
 	@Override
-	protected void onUpdate(String taskName, int cmp, int totalWork, int pcnt) {
+	protected void onUpdate(String taskName, int cmp, int totalWork, int pcnt, Duration duration) {
 		StringBuilder s = new StringBuilder();
-		format(s, taskName, cmp, totalWork, pcnt);
+		format(s, taskName, cmp, totalWork, pcnt, duration);
 		s.append("   \r"); //$NON-NLS-1$
 		send(s);
 	}
 
 	@Override
-	protected void onEndTask(String taskName, int cmp, int totalWork, int pcnt) {
+	protected void onEndTask(String taskName, int cmp, int totalWork, int pcnt, Duration duration) {
 		StringBuilder s = new StringBuilder();
-		format(s, taskName, cmp, totalWork, pcnt);
+		format(s, taskName, cmp, totalWork, pcnt, duration);
 		s.append("\n"); //$NON-NLS-1$
 		send(s);
 	}
 
 	private void format(StringBuilder s, String taskName, int cmp,
-			int totalWork, int pcnt) {
+			int totalWork, int pcnt, Duration duration) {
 		s.append(taskName);
 		s.append(": "); //$NON-NLS-1$
 		if (pcnt < 100)
@@ -111,7 +114,8 @@ class SideBandProgressMonitor extends BatchingProgressMonitor {
 		s.append(cmp);
 		s.append("/"); //$NON-NLS-1$
 		s.append(totalWork);
-		s.append(")"); //$NON-NLS-1$
+		s.append(") "); //$NON-NLS-1$
+		s.append(duration);
 	}
 
 	private void send(StringBuilder s) {

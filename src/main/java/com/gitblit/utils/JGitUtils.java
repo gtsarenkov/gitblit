@@ -2968,7 +2968,7 @@ public class JGitUtils {
 	 * @param commit 
 	 * @return ticket number, or 0 if no ticket
 	 */
-	public static long getTicketNumberFromCommitBranch(Repository repository, RevCommit commit) {
+	public static long getTicketNumberFromCommitBranch(Repository repository, RevCommit commit) throws IOException {
 		// try lookup by change ref
 		Map<AnyObjectId, Set<Ref>> map = repository.getAllRefsByPeeledObjectId();
 		Set<Ref> refs = map.get(commit.getId());

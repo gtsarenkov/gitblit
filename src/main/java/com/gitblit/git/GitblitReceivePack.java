@@ -502,9 +502,9 @@ public class GitblitReceivePack extends ReceivePack implements PreReceiveHook, P
 		}
 
 		ProgressMonitor updating = NullProgressMonitor.INSTANCE;
-		boolean sideBand = isCapabilityEnabled(CAPABILITY_SIDE_BAND_64K);
+		boolean sideBand = isSideBand();
 		if (sideBand) {
-			SideBandProgressMonitor pm = new SideBandProgressMonitor(msgOut);
+			SideBandProgressMonitor pm = new SideBandProgressMonitor(getMessageOutputStream());
 			pm.setDelayStart(250, TimeUnit.MILLISECONDS);
 			updating = pm;
 		}

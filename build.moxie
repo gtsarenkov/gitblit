@@ -72,12 +72,18 @@ resourceDirectories:
 # compile for Java 8 class format
 tasks: {
 	'mx:javac' : {
-        source: 1.8
-        target: 1.8
-        compiler: javac1.8
+        source: 21
+        target: 21
+        compiler: javac10+
         encoding: UTF-8
         # stop complaints about bootstrap classpath when compiling with Java 7
         # compilerArgs: '-Xlint:-options'
+    }
+	'mx:doc' : {
+        compiler: javac10+
+        encoding: UTF-8
+        # stop complaints about bootstrap classpath when compiling with Java 7
+        compilerArgs: '--add-opens java.base/java.lang=ALL-UNNAMED'
     }
 }
 
@@ -109,7 +115,7 @@ properties: {
   slf4j.version  : 1.7.36
   wicket.version : 1.4.22
   lucene.version : 5.5.2
-  jgit.version   : 4.11.9.201909030838-r
+  jgit.version   : 6.10.0.202406032230-r
   groovy.version : 2.4.4
   bouncycastle.version : 1.69
   selenium.version : 2.28.0
