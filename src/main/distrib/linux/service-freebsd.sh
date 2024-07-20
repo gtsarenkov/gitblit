@@ -22,7 +22,7 @@ restart_cmd="${name}_restart"
 GITBLIT_PATH=/opt/gitblit
 GITBLIT_BASE_FOLDER=/opt/gitblit/data
 . ${GITBLIT_PATH}/java-proxy-config.sh
-COMMAND_LINE="java -server -Xmx1024M ${JAVA_PROXY_CONFIG} -Djava.awt.headless=true -cp gitblit.jar:ext/* com.gitblit.GitBlitServer --baseFolder $GITBLIT_BASE_FOLDER"
+COMMAND_LINE="java -server -Xmx1024M ${JAVA_PROXY_CONFIG} -Djava.awt.headless=true --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED -cp gitblit.jar:ext/* com.gitblit.GitBlitServer --baseFolder $GITBLIT_BASE_FOLDER"
 
 gitblit_start()
 {

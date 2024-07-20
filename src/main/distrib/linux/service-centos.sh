@@ -11,7 +11,7 @@ GITBLIT_HTTP_PORT=0
 GITBLIT_HTTPS_PORT=8443
 GITBLIT_LOG=/var/log/gitblit.log
 source ${GITBLIT_PATH}/java-proxy-config.sh
-JAVA="java -server -Xmx1024M ${JAVA_PROXY_CONFIG} -Djava.awt.headless=true -cp"
+JAVA="java -server -Xmx1024M ${JAVA_PROXY_CONFIG} -Djava.awt.headless=true --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED -cp"
 
 RETVAL=0
 
