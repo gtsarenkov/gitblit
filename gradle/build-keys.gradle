@@ -1,0 +1,137 @@
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
+
+import java.util.regex.Pattern
+
+@CacheableTask
+abstract class GenerateKeys extends DefaultTask {
+    private static final Logger logger = Logging.getLogger(GenerateKeys.class)
+
+    @InputFile
+    @PathSensitive(PathSensitivity.RELATIVE)
+    final abstract RegularFileProperty propertiesFile = project.objects.fileProperty();
+
+    @Input
+    final abstract Property<String> outputClass = project.objects.property(String.class);
+
+    @Internal
+    final abstract DirectoryProperty todir = project.objects.directoryProperty();
+
+    @OutputFile
+    RegularFileProperty getOutputFile() {
+        def outputFileCalculation = todir.file(convertClassNameToFilePath(this.outputClass.get(), true));
+        logger.info "Output file initialized at: ${outputFileCalculation}";
+        return project.objects.fileProperty().convention(outputFileCalculation.get());
+    }
+
+    GenerateKeys() {}
+
+    private static final Pattern classNamePattern = ~/^(.*)\.([^.]+)$/;
+
+    static String convertClassNameToFilePath(String fullyQualifiedClassName, boolean isSourceFile) {
+        // Replace dots with file separators and append the appropriate extension
+        String filePath = fullyQualifiedClassName.replace('.', '/');
+        if (isSourceFile) {
+            filePath += ".java";
+        } else {
+            filePath += ".class";
+        }
+        return filePath;
+    }
+
+    void outTree(PrintWriter writer, Object treeNodes, int indentation, String fullPath) {
+        logger.info("${fullPath} : ${treeNodes.getClass().getName()}");
+        if (treeNodes instanceof Map<?, ?>) {
+            def attributes = new TreeMap<String, String>();
+            def groups = new TreeMap<String, Map<String, ?>>();
+            for (String key : treeNodes.keySet()) {
+                def newElement = treeNodes[key];
+                if (newElement.getClass() == String || newElement.getClass() == GString) {
+                    def value = key == "_ROOT" ? fullPath : "${fullPath}.${key}";
+                    attributes.put(key, value);
+                } else {
+                    groups.put(key, newElement as Map<String, ?>);
+                }
+            }
+            for (def e : attributes.entrySet()) {
+                writer.println(("\t" * indentation) + "public static final String ${e.key} = \"${e.value}\";");
+                writer.println("")
+            }
+            for (def e : groups.entrySet()) {
+                try {
+                    writer.println(("\t" * indentation) + "public static final class ${e.key} {");
+                    writer.println("")
+                    def value = fullPath == "" ? e.key : "${fullPath}.${e.key}";
+                    outTree(writer, e.value, indentation + 1, value);
+                } finally {
+                    writer.println(("\t" * indentation) + "}");
+                    writer.println("")
+                }
+            }
+        } else {
+            throw new GradleException("Cannot support treeNodes ${treeNodes.getClass().getName()} of element ${fullPath}")
+        }
+    }
+
+    @TaskAction
+    def generateKeys() {
+        def properties = new Properties();
+        propertiesFile.asFile.get().withInputStream { stream -> properties.load(stream)
+        }
+        logger.debug("Loaded ${properties.size()} properties from ${propertiesFile.asFile.get().absolutePath}")
+
+        def result;
+        def propertiesTree = result = new TreeMap<String, ?>();
+        properties.keySet().each { entry ->
+            logger.debug("Found property key ${entry}");
+            if (entry.getClass() != String && entry.getClass() != GString) {
+                throw new GradleException("Found property ${entry} invalid type ${entry.getClass().getName()}");
+            }
+            def nodes = entry.toString().split("\\.");
+            logger.info("Found structural elements ${nodes} for property key ${entry}");
+            def act = result;
+            for (int ii = 0; ii < nodes.size() - 1; ++ii) {
+                if (!act[nodes[ii]]) {
+                    act = act[nodes[ii]] = new TreeMap(["_ROOT": nodes[ii]]);
+                } else {
+                    act = act[nodes[ii]];
+                }
+            }
+            act[nodes[nodes.size() - 1]] = nodes.join(".");
+        }
+
+        def matcher = classNamePattern.matcher(outputClass.get());
+        if (!matcher.matches()) {
+            throw new GradleException("Cannot parse fully qualified output class name ${outputClass.get()}");
+        }
+
+        def packageName = matcher.group(1);
+        def className = matcher.group(2);
+
+        outputFile.asFile.get().withPrintWriter { writer ->
+            writer.println("package ${packageName};");
+            writer.println("");
+            writer.println("""
+/*
+ * This class is auto-generated from a properties file.
+ * Do not version control!
+ */
+""");
+            try {
+                writer.println("public final class ${className} {");
+                writer.println("");
+                this.outTree(writer, propertiesTree, 1, "");
+            } finally {
+                writer.println("}");
+            }
+        }
+    }
+}
+
+class GenerateKeysPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        project.ext.GenerateKeys = GenerateKeys;
+    }
+}
+
+apply plugin: GenerateKeysPlugin

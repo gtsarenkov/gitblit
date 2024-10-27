@@ -29,6 +29,8 @@ project('gitblit-bom') {
     apply from: "build-bom.gradle"
 }
 
+apply from: "gradle/build-keys.gradle"
+
 ant.lifecycleLogLevel = "INFO"
 ant.failOnError = true
 ant.importBuild('build.xml') { antTargetName ->
@@ -62,6 +64,13 @@ processResources.dependsOn processResourcesFromJavaSources
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+
+tasks.register("mxKeys", GenerateKeys).configure {
+    propertiesFile = file("src/main/distrib/data/defaults.properties")
+    outputClass = "com.gitblit.Keys"
+    todir = project.layout.projectDirectory.dir("src/main/java")
+}
+compileJava.dependsOn mxKeys
 
 jar {
     manifest {
