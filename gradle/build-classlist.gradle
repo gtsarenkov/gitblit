@@ -1,0 +1,81 @@
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.*
+import org.gradle.api.GradleException
+import java.nio.file.Path
+import java.nio.file.Files
+import java.nio.file.FileSystems
+import java.nio.file.PathMatcher
+
+@CacheableTask
+abstract class ClassListDependency extends DefaultTask {
+    private static final Logger logger = Logging.getLogger(ClassListDependency.class)
+
+    @Input
+    String mainClass;
+
+    @Input
+    List<String> classes = [];
+
+    @InputFiles
+    @PathSensitive(PathSensitivity.RELATIVE)
+    final abstract ConfigurableFileCollection classpath = project.objects.fileCollection();
+
+    @Input
+    List<String> excludePatterns = [];
+
+    private FileCollection outputFiles = project.objects.fileCollection();
+
+    @OutputFiles
+    FileCollection getOutputFiles() {
+        return outputFiles;
+    }
+
+    @TaskAction
+    void executeTask() {
+        logger.info("Main Class: $mainClass");
+        logger.info("Classpath: $classpath.files");
+        logger.info("Exclude Patterns: $excludePatterns");
+
+        // Resolve mainClass and classes into class files
+        def resolvedClassFiles = (classes + mainClass).collect { className ->
+            this.resolveClassFile(className)
+        }.findAll { it != null }
+
+        // Filter out excluded files
+        outputFiles = project.files(resolvedClassFiles).filter { file ->
+            !isExcluded(file.toPath())
+        }
+
+        logger.info("Output Files: ${outputFiles.files}")
+    }
+
+    protected File resolveClassFile(String className) {
+        def classFileName = className.replace('.', '/') + '.class'
+        def classFile = classpath.files.find { dir ->
+            new File(dir, classFileName).exists()
+        }
+
+        if (classFile == null) {
+            throw new GradleException("Class file for '$className' not found in classpath: $classFileName")
+        }
+
+        return new File(classFile, classFileName)
+    }
+
+    protected boolean isExcluded(Path filePath) {
+        excludePatterns.any { pattern ->
+            PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:$pattern")
+            matcher.matches(filePath)
+        }
+    }
+}
+
+class ClassListDependPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        project.ext.ClassListDependency = ClassListDependency;
+    }
+}
+
+apply plugin: ClassListDependPlugin
