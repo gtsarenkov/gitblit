@@ -481,7 +481,7 @@
 		</zip>
 		
 		<!-- Build API JavaDoc jar -->
-		<mx:javadoc destdir="${javadoc.dir}" charset="utf-8" encoding="utf-8" docencoding="utf-8" redirect="true">
+		<mx:javadoc destdir="${javadoc.dir}" charset="utf-8" encoding="utf-8" docencoding="utf-8" redirect="true" additionalparam="--ignore-source-errors">
 			<fileset dir="${project.src.dir}" defaultexcludes="yes">
 				<include name="com/gitblit/Constants.java"/>
 				<include name="com/gitblit/GitBlitException.java"/>
