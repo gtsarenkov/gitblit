@@ -3,6 +3,7 @@ tags
 /lib
 /ext
 /build
+/build-gradled
 /site
 /git
 /lucene
