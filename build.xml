@@ -9,7 +9,7 @@
 		~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	-->
 	<property name="moxie.version" value="0.10.0" />
-	<property name="moxie.url" value="http://gitblit-org.github.io/moxie/maven" />
+	<property name="moxie.url" value="https://gitblit-org.github.io/moxie/maven" />
 	<property name="moxie.jar" value="moxie-toolkit-${moxie.version}.jar" />
 	<property name="moxie.dir" value="${user.home}/.moxie" />
 
