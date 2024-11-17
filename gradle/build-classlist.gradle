@@ -1,12 +1,24 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.ow2.asm:asm:9.5'
+        classpath 'org.ow2.asm:asm-tree:9.5'
+    }
+}
+
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.*
 import org.gradle.api.GradleException
-import java.nio.file.Path
-import java.nio.file.Files
-import java.nio.file.FileSystems
-import java.nio.file.PathMatcher
+import org.objectweb.asm.*;
+import java.nio.file.*;
+import java.io.IOException;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 @CacheableTask
 abstract class ClassListDependency extends DefaultTask {
@@ -38,10 +50,14 @@ abstract class ClassListDependency extends DefaultTask {
         logger.info("Classpath: $classpath.files");
         logger.info("Exclude Patterns: $excludePatterns");
 
+        final Set<Path> classPathEntries = classpath.files.collect { it.toPath() } ;
+        ClassDependencyCollector collector = new ClassDependencyCollector(classPathEntries);
+
         // Resolve mainClass and classes into class files
-        def resolvedClassFiles = (classes + mainClass).collect { className ->
-            this.resolveClassFile(className)
-        }.findAll { it != null }
+        (classes + mainClass).forEach { className ->
+            collector.collectDependencies(className)
+        }
+        def resolvedClassFiles = collector.visitedClasses;
 
         // Filter out excluded files
         outputFiles = project.files(resolvedClassFiles).filter { file ->
@@ -68,6 +84,126 @@ abstract class ClassListDependency extends DefaultTask {
         excludePatterns.any { pattern ->
             PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:$pattern")
             matcher.matches(filePath)
+        }
+    }
+
+    static class ClassDependencyCollector {
+
+        private final Set<String> visitedClasses = new HashSet<>();
+        private final Set<Path> classPathEntries = new HashSet<>();
+
+        public ClassDependencyCollector(Set<Path> classPath) {
+            classPathEntries.addAll(classPath);
+        }
+
+        public Set<String> collectDependencies(String classFilePath) throws IOException {
+            Set<String> currentDependencies = new HashSet<>();
+            collectDependenciesInternal(classFilePath, currentDependencies);
+            return currentDependencies;
+        }
+
+        private void collectDependenciesInternal(String classFilePath, Set<String> currentDependencies) throws IOException {
+            Path path = Paths.get(classFilePath);
+            if (!Files.exists(path)) {
+                throw new IOException("Class file not found: " + classFilePath);
+            }
+
+            byte[] classBytes = Files.readAllBytes(path);
+            collectDependenciesFromBytes(classBytes, currentDependencies);
+        }
+
+        private void collectDependenciesFromBytes(byte[] classBytes, Set<String> currentDependencies) throws IOException {
+            ClassReader classReader = new ClassReader(classBytes);
+            DependencyVisitor dependencyVisitor = new DependencyVisitor(currentDependencies);
+            classReader.accept(dependencyVisitor, 0);
+
+            for (String dependency : dependencyVisitor.getDependencies()) {
+                if (!visitedClasses.contains(dependency)) {
+                    visitedClasses.add(dependency);
+                    byte[] dependencyBytes = findClassBytes(dependency);
+                    if (dependencyBytes != null) {
+                        collectDependenciesFromBytes(dependencyBytes, currentDependencies);
+                    } else {
+                        System.err.println("Could not find dependency: " + dependency);
+                    }
+                }
+            }
+        }
+
+        private byte[] findClassBytes(String className) throws IOException {
+            String classFileName = className.replace('.', '/') + ".class";
+
+            for (Path entry : classPathEntries) {
+                if (Files.isDirectory(entry)) {
+                    Path classFile = entry.resolve(classFileName);
+                    if (Files.exists(classFile)) {
+                        return Files.readAllBytes(classFile);
+                    }
+                } else if (Files.isRegularFile(entry) && entry.toString().endsWith(".jar")) {
+                    try (JarFile jarFile = new JarFile(entry.toFile())) {
+                        JarEntry jarEntry = jarFile.getJarEntry(classFileName);
+                        if (jarEntry != null) {
+                            return jarFile.getInputStream(jarEntry).readAllBytes();
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        static class DependencyVisitor extends ClassVisitor {
+
+            private final Set<String> dependencies;
+
+            public DependencyVisitor(Set<String> dependencies) {
+                super(Opcodes.ASM9);
+                this.dependencies = dependencies;
+            }
+
+            @Override
+            public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+                if (superName != null) {
+                    dependencies.add(superName.replace('/', '.'));
+                }
+                for (String iface : interfaces) {
+                    dependencies.add(iface.replace('/', '.'));
+                }
+            }
+
+            @Override
+            public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+                dependencies.add(getClassNameFromDescriptor(descriptor));
+                return super.visitAnnotation(descriptor, visible);
+            }
+
+            @Override
+            public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+                dependencies.add(getClassNameFromDescriptor(descriptor));
+                return super.visitField(access, name, descriptor, signature, value);
+            }
+
+            @Override
+            public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+                dependencies.add(getClassNameFromDescriptor(descriptor));
+                if (exceptions != null) {
+                    for (String exception : exceptions) {
+                        dependencies.add(exception.replace('/', '.'));
+                    }
+                }
+                return super.visitMethod(access, name, descriptor, signature, exceptions);
+            }
+
+            public Set<String> getDependencies() {
+                return dependencies;
+            }
+
+            private String getClassNameFromDescriptor(String descriptor) {
+                if (descriptor == null) return null;
+                if (descriptor.startsWith("L") && descriptor.endsWith(";")) {
+                    return descriptor.substring(1, descriptor.length() - 1).replace('/', '.');
+                }
+                return null;
+            }
         }
     }
 }

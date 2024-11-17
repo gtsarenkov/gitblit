@@ -1,0 +1,40 @@
+plugins {
+    id "com.github.ben-manes.versions" version "0.51.0"
+    id "groovy"
+    id "java-test-fixtures"
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url "https://gitblit-org.github.io/moxie/maven"
+        group "com.gitblit"
+    }
+}
+
+sourceSets {
+    testFixtures {
+        java {
+            srcDir "src/moxie/java"
+        }
+    }
+}
+
+logger.lifecycle "Source Set ${sourceSets.main.java.srcDirs}"
+
+dependencies {
+    implementation 'org.ow2.asm:asm:9.7.1'
+    implementation 'org.ow2.asm:asm-tree:9.7.1'
+    implementation 'org.ow2.asm:asm-util:9.7.1'
+    //runtimeOnly 'com.gitblit.moxie:moxie-toolkit:0.10.0'
+    testImplementation(testFixtures(project))
+    testImplementation 'org.hamcrest:hamcrest-core:2.2'
+    testImplementation 'org.hamcrest:hamcrest-library:2.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}

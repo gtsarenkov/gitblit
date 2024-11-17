@@ -4,6 +4,7 @@ plugins {
     id 'java'
     id 'idea'
     id 'application'
+    id "com.github.ben-manes.versions" version "0.51.0"
 }
 
 repositories {
@@ -24,18 +25,28 @@ sourceSets {
             srcDir 'src/test/generated'
         }
     }
+    federationClient {
+        java {
+        }
+        runtimeClasspath += main.runtimeClasspath
+    }
 }
+
+// Temporary change the build directory to a custom location
+buildDir = 'build-gradled'
 
 project('gitblit-bom') {
     apply from: "build-bom.gradle"
 }
 
 apply from: "gradle/build-keys.gradle"
+apply from: "gradle/build-classlist.gradle"
 
 ant.lifecycleLogLevel = "INFO"
+//ant.lifecycleLogLevel = "VERBOSE"
 ant.failOnError = true
 ant.importBuild('build.xml') { antTargetName ->
-    'a-' + antTargetName
+    'a-' + antTargetName.replace(":",  "-")
 }
 clean.dependsOn("a-clean")
 
@@ -99,8 +110,6 @@ tasks.register('runDebug', JavaExec) {
     //jvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED", "--add-opens", "java.base/java.net=ALL-UNNAMED", "-Djavax.net.debug=all", "-Djavax.net.ssl=all"]
     jvmArgs = ["--add-opens", "java.base/java.lang=ALL-UNNAMED", "--add-opens", "java.base/java.net=ALL-UNNAMED", "-Djavax.net.debug=all", "-Djava.security.debug=all", "-Djavax.net.ssl=trustmanager"]
 }
-
-ext['selenium.version'] = '2.28.0'
 
 dependencies {
     implementation(platform(project(':gitblit-bom')))
@@ -175,8 +184,66 @@ dependencies {
 }
 
 tasks.register('federationClassList', ClassListDependency) {
+    dependsOn compileJava
     mainClass = 'com.gitblit.FederationClient'
     classpath = configurations.runtimeClasspath + sourceSets.main.output.classesDirs
     excludePatterns = ['**/.class', '**/*.java', '**/Thumbs.db', '**/*.mkd', '**/*.md', '**/*.css', 'com/gitblit/wicket/**']
+    //classes = ['com.gitblit.Keys']
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.gitblit.GitBlitServer'
+        attributes 'Specification-Title': "GitBlit Server"
+        attributes 'Specification-Version': "${version}"
+        attributes 'Specification-Vendor': "Development"
+        attributes 'Implementation-Title': project.name
+        attributes 'Implementation-Version': project.version
+        attributes 'Implementation-Vendor': "Development"
+    }
+}
+
+tasks.register("addFilesToFederationClientOutput", AddFilesToOutputTask).configure {
+//    classes = ['com.gitblit.Keys']
+//    runtimeClasspath = sourceSets.federationClient.runtimeClasspath
+//    outputDirs = sourceSets.federationClient.output.classesDirs
+//    excludePatterns = ['**/.class', '**/*.java', '**/Thumbs.db', '**/*.mkd', '**/*.md', '**/*.css', 'com/gitblit/wicket/**']
+    mainClass = 'com.gitblit.FederationClient'
     classes = ['com.gitblit.Keys']
+    runtimeClasspath = sourceSets.federationClient.runtimeClasspath
+    outputDirs = sourceSets.federationClient.output.classesDirs
+    excludePatterns = ['**/.class', '**/*.java', '**/Thumbs.db', '**/*.mkd', '**/*.md', '**/*.css', 'com/gitblit/wicket/**']
+    outputs.upToDateWhen { false }
+//    logger.info("Federation client output on configuration: ${sourceSets.federationClient.output.getClass().name}")
+//    sourceSets.federationClient.output.classesDirs.each {  dd -> logger.info("Federation client output on configuration: ${dd.name}") }
+//    doLast {
+//        def extraFile = file('path/to/extra/classes')
+//        if (extraFile.exists()) {
+//            sourceSets.federationClient.output.dir(extraFile)
+//        }
+//    }
+}
+compileJava.finalizedBy tasks.named("addFilesToFederationClientOutput")
+
+// TODO: fatJar
+task federationClientJar(type: Jar) {
+    group = 'build'
+    federationClientJar.dependsOn addFilesToFederationClientOutput
+    archiveClassifier.set('federationClient')
+    from sourceSets.federationClient.output
+
+    manifest {
+        attributes(
+            'Main-Class': addFilesToFederationClientOutput.mainClass
+        )
+    }
+
+    // Include additional files or directories if needed
+    // from 'path/to/extra/files'
+
+    exclude '**/SomeUnwantedClass.class'
+}
+
+artifacts {
+    archives federationClientJar
 }
