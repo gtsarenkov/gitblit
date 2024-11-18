@@ -24,17 +24,21 @@ sourceSets {
 logger.lifecycle "Source Set ${sourceSets.main.java.srcDirs}"
 
 dependencies {
+    implementation gradleApi()
     implementation 'org.ow2.asm:asm:9.7.1'
     implementation 'org.ow2.asm:asm-tree:9.7.1'
     implementation 'org.ow2.asm:asm-util:9.7.1'
-    //runtimeOnly 'com.gitblit.moxie:moxie-toolkit:0.10.0'
+    testFixturesImplementation("org.apache.ant:ant:1.10.15")
     testImplementation(testFixtures(project))
     testImplementation 'org.hamcrest:hamcrest-core:2.2'
     testImplementation 'org.hamcrest:hamcrest-library:2.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testImplementation 'org.mockito:mockito-core:4.0.0'
+    //testRuntimeOnly 'com.gitblit.moxie:moxie-toolkit:0.10.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
 test {
     useJUnitPlatform()
+    jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
 }

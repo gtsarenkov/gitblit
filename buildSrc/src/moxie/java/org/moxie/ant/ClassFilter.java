@@ -141,7 +141,7 @@ public class ClassFilter {
 	 * @param log
 	 *            Description of the Parameter
 	 */
-	ClassFilter(Logger log) {
+    public ClassFilter(Logger log) {
 		this.log = log;
 		//
 		// you really do NOT want these included in your

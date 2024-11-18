@@ -4,27 +4,16 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.OutputDirectories
-import org.gradle.api.tasks.OutputFiles
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.provider.SetProperty
+import org.gradle.api.tasks.*
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.Type
-import org.objectweb.asm.tree.ClassNode
-import org.objectweb.asm.tree.FieldInsnNode
-import org.objectweb.asm.tree.InvokeDynamicInsnNode
-import org.objectweb.asm.tree.LdcInsnNode
-import org.objectweb.asm.tree.MethodInsnNode
+import org.objectweb.asm.tree.*
 
 import java.nio.file.FileSystems
 import java.nio.file.PathMatcher
-import java.util.zip.ZipFile
 import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 
 @CacheableTask
 class AddFilesToOutputTask extends DefaultTask {
@@ -32,7 +21,28 @@ class AddFilesToOutputTask extends DefaultTask {
     final Property<String> mainClass = project.objects.property(String)
 
     @Input
-    final ListProperty<String> classes = project.objects.listProperty(String)
+    final SetProperty<String> classes = project.objects.setProperty(String)
+
+    @Input
+    final SetProperty<String> excludes = project.objects.setProperty(String).convention(List.of(
+            "java.",
+            "javax.",
+            "sun.",
+            "sunw.",
+            "com.sun.",
+            "org.omg.",
+            "org.w3c.",
+            "com.ibm.jvm.",
+
+            "boolean",
+            "byte",
+            "char",
+            "short",
+            "int",
+            "long",
+            "float",
+            "double"
+    ))
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
@@ -123,7 +133,7 @@ class AddFilesToOutputTask extends DefaultTask {
 
         Set<String> importedClasses = new TreeSet()
 
-        String relativePath = project.buildDir.toPath().relativize(classFile.toPath()).toString()
+        String relativePath = classNode.name
         // Collect method references
         classNode.methods.each { method ->
             method.instructions.each { instruction ->
@@ -173,7 +183,7 @@ class AddFilesToOutputTask extends DefaultTask {
             }
         }
 
-        def uniqueClasses = importedClasses
+        def uniqueClasses = importedClasses.unique()
 
         return uniqueClasses.findAll { className ->
             !isExcluded(new File(className.replace('.', '/') + ".class"))

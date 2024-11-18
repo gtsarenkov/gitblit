@@ -66,7 +66,7 @@ import org.apache.tools.ant.Project;
  * @author Jesse Stockall
  * @version $Revision: 1.1.1.1 $ $Date: 2002/09/26 20:27:13 $
  */
-class Logger {
+public class Logger {
 	private Project proj;
 
 	private boolean trace = false;
@@ -77,7 +77,7 @@ class Logger {
 	 * @param proj
 	 *            Description of the Parameter
 	 */
-	Logger(Project proj) {
+    public Logger(Project proj) {
 		if (proj == null) {
 			throw new IllegalArgumentException("project may not be null");
 		}
