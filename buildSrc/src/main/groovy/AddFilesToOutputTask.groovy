@@ -61,7 +61,7 @@ class AddFilesToOutputTask extends DefaultTask {
 
     @OutputFiles
     Provider<ConfigurableFileCollection> getOutputFiles() {
-        return outputFiles;
+        return outputFiles
     }
 
     @TaskAction
@@ -83,26 +83,26 @@ class AddFilesToOutputTask extends DefaultTask {
 
         classNames.each { classNameEnc ->
             String className = classNameEnc.replaceAll(regex, '')
-            boolean notFound = true;
+            boolean notFound = true
             String classFilePath = className.replace('.', '/') + ".class"
             classpath.findAll { file -> !outputDirs.contains(file) }.each { file ->
                 if (file.isDirectory()) {
                     File potentialFile = new File(file, classFilePath)
                     if (potentialFile.exists() && !isExcluded(potentialFile)) {
                         classFileData.add(new ResolutionResult(className, file, potentialFile, potentialFile.path - file.path))
-                        notFound = false;
+                        notFound = false
                     }
                 } else if (file.name.endsWith('.jar')) {
                     ZipFile zipFile = new ZipFile(file)
                     if (zipFile.entries().any { ZipEntry entry -> entry.name == classFilePath && !isExcluded(entry) }) {
                         jarFiles.add(file)
-                        notFound = false;
+                        notFound = false
                     }
                 }
             }
             if (notFound) {
                 logger.lifecycle(MessageFormat.format("Class file {0} cannot be found in {1}", classFilePath, classpath.asPath))
-                throw new GradleException(MessageFormat.format("Class file {0} cannot be found", classFilePath));
+                throw new GradleException(MessageFormat.format("Class file {0} cannot be found", classFilePath))
             }
         }
 
@@ -204,15 +204,13 @@ class AddFilesToOutputTask extends DefaultTask {
             importedClasses.add(classNode.nestHostClass.replaceAll('/', '.'))
         }
 
-        def uniqueClasses = importedClasses.unique()
-
-        return uniqueClasses.findAll { className ->
+        return importedClasses.findAll { className ->
             !isExcludedClass(className) &&
                     !isExcluded(new File(className.replace('.', '/') + ".class"))
         }
     }
 
-    protected void collectOuterClasses(ClassNode classNode, Closure closure) {
+    protected static void collectOuterClasses(ClassNode classNode, Closure closure) {
         if (classNode.outerClass != null) {
             closure(classNode.outerClass)
         }
@@ -242,7 +240,7 @@ class AddFilesToOutputTask extends DefaultTask {
         excludePatterns.get().any { pattern -> getPathMatcher("glob:$pattern").matches(path) }
     }
 
-    protected PathMatcher getPathMatcher(String pattern) {
+    protected static PathMatcher getPathMatcher(String pattern) {
         FileSystems.getDefault().getPathMatcher(pattern)
     }
 
