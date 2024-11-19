@@ -210,7 +210,7 @@ tasks.register("addFilesToFederationClientOutput", AddFilesToOutputTask).configu
 //    excludePatterns = ['**/.class', '**/*.java', '**/Thumbs.db', '**/*.mkd', '**/*.md', '**/*.css', 'com/gitblit/wicket/**']
     mainClass = 'com.gitblit.FederationClient'
     classes = ['com.gitblit.Keys']
-    runtimeClasspath = sourceSets.federationClient.runtimeClasspath
+    classpath = sourceSets.federationClient.runtimeClasspath
     outputDirs = sourceSets.federationClient.output.classesDirs
     excludePatterns = ['**/.class', '**/*.java', '**/Thumbs.db', '**/*.mkd', '**/*.md', '**/*.css', 'com/gitblit/wicket/**']
     outputs.upToDateWhen { false }
@@ -228,13 +228,14 @@ compileJava.finalizedBy tasks.named("addFilesToFederationClientOutput")
 // TODO: fatJar
 task federationClientJar(type: Jar) {
     group = 'build'
-    federationClientJar.dependsOn addFilesToFederationClientOutput
-    archiveClassifier.set('federationClient')
+    dependsOn addFilesToFederationClientOutput
+    archiveBaseName.set('fedclient')
     from sourceSets.federationClient.output
 
     manifest {
         attributes(
-            'Main-Class': addFilesToFederationClientOutput.mainClass
+            'Main-Class': addFilesToFederationClientOutput.mainClass,
+            'Class-Path': addFilesToFederationClientOutput.outputFiles.get().files.collect { $it.absolutePath }.join(' ')
         )
     }
 

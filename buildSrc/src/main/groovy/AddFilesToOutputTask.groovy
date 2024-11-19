@@ -12,6 +12,7 @@ import org.objectweb.asm.tree.*
 
 import java.nio.file.FileSystems
 import java.nio.file.PathMatcher
+import java.text.MessageFormat
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
@@ -34,6 +35,8 @@ class AddFilesToOutputTask extends DefaultTask {
             "org.w3c.",
             "com.ibm.jvm.",
 
+            "groovy.",
+
             "boolean",
             "byte",
             "char",
@@ -46,7 +49,7 @@ class AddFilesToOutputTask extends DefaultTask {
 
     @InputFiles
     @PathSensitive(PathSensitivity.RELATIVE)
-    final ConfigurableFileCollection runtimeClasspath = project.objects.fileCollection()
+    final ConfigurableFileCollection classpath = project.objects.fileCollection()
 
     @OutputDirectories
     final ConfigurableFileCollection outputDirs = project.objects.fileCollection()
@@ -63,10 +66,10 @@ class AddFilesToOutputTask extends DefaultTask {
 
     @TaskAction
     void addFiles() {
-        if (runtimeClasspath.isEmpty()) {
-            throw new GradleException("runtimeClasspath for task ${getName()} must not be empty")
+        if (classpath.isEmpty()) {
+            throw new GradleException("Lookup classpath for task ${getName()} must not be empty")
         }
-        runtimeClasspath.each { it -> logger.info("runtimeClasspath: ${it.absolutePath}") }
+        classpath.each { it -> logger.info("${getName()}: lookup classpath: ${it.absolutePath}") }
         Set<ResolutionResult> classFileData = findClassFiles([mainClass.get()] + this.classes.get())
         Set<ResolutionResult> resolvedFiles = resolveImportedClasses(classFileData)
 
@@ -76,21 +79,30 @@ class AddFilesToOutputTask extends DefaultTask {
     protected Set<ResolutionResult> findClassFiles(Collection<String> classNames) {
         Set<ResolutionResult> classFileData = new HashSet<>()
         Set<File> jarFiles = new TreeSet<>()
+        def regex = /^(\[L)|(;$)|(\[]$)/
 
-        classNames.each { className ->
-            runtimeClasspath.findAll { file -> !outputDirs.contains(file) }.each { file ->
-                String classFilePath = className.replace('.', '/') + ".class"
+        classNames.each { classNameEnc ->
+            String className = classNameEnc.replaceAll(regex, '')
+            boolean notFound = true;
+            String classFilePath = className.replace('.', '/') + ".class"
+            classpath.findAll { file -> !outputDirs.contains(file) }.each { file ->
                 if (file.isDirectory()) {
                     File potentialFile = new File(file, classFilePath)
                     if (potentialFile.exists() && !isExcluded(potentialFile)) {
                         classFileData.add(new ResolutionResult(className, file, potentialFile, potentialFile.path - file.path))
+                        notFound = false;
                     }
                 } else if (file.name.endsWith('.jar')) {
                     ZipFile zipFile = new ZipFile(file)
                     if (zipFile.entries().any { ZipEntry entry -> entry.name == classFilePath && !isExcluded(entry) }) {
                         jarFiles.add(file)
+                        notFound = false;
                     }
                 }
+            }
+            if (notFound) {
+                logger.lifecycle(MessageFormat.format("Class file {0} cannot be found in {1}", classFilePath, classpath.asPath))
+                throw new GradleException(MessageFormat.format("Class file {0} cannot be found", classFilePath));
             }
         }
 
@@ -114,11 +126,10 @@ class AddFilesToOutputTask extends DefaultTask {
                 if (!resolvedFiles.contains(result)) {
                     resolvedFiles.add(result)
 
-                    Set<String> importedClasses = new TreeSet(findImportedClasses(result.file))
+                    Set<String> importedClasses = findImportedClasses(result.file)
                     Set<ResolutionResult> resolvedImportedFiles = findClassFiles(importedClasses)
 
                     newClasses.addAll(resolvedImportedFiles.findAll { !resolvedFiles.contains(it) })
-                    resolvedFiles.addAll(resolvedImportedFiles)
                 }
             }
         }
@@ -140,19 +151,19 @@ class AddFilesToOutputTask extends DefaultTask {
                 if (instruction instanceof MethodInsnNode) {
                     def value = instruction.owner.replace('/', '.')
                     importedClasses.add(value)
-                    logger.lifecycle("Method instruction found ${relativePath}: ${value} ${instruction.owner}.${instruction.name}")
+                    logger.info("Method instruction found ${relativePath}: ${value} ${instruction.owner}.${instruction.name}")
                 } else if (instruction instanceof FieldInsnNode) {
                     def value = Type.getType(instruction.desc).className.replace('/', '.')
                     importedClasses.add(value)
-                    logger.lifecycle("Field instruction found ${relativePath}: ${value} ${instruction.owner}.${instruction.name}")
+                    logger.info("Field instruction found ${relativePath}: ${value} ${instruction.owner}.${instruction.name}")
                 } else if (instruction instanceof LdcInsnNode && instruction.cst instanceof Type) {
                     def value = instruction.cst.className.replace('/', '.')
                     importedClasses.add(value)
-                    logger.lifecycle("LDC Type instruction found ${relativePath}: ${value} ${instruction.cst.className}")
+                    logger.info("LDC Type instruction found ${relativePath}: ${value} ${instruction.cst.className}")
                 } else if (instruction instanceof InvokeDynamicInsnNode) {
                     def value = instruction.bsm.owner.replace('/', '.')
                     importedClasses.add(value)
-                    logger.lifecycle("InvokeDynamic instruction found ${relativePath}: ${value} ${instruction.bsm.name}")
+                    logger.info("InvokeDynamic instruction found ${relativePath}: ${value} ${instruction.bsm.name}")
                 }
             }
         }
@@ -160,7 +171,13 @@ class AddFilesToOutputTask extends DefaultTask {
         classNode.fields.each { field ->
             def value = Type.getType(field.desc).className.replace('/', '.')
             importedClasses.add(value)
-            logger.lifecycle("Field found ${relativePath}: ${value} ${field.name}")
+            logger.info("Field found ${relativePath}: ${value} ${field.name}")
+        }
+
+        classNode.interfaces.each {intfName ->
+            def value = intfName.replace('/', '.')
+            importedClasses.add(value)
+            logger.info("Interfaces found ${relativePath}: ${value}")
         }
 
         // Collect inner classes
@@ -168,32 +185,47 @@ class AddFilesToOutputTask extends DefaultTask {
             if (innerClass.name) {
                 def value = innerClass.name.replace('/', '.')
                 importedClasses.add(value)
-                logger.lifecycle("Inner class found ${relativePath}: ${value}")
+                logger.info("Inner class found ${relativePath}: ${value}")
             }
         }
 
         // Collect outer classes
-        collectOuterClasses(classNode) {
-            def outerClass = classNode.outerClass.replace('/', '.')
+        collectOuterClasses(classNode) { outerClassNode ->
+            def outerClass = outerClassNode.replaceAll('/', '.')
             if (!importedClasses.contains(outerClass)) {
-                logger.lifecycle("Outer class found ${relativePath}: ${outerClass}")
+                logger.info("Outer class found ${relativePath}: ${outerClass}")
 
-                def classes = findImportedClasses(outerClassNode)
-                importedClasses.addAll(classes)
+                //def classes = findClassFiles(outerClass)
+                importedClasses.addAll(outerClass)
             }
+        }
+
+        if (Objects.nonNull(classNode.nestHostClass)) {
+            importedClasses.add(classNode.nestHostClass.replaceAll('/', '.'))
         }
 
         def uniqueClasses = importedClasses.unique()
 
         return uniqueClasses.findAll { className ->
-            !isExcluded(new File(className.replace('.', '/') + ".class"))
+            !isExcludedClass(className) &&
+                    !isExcluded(new File(className.replace('.', '/') + ".class"))
         }
     }
 
     protected void collectOuterClasses(ClassNode classNode, Closure closure) {
         if (classNode.outerClass != null) {
-            closure(outerClass)
+            closure(classNode.outerClass)
         }
+    }
+
+    protected boolean isExcludedClass(String className) {
+        def result = excludes.get().any { exclude ->
+            className == exclude || className.startsWith(exclude)
+        }
+        if (result) {
+            logger.debug("Excluded class: ${className}")
+        }
+        return result
     }
 
     protected boolean isExcluded(File file) {
@@ -215,7 +247,7 @@ class AddFilesToOutputTask extends DefaultTask {
     }
 
     protected void processOutputFiles(Set<ResolutionResult> resolvedFiles) {
-        Set<File> jarsInClasspath = runtimeClasspath.files.findAll { it.name.endsWith('.jar') }
+        Set<File> jarsInClasspath = classpath.files.findAll { it.name.endsWith('.jar') }
         Set<String> usedClasses = resolvedFiles.collect { it.file.name.replace('.class', '').replace('/', '.') }
 
         jarsInClasspath.each { jarFile ->
