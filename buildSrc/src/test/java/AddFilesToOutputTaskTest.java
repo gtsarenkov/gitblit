@@ -8,6 +8,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 import org.moxie.ant.ClassFilter;
 import org.moxie.ant.ClassUtil;
 
@@ -32,7 +33,7 @@ class AddFilesToOutputTaskTest {
     }
 
     @BeforeEach
-    void setup() throws IOException {
+    void setup() {
         Project project = ProjectBuilder.builder()
                 .withProjectDir(projectDir)
                 .withGradleUserHomeDir(new File(projectDir, "build/.gradle").getAbsoluteFile())
@@ -88,35 +89,35 @@ class AddFilesToOutputTaskTest {
         logger = addFilesToOutputTask.getLogger();
         resolved.forEach(component -> logger.debug("Resolved class path Jars {}", component.getAbsolutePath()));
         //logger.lifecycle("DDDDDDDDDDDDDD {} {}", buildDir.toPath(), addFilesToOutputTask.getClasspath().getAsPath());
+        logger.info("Main Class File {}:{}", probeFile.toPath().normalize().toAbsolutePath(), probeFile.exists());
     }
 
     @Test
-    void findImportedClasses() throws IOException {
-        logger.info("Main Class File " + probeFile.toPath().normalize().toAbsolutePath() + ":" + probeFile.exists());
+    void findImportedClasses() {
         org.apache.tools.ant.Project mockAntProject = Mockito.mock(org.apache.tools.ant.Project.class);
-        Mockito.doAnswer(invocationOnMock -> {
-            logger.info("Ant-Moxie: {}", invocationOnMock.getArguments()[0]);
-            return null;
-        }).when(mockAntProject).log(Mockito.anyString(), Mockito.anyInt());
+        Mockito.doAnswer(logOnAntProject()).when(mockAntProject).log(Mockito.anyString(), Mockito.anyInt());
         ClassFilter classFilter = new ClassFilter(new org.moxie.ant.Logger(mockAntProject));
-        Set<String> dependencies = new TreeSet<>(expectedDependencies.stream().filter(classFilter::include).map(s -> s.replaceAll("^\\[L(.*?);?$", "$1").replace("/", ".")).collect(Collectors.toList()));
-        dependencies.add("com.gitblit.FederationClient"); // This is known difference.
+        Set<String> expectedDependencies = this.expectedDependencies.stream().filter(classFilter::include).map(s -> s.replaceAll("^\\[L(.*?);?$", "$1").replace("/", ".")).collect(Collectors.toSet());
+        expectedDependencies.add("com.gitblit.FederationClient"); // This is known difference.
         Set<String> importedClasses = addFilesToOutputTask.findImportedClasses(probeFile);
         // This classes found during recursion
         importedClasses.addAll(Set.of("com.gitblit.Keys", "com.gitblit.utils.XssFilter"));
-        MatcherAssert.assertThat(importedClasses, containsInAnyOrder(dependencies.toArray()));
+        MatcherAssert.assertThat(importedClasses, containsInAnyOrder(expectedDependencies.toArray()));
+    }
+
+    private Answer<Void> logOnAntProject() {
+        return invocationOnMock -> {
+            logger.info("Ant-Moxie: {}", invocationOnMock.getArguments()[0]);
+            return null;
+        };
     }
 
     @Test
-    void resolveImportedClasses() throws IOException {
-        logger.info("Main Class File " + probeFile.toPath().normalize().toAbsolutePath() + ":" + probeFile.exists());
+    void resolveImportedClasses() {
         org.apache.tools.ant.Project mockAntProject = Mockito.mock(org.apache.tools.ant.Project.class);
-        Mockito.doAnswer(invocationOnMock -> {
-            logger.info("Ant-Moxie: {}", invocationOnMock.getArguments()[0]);
-            return null;
-        }).when(mockAntProject).log(Mockito.anyString(), Mockito.anyInt());
+        Mockito.doAnswer(logOnAntProject()).when(mockAntProject).log(Mockito.anyString(), Mockito.anyInt());
         ClassFilter classFilter = new ClassFilter(new org.moxie.ant.Logger(mockAntProject));
-        Set<String> dependencies = new TreeSet<>(expectedDependencies.stream().filter(classFilter::include).map(s -> s.replaceAll("^\\[L(.*?);?$", "$1").replace("/", ".")).collect(Collectors.toList()));
+        Set<String> dependencies = expectedDependencies.stream().filter(classFilter::include).map(s -> s.replaceAll("^\\[L(.*?);?$", "$1").replace("/", ".")).filter(name -> name.startsWith("com.gitblit")).collect(Collectors.toSet());
         dependencies.add("com.gitblit.FederationClient"); // This is known difference.
         Set<ResolutionResult> importedClassesResult = addFilesToOutputTask.resolveImportedClasses(new TreeSet<>(Set.of(new ResolutionResult("com.gitblit.FederationClient", new File("../build-gradled"), probeFile, "com/gitblit/FederationClient"))));
         Set<String> importedClasses = importedClassesResult.stream().map(ResolutionResult::getCanonicalClassName).collect(Collectors.toSet());
