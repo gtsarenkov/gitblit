@@ -32,8 +32,12 @@ sourceSets {
     }
 }
 
+configurations {
+    federationClient
+}
+
 // Temporary change the build directory to a custom location
-buildDir = 'build-gradled'
+buildDir = file('build-gradled')
 
 project('gitblit-bom') {
     apply from: "build-bom.gradle"
@@ -46,7 +50,7 @@ ant.lifecycleLogLevel = "INFO"
 //ant.lifecycleLogLevel = "VERBOSE"
 ant.failOnError = true
 ant.importBuild('build.xml') { antTargetName ->
-    'a-' + antTargetName.replace(":",  "-")
+    'a-' + antTargetName.replace(":", "-")
 }
 clean.dependsOn("a-clean")
 
@@ -173,7 +177,18 @@ dependencies {
     implementation('org.apache.wicket:wicket-extensions')
     implementation('ro.fortsoft.pf4j:pf4j')
     implementation('javax.mail:mail:latest.release')
-    implementation 'javax.servlet:javax.servlet-api'
+    implementation('javax.servlet:javax.servlet-api')
+
+    federationClient(platform(project(':gitblit-bom')))
+    federationClient('org.apache.lucene:lucene-core')
+    federationClient('org.apache.lucene:lucene-analyzers-common')
+    federationClient('org.apache.lucene:lucene-highlighter')
+    federationClient('org.apache.lucene:lucene-memory')
+    federationClient('org.apache.lucene:lucene-queryparser')
+    federationClient('org.eclipse.jgit:org.eclipse.jgit')
+    federationClient('com.google.code.gson:gson')
+    federationClient('args4j:args4j')
+    federationClient('com.sun.activation:javax.activation:1.2.0')
 
     testImplementation('org.mockito:mockito-core:2.28.2')
     testImplementation("org.seleniumhq.selenium:selenium-java:${property('selenium.version')}")
@@ -234,15 +249,27 @@ task federationClientJar(type: Jar) {
 
     manifest {
         attributes(
-            'Main-Class': addFilesToFederationClientOutput.mainClass,
-            'Class-Path': addFilesToFederationClientOutput.outputFiles.get().files.collect { $it.absolutePath }.join(' ')
+                'Main-Class': addFilesToFederationClientOutput.mainClass,
+                //'Class-Path': addFilesToFederationClientOutput.outputFiles.get().files.collect { "ext/${it.name}" }.join(' ')
+                'Class-Path': configurations.federationClient.files.collect { "ext/${it.name}" }.join(' ')
         )
     }
 
-    // Include additional files or directories if needed
-    // from 'path/to/extra/files'
+    //exclude '**/SomeUnwantedClass.class'
+}
 
-    exclude '**/SomeUnwantedClass.class'
+distributions {
+    federationClient {
+        distributionBaseName = 'fedclient'
+        contents {
+            from(federationClientJar) {
+                into '/'
+            }
+            from(configurations.federationClient) {
+                into '/ext'
+            }
+        }
+    }
 }
 
 artifacts {

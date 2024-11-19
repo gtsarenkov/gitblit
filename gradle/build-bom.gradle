@@ -153,6 +153,7 @@ dependencies {
 
         api('javax.mail:mail:latest.release') //implementation('com.sun.mail:javax.mail:1.5.6')
         api 'javax.servlet:javax.servlet-api:3.1.0'
+        api('args4j:args4j:latest.release') // 2.37
     }
 }
 
