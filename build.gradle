@@ -22,7 +22,9 @@ sourceSets {
     test {
         java {
             srcDir 'src/test/bugtraq'
-            srcDir 'src/test/generated'
+            // strangely enough but generated folder is not used for generation.
+            // Generated file is placed under src/test/java.
+            // srcDir 'src/test/generated'
         }
     }
     federationClient {
@@ -277,6 +279,13 @@ distributions {
 artifacts {
     archives federationClientJar
 }
+
+tasks.register("mxHelloWorldKeys", GenerateKeys).configure {
+    propertiesFile = file("src/test/data/hello-world.properties")
+    outputClass = "com.gitblit.tests.HelloworldKeys"
+    todir = project.layout.projectDirectory.dir("src/test/java")
+}
+compileTestJava.dependsOn mxHelloWorldKeys
 
 test {
     useJUnit()
