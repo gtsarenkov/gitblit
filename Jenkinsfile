@@ -63,9 +63,9 @@ pipeline {
     post {
         always {
             // Archive the build artifacts, assuming they are in the 'build/libs' directory
-            archiveArtifacts artifacts: '**/build/libs/*.jar', allowEmptyArchive: true
+            archiveArtifacts artifacts: '**/build-gradled/libs/*.jar', allowEmptyArchive: true
             // Publish the test results, assuming they are in the 'build/test-results' directory
-            junit '**/build/test-results/test/*.xml'
+            junit '**/build-gradled/test-results/test/*.xml'
         }
     }
 }
