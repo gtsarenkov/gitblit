@@ -289,4 +289,8 @@ compileTestJava.dependsOn mxHelloWorldKeys
 
 test {
     useJUnit()
+    jvmArgs = [
+            "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+            "--add-opens", "java.base/java.net=ALL-UNNAMED"
+    ]
 }
