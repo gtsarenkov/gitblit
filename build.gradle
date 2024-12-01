@@ -44,10 +44,6 @@ configurations {
 // Temporary change the build directory to a custom location
 buildDir = file('build-gradled')
 
-project('gitblit-bom') {
-    apply from: "build-bom.gradle"
-}
-
 apply from: "gradle/build-keys.gradle"
 apply from: "gradle/build-classlist.gradle"
 

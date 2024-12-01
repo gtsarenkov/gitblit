@@ -4,3 +4,4 @@ rootProject.name = 'gitblit'
 
 include(':gitblit-bom')
 project(':gitblit-bom').projectDir = new File(settingsDir, 'gradle')
+project(':gitblit-bom').buildFileName = 'build-bom.gradle'
