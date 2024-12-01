@@ -4,3 +4,6 @@
 [submodule "src/main/js/prosemirror"]
 	path = src/main/js/prosemirror
 	url = https://github.com/ProseMirror/prosemirror.git
+[submodule "gradle/plugins/class-dependencies"]
+	path = gradle/plugins/class-dependencies
+	url = https://github.com/gtsarenkov/gradle-plugins-class-deps.git
