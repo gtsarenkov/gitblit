@@ -57,6 +57,12 @@ clean.dependsOn("a-clean")
 
 group = "com.gitblit"
 version = "0.10.0"
+
+subprojects {
+    group = "com.gitblit"
+    version = "0.10.0"
+}
+
 ext['gb.version'] = "${version} with modern SSH algorithms"
 ext['selenium.version'] = project('gitblit-bom').property('selenium.version')
 
