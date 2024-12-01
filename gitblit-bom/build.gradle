@@ -1,0 +1,178 @@
+apply plugin: 'java-platform'
+apply plugin: 'maven-publish'
+
+ext['bouncycastle.version'] = 'latest.release' // 1.69
+ext['wicket.version'] = 'latest.release' // 1.4.22 // TODO
+ext['lucene.version'] = 'latest.release' // '5.5.2'
+ext['sshd.version'] = 'latest.release' // 1.7.0 // TODO
+ext['mina.version'] = 'latest.release' // 2.0.25
+ext['groovy.version'] = 'latest.release' // 2.4.4
+ext['jetty.version'] = '9.4.55.v20240627' // TODO 'latest.release' // 9.4.49.v20220914
+ext['guice-servlet.version'] = 'latest.release' // 5.1.0-gb2
+ext['wikitext.version'] = 'latest.release' // 1.4
+ext['selenium.version'] = '2.28.0'
+
+javaPlatform {
+    allowDependencies()
+}
+
+archivesBaseName = 'gitblit-bom'
+
+ext.latestReleaseDef = {
+    version {
+        prefer 'latest.release'
+    }
+}
+ext.luceneVersionConfig = {
+    version {
+        strictly '[5.5.0,6.0.0['
+        prefer property('lucene.version')
+    }
+}
+ext.wicketVersionDef = {
+    version {
+        strictly '[1.4,1.5['
+        prefer property('wicket.version')
+    }
+}
+ext.slf4jVersionDef = latestReleaseDef
+ext.jettyVersionDef = latestReleaseDef
+ext.guiceServletVersionDef = {
+    version {
+        strictly '[5.0,7.0['
+        prefer property('guice-servlet.version')
+    }
+}
+ext.sshdVersionDef = {
+    version {
+        strictly '[1.0,2.0['
+        prefer property('sshd.version')
+    }
+}
+ext.minaVersionDef = {
+  version {
+      strictly '[2.0,3.0['
+      prefer property('mina.version')
+  }
+}
+ext.jgitVersionDef = {
+    version {
+        strictly '[4.0.0,7.0.0['
+        //prefer 'latest.version'
+    }
+}
+ext.redisVersionDef = {
+    version {
+        strictly '[2.0,3.0['
+    }
+}
+ext.wikitextVersionDef = {
+    version {
+        prefer property('wikitext.version')
+    }
+}
+ext.javaMailVersionDef = {
+    version {
+        strictly '[1.5,1.6['
+    }
+}
+ext.commonsIoVersionDef = {
+    version {
+        strictly '[2.0,3.0['
+        prefer '2.11.0'
+    }
+}
+
+dependencies {
+    api(platform("org.eclipse.jetty:jetty-bom:${property('jetty.version')}"))
+
+    constraints {
+        api("org.slf4j:slf4j-api", slf4jVersionDef)
+        api('org.kohsuke.args4j:args4j-maven-plugin', latestReleaseDef)
+        api('com.google.inject:guice', latestReleaseDef) // 5.1.0
+        api('com.unboundid:unboundid-ldapsdk', latestReleaseDef) // 2.3.8
+        api('commons-io:commons-io', commonsIoVersionDef) // 2.11.0
+        api('com.google.code.gson:gson:latest.release') // 2.10
+        api('org.kohsuke:libpam4j:latest.release') // 1.11
+        api('com.github.dblock.waffle:waffle-jna:latest.release') // 1.7.3
+        api('com.force.api:force-partner-api:latest.release') // 24.0.0
+        api("org.bouncycastle:bcprov-jdk18on:${property('bouncycastle.version')}")
+        api("org.bouncycastle:bcmail-jdk18on:${property('bouncycastle.version')}")
+        api("org.bouncycastle:bcpkix-jdk18on:${property('bouncycastle.version')}")
+        api('com.toedter:jcalendar:latest.release') // 1.3.2
+
+        api("org.apache.sshd:sshd-core", sshdVersionDef)
+        api("org.apache.mina:mina-core", minaVersionDef)
+
+        api("org.apache.lucene:lucene-core", luceneVersionConfig)
+        api("org.apache.lucene:lucene-analyzers-common", luceneVersionConfig)
+        api("org.apache.lucene:lucene-highlighter", luceneVersionConfig)
+        api("org.apache.lucene:lucene-memory", luceneVersionConfig)
+        api("org.apache.lucene:lucene-queryparser", luceneVersionConfig)
+
+        api("org.codehaus.groovy:groovy-all:${property('groovy.version')}")
+
+        api('org.jetbrains:annotations:latest.release')
+        api('ch.qos.reload4j:reload4j', latestReleaseDef) // 1.2.25
+        api('org.slf4j:slf4j-reload4j', slf4jVersionDef)
+        api('net.i2p.crypto:eddsa', latestReleaseDef) // 0.2.0
+        api('org.apache.tika:tika-core', latestReleaseDef) // 1.28.5
+        api('org.apache.commons:commons-compress', latestReleaseDef) // 1.24.0
+        api('org.jsoup:jsoup', latestReleaseDef) // 1.16.2
+        api('org.pegdown:pegdown', latestReleaseDef) // 1.5.0'
+
+        api('org.fusesource.wikitext:wikitext-core', wikitextVersionDef)
+        api('org.fusesource.wikitext:twiki-core', wikitextVersionDef)
+        api('org.fusesource.wikitext:textile-core', wikitextVersionDef)
+        api('org.fusesource.wikitext:tracwiki-core', wikitextVersionDef)
+        api('org.fusesource.wikitext:mediawiki-core', wikitextVersionDef)
+        api('org.fusesource.wikitext:confluence-core', wikitextVersionDef)
+
+        api('rome:rome', latestReleaseDef) // 0.9
+        api('org.freemarker:freemarker', latestReleaseDef) // 2.3.22
+
+        // TODO: === dependencies to upgrade with source code modification ===
+        api('redis.clients:jedis', redisVersionDef) // 2.6.2
+
+        api('org.eclipse.jgit:org.eclipse.jgit', jgitVersionDef)
+        api('org.eclipse.jgit:org.eclipse.jgit.http.server', jgitVersionDef)
+        api('org.eclipse.jgit:org.eclipse.jgit.ssh.jsch', jgitVersionDef)
+
+        api("org.apache.wicket:wicket", wicketVersionDef)
+        api("org.apache.wicket:wicket-auth-roles", wicketVersionDef)
+        api("org.apache.wicket:wicket-extensions", wicketVersionDef)
+
+        api('com.google.inject.extensions:guice-servlet', guiceServletVersionDef)
+
+        api('ro.fortsoft.pf4j:pf4j:latest.release') {
+            version {
+                strictly '[0.9,1.0['
+                prefer('0.9.0') // TODO: latest.release
+            }
+        }
+
+        api('javax.mail:mail:latest.release') //implementation('com.sun.mail:javax.mail:1.5.6')
+        api 'javax.servlet:javax.servlet-api:3.1.0'
+        api('args4j:args4j:latest.release') // 2.37
+    }
+}
+
+publishing {
+    publications {
+        gitblitPlatform(MavenPublication) {
+            from components.javaPlatform
+            artifactId = archivesBaseName
+        }
+    }
+    repositories {
+        mavenLocal()
+//    if (isCI) {
+//      maven {
+//        url = uri(nexusUrl)
+//        allowInsecureProtocol = true
+//      }
+//    } else {
+//      mavenLocal()
+//    }
+    }
+}

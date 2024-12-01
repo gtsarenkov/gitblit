@@ -129,7 +129,8 @@ tasks.register('runDebug', JavaExec) {
 }
 
 dependencies {
-    implementation(platform(project(':gitblit-bom')))
+    implementation platform(project(":gitblit-bom"))
+    implementation(platform("com.gitblit:gitblit-bom:${version}"))
     implementation("org.slf4j:slf4j-api")
     implementation('org.eclipse.jgit:org.eclipse.jgit')
     implementation('org.eclipse.jgit:org.eclipse.jgit.http.server')
@@ -192,7 +193,7 @@ dependencies {
     implementation('javax.mail:mail:latest.release')
     implementation('javax.servlet:javax.servlet-api')
 
-    federationClient(platform(project(':gitblit-bom')))
+    federationClient platform(project(":gitblit-bom"))
     federationClient('org.apache.lucene:lucene-core')
     federationClient('org.apache.lucene:lucene-analyzers-common')
     federationClient('org.apache.lucene:lucene-highlighter')
