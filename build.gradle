@@ -1,10 +1,13 @@
 import org.apache.tools.ant.filters.*
+import com.jdisc.toolchain.tasks.AddFilesToOutputTask
 
 plugins {
     id 'java'
     id 'idea'
     id 'application'
     id "com.github.ben-manes.versions" version "0.51.0"
+    id "com.jdisc.toolchain.class-dependencies"
+//    id 'com.jdisc.toolchain.github-organization-repo-mirror' version "0.9.0"
 }
 
 repositories {
@@ -72,13 +75,19 @@ tasks.register("processResourcesFromJavaSources", Copy) {
         from(srcDir) {
             exclude '**/*.java'
         }
-        into sourceSets.main.output.classesDirs.asPath
+        into sourceSets.main.output.classesDirs.singleFile
         filter ReplaceTokens, tokens: [
                 'gb.version': project.property('gb.version').toString()
         ]
     }
 }
 processResources.dependsOn processResourcesFromJavaSources
+
+tasks.register("processFederationClientResourcesFromDistribution", Copy) {
+    from(layout.projectDirectory.file("src/main/distrib/federation.properties"))
+    into sourceSets.federationClient.output.resourcesDir
+}
+processFederationClientResources.dependsOn processFederationClientResourcesFromDistribution
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
@@ -223,6 +232,7 @@ jar {
 }
 
 tasks.register("addFilesToFederationClientOutput", AddFilesToOutputTask).configure {
+    dependsOn compileJava, processFederationClientResources
 //    classes = ['com.gitblit.Keys']
 //    runtimeClasspath = sourceSets.federationClient.runtimeClasspath
 //    outputDirs = sourceSets.federationClient.output.classesDirs
@@ -242,7 +252,6 @@ tasks.register("addFilesToFederationClientOutput", AddFilesToOutputTask).configu
 //        }
 //    }
 }
-compileJava.finalizedBy tasks.named("addFilesToFederationClientOutput")
 
 // TODO: fatJar
 task federationClientJar(type: Jar) {
@@ -294,3 +303,7 @@ test {
             "--add-opens", "java.base/java.net=ALL-UNNAMED"
     ]
 }
+
+//cloneAndMirrorRepos {
+//    githubOrg = 'gitblit-org'
+//}

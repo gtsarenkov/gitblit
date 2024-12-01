@@ -1,3 +1,5 @@
+includeBuild "gradle/plugins/class-dependencies"
+
 rootProject.name = 'gitblit'
 
 include(':gitblit-bom')
