@@ -258,7 +258,7 @@ task federationClientJar(type: Jar) {
     group = 'build'
     dependsOn addFilesToFederationClientOutput
     archiveBaseName.set('fedclient')
-    from sourceSets.federationClient.output
+    from sourceSets.federationClient.output.classesDirs
 
     manifest {
         attributes(
@@ -276,6 +276,9 @@ distributions {
         distributionBaseName = 'fedclient'
         contents {
             from(federationClientJar) {
+                into '/'
+            }
+            from(processFederationClientResources) {
                 into '/'
             }
             from(configurations.federationClient) {
