@@ -83,6 +83,10 @@ ext.commonsIoVersionDef = {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 dependencies {
     api(platform("org.eclipse.jetty:jetty-bom:${property('jetty.version')}"))
 

@@ -64,7 +64,12 @@ subprojects {
 }
 
 ext['gb.version'] = "${version} with modern SSH algorithms"
-ext['selenium.version'] = project('gitblit-bom').property('selenium.version')
+ext['selenium.version'] = '2.28.0'
+
+//project(':gitblit-bom').properties.each {
+//    logger.lifecycle "Property ${project(':gitblit-bom').name}.${it.key}=${it.value}"
+//}
+//ext['selenium.version'] = project(':gitblit-bom').property('selenium.version')
 
 java {
     toolchain {
@@ -217,7 +222,7 @@ dependencies {
 tasks.register('federationClassList', ClassListDependency) {
     dependsOn compileJava
     mainClass = 'com.gitblit.FederationClient'
-    classpath = configurations.runtimeClasspath + sourceSets.main.output.classesDirs
+    classpath = files().from(sourceSets.main.output.classesDirs, configurations.runtimeClasspath.incoming)
     excludePatterns = ['**/.class', '**/*.java', '**/Thumbs.db', '**/*.mkd', '**/*.md', '**/*.css', 'com/gitblit/wicket/**']
     //classes = ['com.gitblit.Keys']
 }
