@@ -42,7 +42,7 @@ configurations {
 }
 
 // Temporary change the build directory to a custom location
-buildDir = file('build-gradled')
+layout.buildDirectory.set(file('build-gradled'))
 
 apply from: "gradle/build-keys.gradle"
 apply from: "gradle/build-classlist.gradle"
