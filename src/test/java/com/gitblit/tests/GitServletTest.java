@@ -188,7 +188,7 @@ public class GitServletTest extends GitblitUnitTest {
 		gitblit().addUser(user);
 		repositories().updateRepositoryModel(model.name, model, false);
 
-		FileUtils.delete(ticgit2Folder, FileUtils.RECURSIVE);
+		FileUtils.delete(ticgit2Folder, FileUtils.RECURSIVE | FileUtils.SKIP_MISSING);
 
 		// delete any existing working folder
 		boolean cloned = false;
