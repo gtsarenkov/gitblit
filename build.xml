@@ -13,7 +13,7 @@
 	<property name="moxie.jar" value="moxie-toolkit-${moxie.version}.jar" />
 	<property name="moxie.dir" value="${user.home}/.moxie" />
 
-	<property name="jacoco.version" value="0.8.4" />
+	<property name="jacoco.version" value="0.8.12" />
 
 	<!-- Download Moxie from it's Maven repository to user.home -->
 	<mkdir dir="${moxie.dir}" />
@@ -53,7 +53,7 @@
 
 		<!-- Register JaCoCo tasks -->
 		<taskdef uri="antlib:org.jacoco.ant">
-			<classpath location="${moxie.dir}/remote/repo1.maven.org_maven2/org/jacoco/org.jacoco.ant/${jacoco.version}/org.jacoco.ant-${jacoco.version}-nodeps.jar" />
+			<classpath location="${moxie.dir}/remote/repo1.maven.org_maven2/org/jacoco/org.jacoco.ant/${jacoco.version}/org.jacoco.ant-${jacoco.version}.jar" />
 		</taskdef>
 
 		<!-- Set Ant project properties -->
