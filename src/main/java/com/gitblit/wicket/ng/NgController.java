@@ -19,12 +19,15 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.wicket.ResourceReference;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.IHeaderContributor;
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.IHeaderResponse;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.apache.wicket.request.resource.ResourceReference;
 
 /**
  * Simple AngularJS data controller which injects scoped objects as static,
@@ -54,7 +57,7 @@ public class NgController implements IHeaderContributor {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		// add Google AngularJS reference
-		response.renderJavascriptReference(new ResourceReference(NgController.class, "angular.js"));
+		response.render(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(NgController.class, "angular.js")));
 
 		Gson gson = new GsonBuilder().create();
 
@@ -69,7 +72,7 @@ public class NgController implements IHeaderContributor {
 		}
 		line(sb, "}");
 
-		response.renderJavascript(sb.toString(), null);
+		response.render(OnDomReadyHeaderItem.forScript(sb.toString()));
 	}
 
 	private void line(StringBuilder sb, String line) {

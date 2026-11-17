@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com.gitblit.utils.PasswordHash;
-import org.apache.wicket.PageParameters;
-import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.form.palette.Palette;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.CheckBox;
@@ -50,6 +49,7 @@ import com.gitblit.wicket.RequiresAdminRole;
 import com.gitblit.wicket.StringChoiceRenderer;
 import com.gitblit.wicket.WicketUtils;
 import com.gitblit.wicket.panels.RegistrantPermissionsPanel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 @RequiresAdminRole
 public class EditUserPage extends RootSubPage {
@@ -210,7 +210,6 @@ public class EditUserPage extends RootSubPage {
 					error(e.getMessage());
 					return;
 				}
-				setRedirect(false);
 				if (isCreate) {
 					// create another user
 					info(MessageFormat.format(getString("gb.userCreated"),
@@ -224,7 +223,7 @@ public class EditUserPage extends RootSubPage {
 		};
 
 		// do not let the browser pre-populate these fields
-		form.add(new SimpleAttributeModifier("autocomplete", "off"));
+		form.add(new AttributeAppender("autocomplete", "off"));
 
 		// not all user providers support manipulating username and password
 		boolean editCredentials = app().authentication().supportsCredentialChanges(userModel);

@@ -21,7 +21,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
 
@@ -44,6 +43,7 @@ import com.gitblit.wicket.GitBlitWebSession;
 import com.gitblit.wicket.GitblitRedirectException;
 import com.gitblit.wicket.WicketUtils;
 import com.gitblit.wicket.panels.FilterableRepositoryList;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 @CacheControl(LastModified.PROJECT)
 public class ProjectPage extends DashboardPage {
@@ -107,7 +107,7 @@ public class ProjectPage extends DashboardPage {
 		add(new Label("projectTitle", project.getDisplayName()));
 		add(new Label("projectDescription", project.description));
 
-		String feedLink = SyndicationServlet.asLink(getRequest().getRelativePathPrefixToContextRoot(), projectName, null, 0);
+		String feedLink = SyndicationServlet.asLink(getRequest().getPrefixToContextPath(), projectName, null, 0);
 		add(new ExternalLink("syndication", feedLink));
 
 		add(WicketUtils.syndicationDiscoveryLink(SyndicationServlet.getTitle(project.getDisplayName(),

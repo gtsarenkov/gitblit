@@ -1,0 +1,3 @@
+# Copy to nexus.properties to enable the optional local Nexus cache.
+# Remove or leave nexusUrl empty to use public repositories.
+nexusUrl=http://192.168.0.104:8085

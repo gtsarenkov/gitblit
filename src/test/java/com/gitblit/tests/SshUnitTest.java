@@ -25,6 +25,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PublicKey;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -35,7 +36,9 @@ import org.apache.sshd.client.config.keys.ClientIdentityLoader;
 import org.apache.sshd.client.future.AuthFuture;
 import org.apache.sshd.client.keyverifier.ServerKeyVerifier;
 import org.apache.sshd.client.session.ClientSession;
+import org.apache.sshd.common.NamedResource;
 import org.apache.sshd.common.config.keys.FilePasswordProvider;
+import org.apache.sshd.common.session.SessionContext;
 import org.apache.sshd.common.util.security.SecurityUtils;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.storage.file.FileBasedConfig;
@@ -165,12 +168,12 @@ public abstract class SshUnitTest extends GitblitUnitTest {
 		SshClient client = SshClient.setUpDefaultClient();
 		client.setClientIdentityLoader(new ClientIdentityLoader() {	// Ignore the files under ~/.ssh
 				@Override
-				public boolean isValidLocation(String location) throws IOException {
+				public boolean isValidLocation(NamedResource location) throws IOException {
 					return true;
 				}
 				@Override
-				public KeyPair loadClientIdentity(String location, FilePasswordProvider provider) throws IOException, GeneralSecurityException {
-					return null;
+				public Iterable<KeyPair> loadClientIdentities(SessionContext session, NamedResource location, FilePasswordProvider provider) throws IOException, GeneralSecurityException {
+					return Collections.emptyList();
 				}
 			});
 		client.setServerKeyVerifier(new ServerKeyVerifier() {

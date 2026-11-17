@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 ext['bouncycastle.version'] = 'latest.release' // 1.69
 ext['wicket.version'] = 'latest.release' // 1.4.22 // TODO
 ext['lucene.version'] = 'latest.release' // '5.5.2'
-ext['sshd.version'] = 'latest.release' // 1.7.0 // TODO
+ext['sshd.version'] = '2.20.1'
 ext['mina.version'] = 'latest.release' // 2.0.25
 ext['groovy.version'] = 'latest.release' // 2.4.4
 ext['jetty.version'] = '9.4.55.v20240627' // TODO 'latest.release' // 9.4.49.v20220914
@@ -31,7 +31,7 @@ ext.luceneVersionConfig = {
 }
 ext.wicketVersionDef = {
     version {
-        strictly '[1.4,1.5['
+        strictly '[1.4,8.0['
         prefer property('wicket.version')
     }
 }
@@ -45,7 +45,7 @@ ext.guiceServletVersionDef = {
 }
 ext.sshdVersionDef = {
     version {
-        strictly '[1.0,2.0['
+        strictly '[2.0,3.0['
         prefer property('sshd.version')
     }
 }
@@ -84,7 +84,24 @@ ext.commonsIoVersionDef = {
 }
 
 repositories {
-    mavenCentral()
+    def localNexusProperties = new Properties()
+    def localNexusFile = rootProject.file('nexus.properties')
+    if (localNexusFile.isFile()) {
+        localNexusFile.withInputStream { localNexusProperties.load(it) }
+    }
+
+    def nexusUrl = providers.gradleProperty('nexusUrl')
+            .orElse(providers.environmentVariable('NEXUS_URL'))
+            .getOrElse(localNexusProperties.getProperty('nexusUrl', '')).trim().replaceAll('/+$', '')
+    if (nexusUrl) {
+        maven {
+            name = 'nexusMavenPublic'
+            url = uri("${nexusUrl}/repository/maven-public/")
+            allowInsecureProtocol = nexusUrl.startsWith('http://')
+        }
+    } else {
+        mavenCentral()
+    }
 }
 
 dependencies {
@@ -106,6 +123,7 @@ dependencies {
         api('com.toedter:jcalendar:latest.release') // 1.3.2
 
         api("org.apache.sshd:sshd-core", sshdVersionDef)
+        api("org.apache.sshd:sshd-mina", sshdVersionDef)
         api("org.apache.mina:mina-core", minaVersionDef)
 
         api("org.apache.lucene:lucene-core", luceneVersionConfig)

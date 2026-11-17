@@ -15,8 +15,8 @@
  */
 package com.gitblit.wicket.pages;
 
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -36,7 +36,7 @@ public class PatchPage extends SessionPage {
 	public PatchPage(final PageParameters params) {
 		super(params);
 
-		if (!params.containsKey("r")) {
+		if (!params.getNamedKeys().contains("r")) {
 			error(getString("gb.repositoryNotSpecified"));
 			redirectToInterceptPage(new RepositoriesPage());
 		}

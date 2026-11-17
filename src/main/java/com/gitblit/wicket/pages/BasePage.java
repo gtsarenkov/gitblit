@@ -15,44 +15,6 @@
  */
 package com.gitblit.wicket.pages;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.wicket.Application;
-import org.apache.wicket.Page;
-import org.apache.wicket.PageParameters;
-import org.apache.wicket.RedirectToUrlException;
-import org.apache.wicket.markup.html.CSSPackageResource;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.ExternalLink;
-import org.apache.wicket.markup.html.panel.FeedbackPanel;
-import org.apache.wicket.markup.html.resources.JavascriptResourceReference;
-import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.protocol.http.RequestUtils;
-import org.apache.wicket.protocol.http.WebResponse;
-import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
-import org.apache.wicket.request.target.basic.RedirectRequestTarget;
-import org.apache.wicket.util.time.Duration;
-import org.apache.wicket.util.time.Time;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.gitblit.Constants;
 import com.gitblit.Constants.AccessPermission;
 import com.gitblit.Constants.AccessRestrictionType;
@@ -68,6 +30,37 @@ import com.gitblit.wicket.CacheControl;
 import com.gitblit.wicket.GitBlitWebApp;
 import com.gitblit.wicket.GitBlitWebSession;
 import com.gitblit.wicket.WicketUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.wicket.Application;
+import org.apache.wicket.Component;
+import org.apache.wicket.Page;
+import org.apache.wicket.behavior.Behavior;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.pages.RedirectPage;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.apache.wicket.request.http.WebResponse;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.apache.wicket.request.resource.ResourceReference;
+import org.apache.wicket.request.resource.UrlResourceReference;
+import org.apache.wicket.util.time.Duration;
+import org.apache.wicket.util.time.Time;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public abstract class BasePage extends SessionPage {
 
@@ -92,17 +85,36 @@ public abstract class BasePage extends SessionPage {
 		return logger;
 	}
 
+	public static class BootstrapResponsive extends ResourceReference.Key {
+
+		public BootstrapResponsive(ResourceReference reference) {
+			super(reference);
+		}
+	}
+
 	private void customizeHeader() {
 		if (app().settings().getBoolean(Keys.web.useResponsiveLayout, true)) {
-			add(CSSPackageResource.getHeaderContribution("bootstrap/css/bootstrap-responsive.css"));
+			add(new Behavior() {
+				@Override
+				public void renderHead(Component component, IHeaderResponse response) {
+					super.renderHead(component, response);
+					response.render(CssHeaderItem.forUrl(getRequest().getContextPath() + "/bootstrap/css/bootstrap-responsive.css"));
+				}
+			});
 		}
 		if (app().settings().getBoolean(Keys.web.hideHeader, false)) {
-			add(CSSPackageResource.getHeaderContribution("hideheader.css"));
+			add(new Behavior() {
+					@Override
+					public void renderHead(Component component, IHeaderResponse response) {
+						super.renderHead(component, response);
+						response.render(CssHeaderItem.forUrl(getRequest().getContextPath() + "/hideheader.css"));
+					}
+				});
 		}
 	}
 
 	protected String getContextUrl() {
-		return getRequest().getRelativePathPrefixToContextRoot();
+		return getRequest().getPrefixToContextPath();
 	}
 
 	protected String getCanonicalUrl() {
@@ -111,7 +123,7 @@ public abstract class BasePage extends SessionPage {
 
 	protected String getCanonicalUrl(Class<? extends BasePage> clazz, PageParameters params) {
 		String relativeUrl = urlFor(clazz, params).toString();
-		String canonicalUrl = RequestUtils.toAbsolutePath(relativeUrl);
+		String canonicalUrl = WicketUtils.toAbsoluteUrl(relativeUrl);
 		return canonicalUrl;
 	}
 
@@ -121,7 +133,7 @@ public abstract class BasePage extends SessionPage {
 
 	protected void redirectTo(Class<? extends BasePage> pageClass, PageParameters parameters) {
 		String absoluteUrl = getCanonicalUrl(pageClass, parameters);
-		getRequestCycle().setRequestTarget(new RedirectRequestTarget(absoluteUrl));
+		getRequestCycle().setResponsePage(new RedirectPage(absoluteUrl));
 	}
 
 	protected String getLanguageCode() {
@@ -227,7 +239,7 @@ public abstract class BasePage extends SessionPage {
 		int expires = app().settings().getInteger(Keys.web.pageCacheExpires, 0);
 		WebResponse response = (WebResponse) getResponse();
 		response.setLastModifiedTime(Time.valueOf(when));
-		response.setDateHeader("Expires", System.currentTimeMillis() + Duration.minutes(expires).getMilliseconds());
+		response.setDateHeader("Expires", Time.millis(System.currentTimeMillis() + Duration.minutes(expires).getMilliseconds()));
 	}
 
 	protected String getPageTitle(String repositoryName) {
@@ -353,7 +365,7 @@ public abstract class BasePage extends SessionPage {
 
 	protected String getServerName() {
 		ServletWebRequest servletWebRequest = (ServletWebRequest) getRequest();
-		HttpServletRequest req = servletWebRequest.getHttpServletRequest();
+		HttpServletRequest req = servletWebRequest.getContainerRequest();
 		return req.getServerName();
 	}
 
@@ -371,7 +383,7 @@ public abstract class BasePage extends SessionPage {
 		boolean hasParameter = false;
 		String regex = WicketUtils.getRegEx(params);
 		String team = WicketUtils.getTeam(params);
-		int daysBack = params.getInt("db", 0);
+		int daysBack = params.get("db").toInt(0);
 		int maxDaysBack = app().settings().getInteger(Keys.web.activityDurationMaximum, 30);
 
 		List<ProjectModel> availableModels = getProjectModels();
@@ -469,7 +481,7 @@ public abstract class BasePage extends SessionPage {
 		if (toPage != null) {
 			GitBlitWebSession.get().cacheErrorMessage(message);
 			String relativeUrl = urlFor(toPage, params).toString();
-			String absoluteUrl = RequestUtils.toAbsolutePath(relativeUrl);
+			String absoluteUrl = WicketUtils.toAbsoluteUrl(relativeUrl);
 			throw new RedirectToUrlException(absoluteUrl);
 		} else {
 			super.error(message);
@@ -477,7 +489,7 @@ public abstract class BasePage extends SessionPage {
 	}
 
 	public void authenticationError(String message) {
-		logger().error(getRequest().getURL() + " for " + GitBlitWebSession.get().getUsername());
+		logger().error(getRequest().getUrl() + " for " + GitBlitWebSession.get().getUsername());
 		if (!GitBlitWebSession.get().isLoggedIn()) {
 			// cache the request if we have not authenticated.
 			// the request will continue after authentication.
@@ -527,7 +539,7 @@ public abstract class BasePage extends SessionPage {
 	protected void addBottomScript(String scriptPath) {
 		RepeatingView bottomScripts = getBottomScriptContainer();
 		Label script = new Label(bottomScripts.newChildId(), "<script type='text/javascript' src='"
-				+ urlFor(new JavascriptResourceReference(this.getClass(), scriptPath)) + "'></script>\n");
+				+ urlFor(new UrlResourceReference(Url.parse(scriptPath)), new PageParameters()) + "'></script>\n");
 		bottomScripts.add(script.setEscapeModelStrings(false).setRenderBodyOnly(true));
 	}
 

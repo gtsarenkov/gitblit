@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.ExternalLink;
@@ -29,7 +28,9 @@ import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.DataView;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.StringResourceModel;
-import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
+import org.apache.wicket.request.Response;
+import org.apache.wicket.request.handler.resource.ResourceStreamRequestHandler;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.resource.AbstractResourceStreamWriter;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
@@ -227,7 +228,7 @@ public class CommitPage extends RepositoryPage {
 						    	  };
 						    	      
 						    	
-						    	getRequestCycle().setRequestTarget(new ResourceStreamRequestTarget(resourceStream, entry.path));
+						    	getRequestCycle().scheduleRequestHandlerAfterCurrent(new ResourceStreamRequestHandler(resourceStream, entry.path));
 						    }}));
 						
 						
@@ -279,9 +280,9 @@ public class CommitPage extends RepositoryPage {
 						    	        app().filestore().downloadBlob(entry.getFilestoreOid(), user, getRepositoryModel(), output);
 						    	      }
 						    	  };
-						    	      
-						    	
-						    	getRequestCycle().setRequestTarget(new ResourceStreamRequestTarget(resourceStream, entry.path));
+
+
+								getRequestCycle().scheduleRequestHandlerAfterCurrent(new ResourceStreamRequestHandler(resourceStream, entry.path));
 						    }});
 						
 						item.add(new Link<Object>("raw", null) {
@@ -303,9 +304,9 @@ public class CommitPage extends RepositoryPage {
 						    	        app().filestore().downloadBlob(entry.getFilestoreOid(), user, getRepositoryModel(), output);
 						    	      }
 						    	  };
-						    	      
-						    	
-						    	getRequestCycle().setRequestTarget(new ResourceStreamRequestTarget(resourceStream, entry.path));
+
+
+								getRequestCycle().scheduleRequestHandlerAfterCurrent(new ResourceStreamRequestHandler(resourceStream, entry.path));
 						    }});
 						    						
 					} else {

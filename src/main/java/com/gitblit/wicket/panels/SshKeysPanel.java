@@ -113,7 +113,7 @@ public class SshKeysPanel extends BasePanel {
 							keys.addAll(app().keys().getKeys(user.username));
 
 							// update the panel
-							target.addComponent(SshKeysPanel.this);
+							target.add(SshKeysPanel.this);
 						}
 						keyFeedback.setObject("");
 					}
@@ -165,7 +165,7 @@ public class SshKeysPanel extends BasePanel {
 				if (StringUtils.isEmpty(data)) {
 					// do not submit empty key
 					keyFeedback.setObject(getString("gb.addSshKeyErrorEmpty"));
-					target.addComponent(addKeyFeedback);
+					target.add(addKeyFeedback);
 					return;
 				}
 
@@ -175,7 +175,7 @@ public class SshKeysPanel extends BasePanel {
 				} catch (Exception e) {
 					// failed to parse the key
 					keyFeedback.setObject(getString("gb.addSshKeyErrorFormat"));
-					target.addComponent(addKeyFeedback);
+					target.add(addKeyFeedback);
 					return;
 				}
 
@@ -200,7 +200,7 @@ public class SshKeysPanel extends BasePanel {
 					keyFeedback.setObject("");
 
 					// update the panel
-					target.addComponent(SshKeysPanel.this);
+					target.add(SshKeysPanel.this);
 				}
 				else keyFeedback.setObject("Key not added.");
 			}

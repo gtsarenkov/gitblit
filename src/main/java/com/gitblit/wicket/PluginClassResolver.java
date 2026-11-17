@@ -94,6 +94,11 @@ public class PluginClassResolver implements IClassResolver {
 		return urls.iterator();
 	}
 
+	@Override
+	public ClassLoader getClassLoader() {
+		return this.coreResolver.getClassLoader();
+	}
+
 	protected Iterator<URL> getResources(String name, PluginWrapper plugin) {
 		HashSet<URL> loadedFiles = new HashSet<URL>();
 		try {

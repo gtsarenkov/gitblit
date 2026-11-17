@@ -23,16 +23,15 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
-import org.apache.wicket.RequestCycle;
-import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.image.ContextImage;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.DataView;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
-import org.apache.wicket.protocol.http.WebRequest;
 import org.apache.wicket.protocol.http.request.WebClientInfo;
 
 import com.gitblit.Constants.AccessPermission;
@@ -79,7 +78,7 @@ public class RepositoryUrlPanel extends BasePanel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		HttpServletRequest req = ((WebRequest) getRequest()).getHttpServletRequest();
+		HttpServletRequest req = (HttpServletRequest) getRequest().getContainerRequest();
 
 		List<RepositoryUrl> repositoryUrls = app().services().getRepositoryUrls(req, user, repository);
 		// grab primary url from the top of the list
@@ -120,7 +119,7 @@ public class RepositoryUrlPanel extends BasePanel {
 
 	protected Fragment createPrimaryUrlPanel(String wicketId, final RepositoryModel repository, List<RepositoryUrl> repositoryUrls) {
 
-		Fragment urlPanel = new Fragment(wicketId, "repositoryUrlFragment", this);
+		Fragment urlPanel = new Fragment(wicketId, "repositoryUrlFragment", RepositoryUrlPanel.this);
 		urlPanel.setRenderBodyOnly(true);
 
 		if (repositoryUrls.size() == 1) {
@@ -140,7 +139,7 @@ public class RepositoryUrlPanel extends BasePanel {
 				public void populateItem(final Item<RepositoryUrl> item) {
 					RepositoryUrl repoUrl = item.getModelObject();
 					// repository url
-					Fragment fragment = new Fragment("repoUrl", "actionFragment", this);
+					Fragment fragment = new Fragment("repoUrl", "actionFragment", RepositoryUrlPanel.this);
 					Component content = new Label("content", repoUrl.url).setOutputMarkupId(true);
 					fragment.add(content);
 					item.add(fragment);
@@ -154,7 +153,7 @@ public class RepositoryUrlPanel extends BasePanel {
 				}
 			};
 
-			Fragment urlMenuFragment = new Fragment("menu", "urlProtocolMenuFragment", this);
+			Fragment urlMenuFragment = new Fragment("menu", "urlProtocolMenuFragment", RepositoryUrlPanel.this);
 			urlMenuFragment.setRenderBodyOnly(true);
 			urlMenuFragment.add(new Label("menuText", getString("gb.url")));
 			urlMenuFragment.add(repoUrlMenuItems);
@@ -255,7 +254,7 @@ public class RepositoryUrlPanel extends BasePanel {
 					return;
 				}
 
-				Fragment appMenu = new Fragment("appMenu", "appMenuFragment", this);
+				Fragment appMenu = new Fragment("appMenu", "appMenuFragment", RepositoryUrlPanel.this);
 				appMenu.setRenderBodyOnly(true);
 				item.add(appMenu);
 
@@ -306,7 +305,7 @@ public class RepositoryUrlPanel extends BasePanel {
 					@Override
 					public void populateItem(final Item<RepositoryUrl> repoLinkItem) {
 						RepositoryUrl repoUrl = repoLinkItem.getModelObject();
-						Fragment fragment = new Fragment("actionItem", "actionFragment", this);
+						Fragment fragment = new Fragment("actionItem", "actionFragment", RepositoryUrlPanel.this);
 						fragment.add(createPermissionBadge("permission", repoUrl));
 
 						if (!StringUtils.isEmpty(clientApp.cloneUrl)) {
@@ -332,7 +331,7 @@ public class RepositoryUrlPanel extends BasePanel {
 			}
 		};
 
-		Fragment applicationMenus = new Fragment(wicketId, "applicationMenusFragment", this);
+		Fragment applicationMenus = new Fragment(wicketId, "applicationMenusFragment", RepositoryUrlPanel.this);
 		applicationMenus.add(appMenus);
 		return applicationMenus;
 	}
@@ -352,16 +351,16 @@ public class RepositoryUrlPanel extends BasePanel {
 	protected Fragment createCopyFragment(String text, String target) {
 		if (app().settings().getBoolean(Keys.web.allowFlashCopyToClipboard, true)) {
 			// javascript: browser JS API based copy to clipboard
-			Fragment copyFragment = new Fragment("copyFunction", "clippyPanel", this);
+			Fragment copyFragment = new Fragment("copyFunction", "clippyPanel", RepositoryUrlPanel.this);
 			ContextImage img = WicketUtils.newImage("copyIcon", "clippy.png");
 			// Add the ID of the target element that holds the text to copy to clipboard
-			img.add(new SimpleAttributeModifier("data-clipboard-target", "#"+target));
+			img.add(new AttributeModifier("data-clipboard-target", "#"+target));
 			copyFragment.add(img);
 			return copyFragment;
 		}
 		else {
 			// javascript: manual copy & paste with modal browser prompt dialog
-			Fragment copyFragment = new Fragment("copyFunction", "jsPanel", this);
+			Fragment copyFragment = new Fragment("copyFunction", "jsPanel", RepositoryUrlPanel.this);
 			ContextImage img = WicketUtils.newImage("copyIcon", "clippy.png");
 			img.add(new JavascriptTextPrompt("onclick", "Copy to Clipboard (Ctrl+C, Enter)", text));
 			copyFragment.add(img);
@@ -445,11 +444,11 @@ public class RepositoryUrlPanel extends BasePanel {
 	}
 
 	protected Component createRepositoryIndicators(RepositoryModel repository) {
-		Fragment fragment = new Fragment("repositoryIndicators", "indicatorsFragment", this);
+		Fragment fragment = new Fragment("repositoryIndicators", "indicatorsFragment", RepositoryUrlPanel.this);
 		if (repository.isBare) {
 			fragment.add(new Label("workingCopyIndicator").setVisible(false));
 		} else {
-			Fragment wc = new Fragment("workingCopyIndicator", "workingCopyFragment", this);
+			Fragment wc = new Fragment("workingCopyIndicator", "workingCopyFragment", RepositoryUrlPanel.this);
 			Label lbl = new Label("workingCopy", getString("gb.workingCopy"));
 			WicketUtils.setHtmlTooltip(lbl,  getString("gb.workingCopyWarning"));
 			wc.add(lbl);
@@ -468,7 +467,7 @@ public class RepositoryUrlPanel extends BasePanel {
 			if (hasFork || !canFork) {
 				if (user.canFork() && !repository.allowForks) {
 					// show forks prohibited indicator
-					Fragment wc = new Fragment("forksProhibitedIndicator", "forksProhibitedFragment", this);
+					Fragment wc = new Fragment("forksProhibitedIndicator", "forksProhibitedFragment", RepositoryUrlPanel.this);
 					Label lbl = new Label("forksProhibited", getString("gb.forksProhibited"));
 					WicketUtils.setHtmlTooltip(lbl,  getString("gb.forksProhibitedWarning"));
 					wc.add(lbl);

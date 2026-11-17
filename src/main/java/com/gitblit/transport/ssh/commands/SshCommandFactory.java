@@ -28,11 +28,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.sshd.server.Command;
-import org.apache.sshd.server.CommandFactory;
+import org.apache.sshd.server.command.Command;
+import org.apache.sshd.server.command.CommandFactory;
 import org.apache.sshd.server.Environment;
+import org.apache.sshd.server.channel.ChannelSession;
 import org.apache.sshd.server.ExitCallback;
-import org.apache.sshd.server.SessionAware;
+import org.apache.sshd.server.session.ServerSessionAware;
 import org.apache.sshd.server.session.ServerSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,11 +75,11 @@ public class SshCommandFactory implements CommandFactory {
 	}
 
 	@Override
-	public Command createCommand(final String commandLine) {
+	public Command createCommand(ChannelSession channel, final String commandLine) {
 		return new Trampoline(commandLine);
 	}
 
-	private class Trampoline implements Command, SessionAware {
+	private class Trampoline implements Command, ServerSessionAware {
 		private final String[] argv;
 		private ServerSession session;
 		private InputStream in;
@@ -127,7 +128,7 @@ public class SshCommandFactory implements CommandFactory {
 		}
 
 		@Override
-		public void start(final Environment env) throws IOException {
+		public void start(ChannelSession channel, final Environment env) throws IOException {
 			this.env = env;
 			task.set(startExecutor.submit(new Runnable() {
 				@Override
@@ -157,14 +158,8 @@ public class SshCommandFactory implements CommandFactory {
 					cmd.setErrorStream(err);
 					cmd.setExitCallback(new ExitCallback() {
 						@Override
-						public void onExit(int rc, String exitMessage) {
-							exit.onExit(translateExit(rc), exitMessage);
-							log(rc);
-						}
-
-						@Override
-						public void onExit(int rc) {
-							exit.onExit(translateExit(rc));
+						public void onExit(int rc, String exitMessage, boolean closeImmediately) {
+							exit.onExit(translateExit(rc), exitMessage, closeImmediately);
 							log(rc);
 						}
 					});
@@ -198,7 +193,7 @@ public class SshCommandFactory implements CommandFactory {
 		}
 
 		@Override
-		public void destroy() {
+		public void destroy(ChannelSession channel) {
 			Future<?> future = task.getAndSet(null);
 			if (future != null) {
 				future.cancel(true);

@@ -14,4 +14,12 @@ set JDK_JAVA_OPTIONS=""--add-opens=java.base/java.lang=ALL-UNNAMED"" ""--add-ope
 
 ## Gradle
 
-TBD
+By default, dependencies use Maven Central and plugins use the Gradle Plugin Portal. Existing local Maven and Moxie repositories remain available.
+
+To use the optional Nexus cache, copy `nexus.properties.example` to `nexus.properties` in the project root. This local file is ignored by Git. Set its base URL as follows:
+
+```properties
+nexusUrl=http://172.16.0.104:8085
+```
+
+Remove the local file or leave `nexusUrl` empty to use public repositories. Configuration precedence is `-PnexusUrl`, then the `NEXUS_URL` environment variable, then `nexus.properties`. An empty Gradle property disables Nexus even if the environment or local file enables it. Both the main build and the included class-dependencies build read the same local file. Nexus must expose `repository/maven-public/` and `repository/gradle-plugins/`.

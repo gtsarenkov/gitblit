@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -44,6 +43,7 @@ import com.gitblit.wicket.GitBlitWebSession;
 import com.gitblit.wicket.Html5DateField;
 import com.gitblit.wicket.WicketUtils;
 import com.gitblit.wicket.panels.BasePanel.JavascriptEventConfirmation;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 /**
  * Page for creating a new milestone.

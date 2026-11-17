@@ -31,6 +31,7 @@ import java.util.NoSuchElementException;
 
 import org.apache.sshd.common.config.keys.PrivateKeyEntryDecoder;
 import org.apache.sshd.common.keyprovider.AbstractKeyPairProvider;
+import org.apache.sshd.common.session.SessionContext;
 import org.apache.sshd.common.util.security.SecurityUtils;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
@@ -79,7 +80,7 @@ public class FileKeyPairProvider extends AbstractKeyPairProvider
 
 
     @Override
-    public Iterable<KeyPair> loadKeys()
+    public Iterable<KeyPair> loadKeys(SessionContext session)
     {
         if (!SecurityUtils.isBouncyCastleRegistered()) {
             throw new IllegalStateException("BouncyCastle must be registered as a JCE provider");
@@ -128,7 +129,7 @@ public class FileKeyPairProvider extends AbstractKeyPairProvider
                                 log.debug("File does not exist, skipping {}", file);
                                 continue;
                             }
-                            nextKeyPair = doLoadKey(file);
+                            nextKeyPair = doLoadKey(session, file);
                             if (nextKeyPair != null) {
                                 nextKeyPairSet = true;
                                 return true;
@@ -143,7 +144,7 @@ public class FileKeyPairProvider extends AbstractKeyPairProvider
     }
 
 
-    private KeyPair doLoadKey(String file)
+    private KeyPair doLoadKey(SessionContext session, String file)
     {
         try {
 
@@ -182,7 +183,7 @@ public class FileKeyPairProvider extends AbstractKeyPairProvider
                     // The type EDDSA PRIVATE KEY was given by us and nothing official.
                     byte[] privateKeyContent = pemObject.getContent();
                     PrivateKeyEntryDecoder<? extends PublicKey,? extends PrivateKey> decoder = SecurityUtils.getOpenSSHEDDSAPrivateKeyEntryDecoder();
-                    PrivateKey privateKey = decoder.decodePrivateKey(null, privateKeyContent, 0, privateKeyContent.length);
+                    PrivateKey privateKey = decoder.decodePrivateKey(session, null, privateKeyContent, 0, privateKeyContent.length);
                     PublicKey publicKey = SecurityUtils. recoverEDDSAPublicKey(privateKey);
                     return new KeyPair(publicKey, privateKey);
                 }

@@ -17,11 +17,11 @@ package com.gitblit.wicket.pages;
 
 import java.util.List;
 
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -88,9 +88,9 @@ public class DocPage extends RepositoryPage {
 		Fragment fragment;
 		MarkupDocument markupDoc = processor.parse(repositoryName, getBestCommitId(commit), documentPath, markupText);
 		if (MarkupSyntax.PLAIN.equals(markupDoc.syntax)) {
-			fragment = new Fragment("doc", "plainContent", this);
+			fragment = new Fragment("doc", "plainContent", DocPage.this);
 		} else {
-			fragment = new Fragment("doc", "markupContent", this);
+			fragment = new Fragment("doc", "markupContent", DocPage.this);
 		}
 
 		// document page links

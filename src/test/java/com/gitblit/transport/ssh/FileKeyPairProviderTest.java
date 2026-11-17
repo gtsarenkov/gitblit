@@ -32,7 +32,7 @@ public class FileKeyPairProviderTest
         FileKeyPairProvider hostKeyPairProvider = new FileKeyPairProvider();
         hostKeyPairProvider.setFiles(new String [] { file.getPath() });
 
-        Iterable<KeyPair> keyPairs = hostKeyPairProvider.loadKeys();
+        Iterable<KeyPair> keyPairs = hostKeyPairProvider.loadKeys(null);
         Iterator<KeyPair> iterator = keyPairs.iterator();
         assertTrue(iterator.hasNext());
         KeyPair keyPair = iterator.next();
@@ -49,7 +49,7 @@ public class FileKeyPairProviderTest
         FileKeyPairProvider hostKeyPairProvider = new FileKeyPairProvider();
         hostKeyPairProvider.setFiles(new String [] { file.getPath() });
 
-        Iterable<KeyPair> keyPairs = hostKeyPairProvider.loadKeys();
+        Iterable<KeyPair> keyPairs = hostKeyPairProvider.loadKeys(null);
         Iterator<KeyPair> iterator = keyPairs.iterator();
         assertTrue(iterator.hasNext());
         KeyPair keyPair = iterator.next();
@@ -66,7 +66,7 @@ public class FileKeyPairProviderTest
         FileKeyPairProvider hostKeyPairProvider = new FileKeyPairProvider();
         hostKeyPairProvider.setFiles(new String [] { file.getPath() });
 
-        Iterable<KeyPair> keyPairs = hostKeyPairProvider.loadKeys();
+        Iterable<KeyPair> keyPairs = hostKeyPairProvider.loadKeys(null);
         Iterator<KeyPair> iterator = keyPairs.iterator();
         assertTrue(iterator.hasNext());
         KeyPair keyPair = iterator.next();
@@ -83,7 +83,7 @@ public class FileKeyPairProviderTest
         FileKeyPairProvider hostKeyPairProvider = new FileKeyPairProvider();
         hostKeyPairProvider.setFiles(new String [] { file.getPath() });
 
-        Iterable<KeyPair> keyPairs = hostKeyPairProvider.loadKeys();
+        Iterable<KeyPair> keyPairs = hostKeyPairProvider.loadKeys(null);
         Iterator<KeyPair> iterator = keyPairs.iterator();
         assertTrue(iterator.hasNext());
         KeyPair keyPair = iterator.next();
@@ -106,7 +106,7 @@ public class FileKeyPairProviderTest
         FileKeyPairProvider hostKeyPairProvider = new FileKeyPairProvider();
         hostKeyPairProvider.setFiles(new String [] { ecdsa.getPath(), eddsa.getPath(), rsa.getPath(), ed25519.getPath() });
 
-        Iterable<KeyPair> keyPairs = hostKeyPairProvider.loadKeys();
+        Iterable<KeyPair> keyPairs = hostKeyPairProvider.loadKeys(null);
         Iterator<KeyPair> iterator = keyPairs.iterator();
 
         assertTrue(iterator.hasNext());

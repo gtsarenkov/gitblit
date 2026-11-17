@@ -27,9 +27,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.RestartResponseException;
-import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.TextField;
@@ -37,7 +36,8 @@ import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.target.basic.RedirectRequestTarget;
+import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
@@ -130,9 +130,9 @@ public abstract class RepositoryPage extends RootPage {
 			}
 		}
 
-		if (params.containsKey(PARAM_STAR)) {
+		if (params.getNamedKeys().contains(PARAM_STAR)) {
 			// set starred state
-			boolean star = params.getBoolean(PARAM_STAR);
+			boolean star = params.get(PARAM_STAR).toBoolean();
 			UserModel user = GitBlitWebSession.get().getUser();
 			if (user != null && user.isAuthenticated) {
 				UserRepositoryPreferences prefs = user.getPreferences().getRepositoryPreferences(getRepositoryModel().name);
@@ -163,8 +163,7 @@ public abstract class RepositoryPage extends RootPage {
 		NavigationPanel navigationPanel = new NavigationPanel("repositoryNavPanel", getRepoNavPageClass(), navLinks);
 		add(navigationPanel);
 
-		add(new ExternalLink("syndication", SyndicationServlet.asLink(getRequest()
-				.getRelativePathPrefixToContextRoot(), getRepositoryName(), null, 0)));
+		add(new ExternalLink("syndication", SyndicationServlet.asLink(getRequest().getPrefixToContextPath(), getRepositoryName(), null, 0)));
 
 		// add floating search form
 		SearchForm searchForm = new SearchForm("searchForm", getRepositoryName());
@@ -246,7 +245,7 @@ public abstract class RepositoryPage extends RootPage {
 		// per-repository extra navlinks
 		if (JGitUtils.getPagesBranch(r) != null) {
 			ExternalNavLink pagesLink = new ExternalNavLink("gb.pages", PagesServlet.asLink(
-					getRequest().getRelativePathPrefixToContextRoot(), getRepositoryName(), null), true);
+					getRequest().getPrefixToContextPath(), getRepositoryName(), null), true);
 			navLinks.add(pagesLink);
 		}
 
@@ -305,16 +304,16 @@ public abstract class RepositoryPage extends RootPage {
 		RepositoryModel model = getRepositoryModel();
 		if (StringUtils.isEmpty(model.originRepository)) {
 			if (model.isMirror) {
-				add(new Fragment("repoIcon", "mirrorIconFragment", this));
-				Fragment mirrorFrag = new Fragment("originRepository", "mirrorFragment", this);
+				add(new Fragment("repoIcon", "mirrorIconFragment", RepositoryPage.this));
+				Fragment mirrorFrag = new Fragment("originRepository", "mirrorFragment", RepositoryPage.this);
 				Label lbl = new Label("originRepository", MessageFormat.format(getString("gb.mirrorOf"), "<b>" + model.origin + "</b>"));
 				mirrorFrag.add(lbl.setEscapeModelStrings(false));
 				add(mirrorFrag);
 			} else {
 				if (model.isBare) {
-					add(new Fragment("repoIcon", "repoIconFragment", this));
+					add(new Fragment("repoIcon", "repoIconFragment", RepositoryPage.this));
 				} else {
-					add(new Fragment("repoIcon", "cloneIconFragment", this));
+					add(new Fragment("repoIcon", "cloneIconFragment", RepositoryPage.this));
 				}
 				add(new Label("originRepository", Optional.of(model.description).or("")));
 			}
@@ -323,21 +322,21 @@ public abstract class RepositoryPage extends RootPage {
 			if (origin == null) {
 				// no origin repository, show description if available
 				if (model.isBare) {
-					add(new Fragment("repoIcon", "repoIconFragment", this));
+					add(new Fragment("repoIcon", "repoIconFragment", RepositoryPage.this));
 				} else {
-					add(new Fragment("repoIcon", "cloneIconFragment", this));
+					add(new Fragment("repoIcon", "cloneIconFragment", RepositoryPage.this));
 				}
 				add(new Label("originRepository", Optional.of(model.description).or("")));
 			} else if (!user.canView(origin)) {
 				// show origin repository without link
-				add(new Fragment("repoIcon", "forkIconFragment", this));
-				Fragment forkFrag = new Fragment("originRepository", "originFragment", this);
+				add(new Fragment("repoIcon", "forkIconFragment", RepositoryPage.this));
+				Fragment forkFrag = new Fragment("originRepository", "originFragment", RepositoryPage.this);
 				forkFrag.add(new Label("originRepository", StringUtils.stripDotGit(model.originRepository)));
 				add(forkFrag);
 			} else {
 				// link to origin repository
-				add(new Fragment("repoIcon", "forkIconFragment", this));
-				Fragment forkFrag = new Fragment("originRepository", "originFragment", this);
+				add(new Fragment("repoIcon", "forkIconFragment", RepositoryPage.this));
+				Fragment forkFrag = new Fragment("originRepository", "originFragment", RepositoryPage.this);
 				forkFrag.add(new LinkPanel("originRepository", null, StringUtils.stripDotGit(model.originRepository),
 						SummaryPage.class, WicketUtils.newRepositoryParameter(model.originRepository)));
 				add(forkFrag);
@@ -355,7 +354,7 @@ public abstract class RepositoryPage extends RootPage {
 		// (un)star link allows a user to star a repository
 		if (user.isAuthenticated && model.hasCommits) {
 			PageParameters starParams = DeepCopier.copy(getPageParameters());
-			starParams.put(PARAM_STAR, !user.getPreferences().isStarredRepository(model.name));
+			starParams.add(PARAM_STAR, !user.getPreferences().isStarredRepository(model.name));
 			String toggleStarUrl = getRequestCycle().urlFor(getClass(), starParams).toString();
 			if (user.getPreferences().isStarredRepository(model.name)) {
 				// show unstar button
@@ -415,19 +414,19 @@ public abstract class RepositoryPage extends RootPage {
 	}
 
 	protected void addToolbarButton(String wicketId, String iconClass, String label, String url) {
-		Fragment button = new Fragment(wicketId, "toolbarLinkFragment", this);
+		Fragment button = new Fragment(wicketId, "toolbarLinkFragment", RepositoryPage.this);
 		Label icon = new Label("icon");
 		WicketUtils.setCssClass(icon, iconClass);
 		button.add(icon);
 		button.add(new Label("label", label));
-		button.add(new SimpleAttributeModifier("href", url));
+		button.add(new AttributeAppender("href", url));
 		add(button);
 	}
 
 	protected void addSyndicationDiscoveryLink() {
 		add(WicketUtils.syndicationDiscoveryLink(SyndicationServlet.getTitle(repositoryName,
 				objectId), SyndicationServlet.asLink(getRequest()
-				.getRelativePathPrefixToContextRoot(), repositoryName, objectId, 0)));
+				.getPrefixToContextPath(), repositoryName, objectId, 0)));
 	}
 
 	protected Repository getRepository() {
@@ -621,14 +620,14 @@ public abstract class RepositoryPage extends RootPage {
 					value = getString("gb.missingUsername");
 				}
 			}
-			Fragment partial = new Fragment(wicketId, "partialPersonIdent", this);
+			Fragment partial = new Fragment(wicketId, "partialPersonIdent", RepositoryPage.this);
 			LinkPanel link = new LinkPanel("personName", "list", value, GitSearchPage.class,
 					WicketUtils.newSearchParameter(repositoryName, objectId, value, searchType));
 			setPersonSearchTooltip(link, value, searchType);
 			partial.add(link);
 			return partial;
 		} else {
-			Fragment fullPerson = new Fragment(wicketId, "fullPersonIdent", this);
+			Fragment fullPerson = new Fragment(wicketId, "fullPersonIdent", RepositoryPage.this);
 			LinkPanel nameLink = new LinkPanel("personName", "list", name, GitSearchPage.class,
 					WicketUtils.newSearchParameter(repositoryName, objectId, name, searchType));
 			setPersonSearchTooltip(nameLink, name, searchType);
@@ -764,8 +763,7 @@ public abstract class RepositoryPage extends RootPage {
 			if (StringUtils.isEmpty(searchString)) {
 				// redirect to self to avoid wicket page update bug
 				String absoluteUrl = getCanonicalUrl();
-				getRequestCycle().setRequestTarget(new RedirectRequestTarget(absoluteUrl));
-				return;
+				throw new RedirectToUrlException(absoluteUrl);
 			}
 			for (Constants.SearchType type : Constants.SearchType.values()) {
 				if (searchString.toLowerCase().startsWith(type.name().toLowerCase() + ":")) {
@@ -786,7 +784,7 @@ public abstract class RepositoryPage extends RootPage {
 			// mounted url parameters (issue-111)
 			PageParameters params = WicketUtils.newSearchParameter(repositoryName, null, searchString, searchType);
 			String absoluteUrl = getCanonicalUrl(searchPageClass, params);
-			getRequestCycle().setRequestTarget(new RedirectRequestTarget(absoluteUrl));
+			throw new RedirectToUrlException(absoluteUrl);
 		}
 	}
 }

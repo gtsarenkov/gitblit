@@ -2,10 +2,10 @@ package com.gitblit.models;
 
 import java.io.Serializable;
 
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.WebPage;
 
 import com.gitblit.utils.StringUtils;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 public class Menu {
 
@@ -108,8 +108,8 @@ public class Menu {
 				isSelected = false;
 			} else {
 				parameters = new PageParameters(params);
-				if (parameters.containsKey(parameter)) {
-					isSelected = params.getString(parameter).equals(value);
+				if (parameters.getNamedKeys().contains(parameter)) {
+					isSelected = params.get(parameter).toString("").equals(value);
 					// set the new selection value
 					setParameter(parameter, value);
 				} else {
@@ -125,7 +125,7 @@ public class Menu {
 				if (StringUtils.isEmpty(value)) {
 					this.parameters.remove(parameter);
 				} else {
-					this.parameters.put(parameter, value);
+					this.parameters.set(parameter, value);
 				}
 			}
 		}

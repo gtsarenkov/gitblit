@@ -37,6 +37,8 @@ import com.gitblit.models.ProjectModel;
 import com.gitblit.models.RepositoryModel;
 import com.gitblit.utils.JGitUtils;
 import com.gitblit.utils.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -48,6 +50,7 @@ import com.gitblit.utils.StringUtils;
  */
 @Singleton
 public class GitblitWicketFilter extends WicketFilter {
+	private static final Logger logger = LoggerFactory.getLogger(GitblitWicketFilter.class);
 
 	private IStoredSettings settings;
 
@@ -81,6 +84,11 @@ public class GitblitWicketFilter extends WicketFilter {
 			public WebApplication createApplication(WicketFilter filter) {
 				return webapp;
 			}
+
+			@Override
+			public void destroy(WicketFilter filter) {
+				logger.debug("Application factory destroy for wicket filter {}", filter);
+			}
 		};
 	}
 
@@ -90,13 +98,12 @@ public class GitblitWicketFilter extends WicketFilter {
 	 * @param servletRequest
 	 * @return The last modified time stamp
 	 */
-	@Override
 	protected long getLastModified(final HttpServletRequest servletRequest)	{
 		final String pathInfo = getRelativePath(servletRequest);
 		if (Strings.isEmpty(pathInfo)) {
 			return -1;
 		}
-		long lastModified = super.getLastModified(servletRequest);
+		long lastModified = servletRequest.getDateHeader("Last-Modified");
 		if (lastModified > -1) {
 			return lastModified;
 		}
@@ -123,7 +130,7 @@ public class GitblitWicketFilter extends WicketFilter {
 
 		repo = repo.replace("%2f", "/").replace("%2F", "/").replace(settings.getChar(Keys.web.forwardSlashCharacter, '/'), '/');
 
-		GitBlitWebApp app = (GitBlitWebApp) getWebApplication();
+		GitBlitWebApp app = webapp;
 		int expires = settings.getInteger(Keys.web.pageCacheExpires, 0);
 		if (!StringUtils.isEmpty(page) && app.isCacheablePage(page) && expires > 0) {
 			// page can be cached by the browser

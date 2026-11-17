@@ -36,7 +36,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.tika.Tika;
-import org.apache.wicket.protocol.http.WicketURLEncoder;
+import org.apache.wicket.util.encoding.UrlEncoder;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.MutableObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
@@ -123,7 +124,7 @@ public class RawServlet extends HttpServlet {
 		}
 		String encodedPath = path == null ? "" : path.replace('/', fsc);
 		String fullPath = repository + "/" + (branch == null ? "" : (branch + "/" + encodedPath));
-		return baseURL + Constants.RAW_PATH + WicketURLEncoder.FULL_PATH_INSTANCE.encode(fullPath);
+		return baseURL + Constants.RAW_PATH + UrlEncoder.FULL_PATH_INSTANCE.encode(fullPath, RequestCycle.get().getRequest().getCharset());
 	}
 
 

@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.wicket.behavior.HeaderContributor;
 import org.apache.wicket.markup.html.basic.Label;
+import com.gitblit.wicket.pages.HeaderContributor;
 
 import com.gitblit.Keys;
 import com.gitblit.models.RepositoryModel;
@@ -140,10 +140,10 @@ public class FilterableRepositoryList extends BasePanel {
 		// inject an AngularJS controller with static data
 		NgController ctrl = new NgController(ngCtrl);
 		ctrl.addVariable(ngList, list);
-		add(new HeaderContributor(ctrl));
+		add(new HeaderContributor<>(ctrl));
 	}
 
-	protected class RepoListItem implements Serializable {
+	protected static class RepoListItem implements Serializable {
 
 		private static final long serialVersionUID = 1L;
 

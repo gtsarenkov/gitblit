@@ -1,3 +1,31 @@
+pluginManagement {
+    def localNexusProperties = new Properties()
+    def localNexusFile = new File(settingsDir, 'nexus.properties')
+    if (localNexusFile.isFile()) {
+        localNexusFile.withInputStream { localNexusProperties.load(it) }
+    }
+
+    def nexusUrl = providers.gradleProperty('nexusUrl')
+            .orElse(providers.environmentVariable('NEXUS_URL'))
+            .getOrElse(localNexusProperties.getProperty('nexusUrl', '')).trim().replaceAll('/+$', '')
+    repositories {
+        if (nexusUrl) {
+            maven {
+                name = 'nexusGradlePlugins'
+                url = uri("${nexusUrl}/repository/gradle-plugins/")
+                allowInsecureProtocol = nexusUrl.startsWith('http://')
+            }
+            maven {
+                name = 'nexusMavenPublic'
+                url = uri("${nexusUrl}/repository/maven-public/")
+                allowInsecureProtocol = nexusUrl.startsWith('http://')
+            }
+        } else {
+            gradlePluginPortal()
+        }
+    }
+}
+
 includeBuild "gradle/plugins/class-dependencies"
 
 rootProject.name = 'gitblit'

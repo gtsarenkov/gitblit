@@ -35,11 +35,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.PageParameters;
-import org.apache.wicket.RequestCycle;
-import org.apache.wicket.behavior.HeaderContributor;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.html.IHeaderContributor;
-import org.apache.wicket.markup.html.IHeaderResponse;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -49,8 +47,6 @@ import org.apache.wicket.markup.repeater.data.DataView;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.protocol.http.WebRequest;
-import org.apache.wicket.protocol.http.WebResponse;
 
 import com.gitblit.Constants;
 import com.gitblit.Constants.AuthenticationType;
@@ -77,6 +73,8 @@ import com.gitblit.wicket.WicketUtils;
 import com.gitblit.wicket.panels.AvatarImage;
 import com.gitblit.wicket.panels.LinkPanel;
 import com.gitblit.wicket.panels.NavigationPanel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 /**
  * Root page is a topbar, navigable page like Repositories, Users, or
@@ -86,7 +84,6 @@ import com.gitblit.wicket.panels.NavigationPanel;
  *
  */
 public abstract class RootPage extends BasePage {
-
 	boolean showAdmin;
 
 	IModel<String> username = new Model<String>("");
@@ -105,7 +102,7 @@ public abstract class RootPage extends BasePage {
 	protected void setupPage(String repositoryName, String pageName) {
 
 		// CSS header overrides
-		add(new HeaderContributor(new IHeaderContributor() {
+		add(new HeaderContributor<>(new IHeaderContributor() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -144,7 +141,7 @@ public abstract class RootPage extends BasePage {
 					buffer.append("}\n");
 				}
 				buffer.append("</style>\n");
-				response.renderString(buffer.toString());
+				response.render(CssHeaderItem.forCSS(buffer.toString(),null));
 				}
 			}));
 
@@ -255,8 +252,8 @@ public abstract class RootPage extends BasePage {
 				params.remove("user");
 
 				// remove days back parameter if it is the default value
-				if (params.containsKey("db")
-						&& params.getInt("db") == app().settings().getInteger(Keys.web.activityDuration, 7)) {
+				if (params.getNamedKeys().contains("db")
+						&& params.get("db").toOptionalInteger() == app().settings().getInteger(Keys.web.activityDuration, 7)) {
 					params.remove("db");
 				}
 				return params;
@@ -271,8 +268,8 @@ public abstract class RootPage extends BasePage {
 
 	private void loginUser(UserModel user) {
 		if (user != null) {
-			HttpServletRequest request = ((WebRequest) getRequest()).getHttpServletRequest();
-			HttpServletResponse response = ((WebResponse) getResponse()).getHttpServletResponse();
+			HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
+			HttpServletResponse response = (HttpServletResponse) getResponse().getContainerResponse();
 
 			// Set the user into the session
 			GitBlitWebSession session = GitBlitWebSession.get();
@@ -281,8 +278,8 @@ public abstract class RootPage extends BasePage {
 			session.replaceSession();
 			session.setUser(user);
 
-			request = ((WebRequest) getRequest()).getHttpServletRequest();
-			response = ((WebResponse) getResponse()).getHttpServletResponse();
+			request = (HttpServletRequest) getRequest().getContainerRequest();
+			response = (HttpServletResponse) getResponse().getContainerResponse();
 			request.getSession().setAttribute(Constants.ATTRIB_AUTHTYPE, AuthenticationType.CREDENTIALS);
 
 			// Set Cookie
@@ -393,8 +390,8 @@ public abstract class RootPage extends BasePage {
 			clonedParams = new PageParameters(params);
 		}
 
-		if (!clonedParams.containsKey("db")) {
-			clonedParams.put("db",  daysBack);
+		if (!clonedParams.getNamedKeys().contains("db")) {
+			clonedParams.add("db",  daysBack);
 		}
 
 		List<MenuItem> items = new ArrayList<MenuItem>();
@@ -434,7 +431,7 @@ public abstract class RootPage extends BasePage {
 		String set = WicketUtils.getSet(params);
 		String regex = WicketUtils.getRegEx(params);
 		String team = WicketUtils.getTeam(params);
-		int daysBack = params.getInt("db", 0);
+		int daysBack = params.get("db").toInt(0);
 		int maxDaysBack = app().settings().getInteger(Keys.web.activityDurationMaximum, 30);
 
 		List<RepositoryModel> availableModels = getRepositoryModels();
@@ -569,7 +566,7 @@ public abstract class RootPage extends BasePage {
 					String username = RootPage.this.username.getObject();
 					char[] password = RootPage.this.password.getObject().toCharArray();
 
-					HttpServletRequest request = ((WebRequest)RequestCycle.get().getRequest()).getHttpServletRequest();
+					HttpServletRequest request = (HttpServletRequest) RequestCycle.get().getRequest().getContainerRequest();
 
 					UserModel user = app().authentication().authenticate(username, password, request.getRemoteAddr());
 					if (user == null) {
@@ -613,7 +610,7 @@ public abstract class RootPage extends BasePage {
 			GitBlitWebSession session = GitBlitWebSession.get();
 			UserModel user = session.getUser();
 			boolean editCredentials = app().authentication().supportsCredentialChanges(user);
-			HttpServletRequest request = ((WebRequest) getRequest()).getHttpServletRequest();
+			HttpServletRequest request = (HttpServletRequest) getRequest().getContainerRequest();
 			AuthenticationType authenticationType = (AuthenticationType) request.getAttribute(Constants.ATTRIB_AUTHTYPE);
 			boolean standardLogin = (null != authenticationType) ? authenticationType.isStandard() : true;
 
@@ -687,7 +684,7 @@ public abstract class RootPage extends BasePage {
 		 * @return a submenu fragment
 		 */
 		private Fragment newSubmenu(String wicketId, String submenuTitle, List<MenuItem> menuItems) {
-			Fragment submenu = new Fragment(wicketId, "submenuFragment", this);
+			Fragment submenu = new Fragment(wicketId, "submenuFragment", RootPage.this);
 			submenu.add(new Label("submenuTitle", submenuTitle).setRenderBodyOnly(true));
 			ListDataProvider<MenuItem> menuItemsDp = new ListDataProvider<MenuItem>(menuItems);
 			DataView<MenuItem> submenuItems = new DataView<MenuItem>("submenuItem", menuItemsDp) {

@@ -19,7 +19,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -32,8 +31,8 @@ import org.apache.wicket.markup.repeater.data.DataView;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.protocol.http.RequestUtils;
-import org.apache.wicket.request.target.basic.RedirectRequestTarget;
+import org.apache.wicket.request.http.handler.RedirectRequestHandler;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -83,7 +82,7 @@ public class ComparePage extends RepositoryPage {
 			add(new Label("comparison").setVisible(false));
 		} else {
 			// active comparison
-			Fragment comparison = new Fragment("comparison", "comparisonFragment", this);
+			Fragment comparison = new Fragment("comparison", "comparisonFragment", ComparePage.this);
 			add(comparison);
 
 			RevCommit fromCommit;
@@ -224,7 +223,7 @@ public class ComparePage extends RepositoryPage {
 		//
 		// ref selection form
 		//
-		SessionlessForm<Void> refsForm = new SessionlessForm<Void>("compareRefsForm", getClass(), getPageParameters()) {
+		SessionlessForm<Void> refsForm = new SessionlessForm<Void>("compareRefsForm", this.getClass(), getPageParameters()) {
 
 			private static final long serialVersionUID = 1L;
 
@@ -236,12 +235,12 @@ public class ComparePage extends RepositoryPage {
 
 				PageParameters params = WicketUtils.newRangeParameter(repositoryName, from, to);
 				if (ignoreWS) {
-					params.put("w", 1);
+					params.add("w", 1);
 				}
 
 				String relativeUrl = urlFor(ComparePage.class, params).toString();
-				String absoluteUrl = RequestUtils.toAbsolutePath(relativeUrl);
-				getRequestCycle().setRequestTarget(new RedirectRequestTarget(absoluteUrl));
+				String absoluteUrl = WicketUtils.toAbsoluteUrl(relativeUrl);
+				getRequestCycle().scheduleRequestHandlerAfterCurrent(new RedirectRequestHandler(absoluteUrl));
 			}
 		};
 
@@ -266,7 +265,7 @@ public class ComparePage extends RepositoryPage {
 		//
 		// manual ids form
 		//
-		SessionlessForm<Void> idsForm = new SessionlessForm<Void>("compareIdsForm", getClass(), getPageParameters()) {
+		SessionlessForm<Void> idsForm = new SessionlessForm<Void>("compareIdsForm", this.getClass(), getPageParameters()) {
 
 			private static final long serialVersionUID = 1L;
 
@@ -278,11 +277,11 @@ public class ComparePage extends RepositoryPage {
 
 				PageParameters params = WicketUtils.newRangeParameter(repositoryName, from, to);
 				if (ignoreWS) {
-					params.put("w", 1);
+					params.add("w", 1);
 				}
 				String relativeUrl = urlFor(ComparePage.class, params).toString();
-				String absoluteUrl = RequestUtils.toAbsolutePath(relativeUrl);
-				getRequestCycle().setRequestTarget(new RedirectRequestTarget(absoluteUrl));
+				String absoluteUrl = WicketUtils.toAbsoluteUrl(relativeUrl);
+				getRequestCycle().scheduleRequestHandlerAfterCurrent(new RedirectRequestHandler(absoluteUrl));
 			}
 		};
 

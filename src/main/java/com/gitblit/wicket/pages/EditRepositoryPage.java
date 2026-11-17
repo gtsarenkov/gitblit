@@ -16,20 +16,11 @@
 package com.gitblit.wicket.pages;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import org.apache.wicket.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior;
-import org.apache.wicket.behavior.SimpleAttributeModifier;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.form.palette.Palette;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -49,6 +40,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.util.CollectionModel;
 import org.apache.wicket.model.util.ListModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Repository;
 
 import com.gitblit.Constants;
@@ -389,7 +381,6 @@ public class EditRepositoryPage extends RootSubPage {
 					error(e.getMessage());
 					return;
 				}
-				setRedirect(false);
 				setResponsePage(SummaryPage.class, WicketUtils.newRepositoryParameter(repositoryModel.name));
 			}
 		};
@@ -409,7 +400,7 @@ public class EditRepositoryPage extends RootSubPage {
 		}
 
 		// do not let the browser pre-populate these fields
-		form.add(new SimpleAttributeModifier("autocomplete", "off"));
+		form.add(new AttributeAppender("autocomplete", "off"));
 
 
 		//
@@ -644,9 +635,9 @@ public class EditRepositoryPage extends RootSubPage {
 					repositoryModel.authorizationControl = AuthorizationControl.NAMED;
 				}
 
-				target.addComponent(verifyCommitter);
-				target.addComponent(usersPalette);
-				target.addComponent(teamsPalette);
+				target.add(verifyCommitter);
+				target.add(usersPalette);
+				target.add(teamsPalette);
 			}
 		};
 
@@ -774,6 +765,11 @@ public class EditRepositoryPage extends RootSubPage {
 		}
 
 		@Override
+		public FederationStrategy getObject(String id, IModel<? extends List<? extends FederationStrategy>> choices) {
+			return choices.getObject().get(Integer.parseInt(id));
+		}
+
+		@Override
 		public String getDisplayValue(FederationStrategy type) {
 			return map.get(type);
 		}
@@ -804,6 +800,11 @@ public class EditRepositoryPage extends RootSubPage {
 		public String getIdValue(Integer value, int index) {
 			return Integer.toString(index);
 		}
+
+		@Override
+		public Integer getObject(String id, IModel<? extends List<? extends Integer>> choices) {
+			return choices.getObject().get(Integer.parseInt(id));
+		}
 	}
 
 	private class MaxActivityCommitsRenderer implements IChoiceRenderer<Integer> {
@@ -827,6 +828,11 @@ public class EditRepositoryPage extends RootSubPage {
 		@Override
 		public String getIdValue(Integer value, int index) {
 			return Integer.toString(index);
+		}
+
+		@Override
+		public Integer getObject(String id, IModel<? extends List<? extends Integer>> choices) {
+			return choices.getObject().get(Integer.parseInt(id));
 		}
 	}
 }

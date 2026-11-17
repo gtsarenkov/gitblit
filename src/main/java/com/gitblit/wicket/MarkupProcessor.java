@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.Page;
-import org.apache.wicket.RequestCycle;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.mylyn.wikitext.confluence.core.ConfluenceLanguage;
@@ -268,7 +268,7 @@ public class MarkupProcessor {
 				if (! isFullUrl(imagePath)) {
 					// relative image
 					String path = doc.getRelativePath(imagePath);
-					String contextUrl = RequestCycle.get().getRequest().getRelativePathPrefixToContextRoot();
+					String contextUrl = RequestCycle.get().getRequest().getPrefixToContextPath();
 					url = RawServlet.asLink(contextUrl, repositoryName, commitId, path);
 				} else {
 					// absolute image
@@ -325,7 +325,7 @@ public class MarkupProcessor {
 				if (! isFullUrl(node.url)) {
 					// repository-relative image link
 					String path = doc.getRelativePath(node.url);
-					String contextUrl = RequestCycle.get().getRequest().getRelativePathPrefixToContextRoot();
+					String contextUrl = RequestCycle.get().getRequest().getPrefixToContextPath();
 					String url = RawServlet.asLink(contextUrl, repositoryName, commitId, path);
 					return new Rendering(url, text);
 				}
@@ -339,7 +339,7 @@ public class MarkupProcessor {
 				if (! isFullUrl(url)) {
 					// repository-relative image link
 					String path = doc.getRelativePath(url);
-					String contextUrl = RequestCycle.get().getRequest().getRelativePathPrefixToContextRoot();
+					String contextUrl = RequestCycle.get().getRequest().getPrefixToContextPath();
 					String wurl = RawServlet.asLink(contextUrl, repositoryName, commitId, path);
 					rendering = new Rendering(wurl, alt);
 				} else {

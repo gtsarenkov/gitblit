@@ -28,10 +28,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.sshd.common.SshException;
-import org.apache.sshd.server.Command;
+import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.Environment;
+import org.apache.sshd.server.channel.ChannelSession;
 import org.apache.sshd.server.ExitCallback;
-import org.apache.sshd.server.SessionAware;
+import org.apache.sshd.server.session.ServerSessionAware;
 import org.apache.sshd.server.session.ServerSession;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
@@ -47,7 +48,7 @@ import com.gitblit.utils.cli.CmdLineParser;
 import com.google.common.base.Charsets;
 import com.google.common.util.concurrent.Atomics;
 
-public abstract class BaseCommand implements Command, SessionAware {
+public abstract class BaseCommand implements Command, ServerSessionAware {
 
 	private static final Logger log = LoggerFactory.getLogger(BaseCommand.class);
 
@@ -93,6 +94,10 @@ public abstract class BaseCommand implements Command, SessionAware {
 	}
 
 	@Override
+	public void destroy(ChannelSession channel) {
+		destroy();
+	}
+
 	public void destroy() {
 		log.debug("destroying " + getClass().getName());
 		Future<?> future = task.getAndSet(null);
@@ -108,6 +113,10 @@ public abstract class BaseCommand implements Command, SessionAware {
 	}
 
 	@Override
+	public void start(ChannelSession channel, Environment env) throws IOException {
+		start(env);
+	}
+
 	public abstract void start(Environment env) throws IOException;
 
 	protected void provideStateTo(final BaseCommand cmd) {

@@ -18,7 +18,20 @@ package com.gitblit.wicket.pages;
 import java.io.OutputStream;
 import java.util.List;
 
-import org.apache.wicket.PageParameters;
+import com.gitblit.models.PathModel;
+import com.gitblit.models.SubmoduleModel;
+import com.gitblit.models.UserModel;
+import com.gitblit.servlet.RawServlet;
+import com.gitblit.utils.ByteFormat;
+import com.gitblit.utils.JGitUtils;
+import com.gitblit.wicket.CacheControl;
+import com.gitblit.wicket.CacheControl.LastModified;
+import com.gitblit.wicket.GitBlitWebSession;
+import com.gitblit.wicket.WicketUtils;
+import com.gitblit.wicket.panels.CommitHeaderPanel;
+import com.gitblit.wicket.panels.CompressedDownloadsPanel;
+import com.gitblit.wicket.panels.LinkPanel;
+import com.gitblit.wicket.panels.PathBreadcrumbsPanel;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.ExternalLink;
@@ -27,27 +40,13 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.DataView;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
-import org.apache.wicket.request.target.resource.ResourceStreamRequestTarget;
+import org.apache.wicket.request.handler.resource.ResourceStreamRequestHandler;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.resource.AbstractResourceStreamWriter;
 import org.apache.wicket.util.resource.IResourceStream;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-
-import com.gitblit.models.PathModel;
-import com.gitblit.models.SubmoduleModel;
-import com.gitblit.models.UserModel;
-import com.gitblit.servlet.RawServlet;
-import com.gitblit.utils.ByteFormat;
-import com.gitblit.utils.JGitUtils;
-import com.gitblit.wicket.CacheControl;
-import com.gitblit.wicket.GitBlitWebSession;
-import com.gitblit.wicket.CacheControl.LastModified;
-import com.gitblit.wicket.WicketUtils;
-import com.gitblit.wicket.panels.CommitHeaderPanel;
-import com.gitblit.wicket.panels.CompressedDownloadsPanel;
-import com.gitblit.wicket.panels.LinkPanel;
-import com.gitblit.wicket.panels.PathBreadcrumbsPanel;
 
 @CacheControl(LastModified.BOOT)
 public class TreePage extends RepositoryPage {
@@ -65,7 +64,7 @@ public class TreePage extends RepositoryPage {
 		add(new BookmarkablePageLink<Void>("historyLink", HistoryPage.class,
 				WicketUtils.newPathParameter(repositoryName, objectId, path)));
 		add(new CompressedDownloadsPanel("compressedLinks", getRequest()
-				.getRelativePathPrefixToContextRoot(), repositoryName, objectId, path));
+				.getPrefixToContextPath(), repositoryName, objectId, path));
 
 		add(new CommitHeaderPanel("commitHeader", repositoryName, commit));
 
@@ -118,7 +117,7 @@ public class TreePage extends RepositoryPage {
 										entry.path)));
 
 						// links
-						Fragment links = new Fragment("pathLinks", "treeLinks", this);
+						Fragment links = new Fragment("pathLinks", "treeLinks", TreePage.this);
 						links.add(new BookmarkablePageLink<Void>("tree", TreePage.class,
 								WicketUtils.newPathParameter(repositoryName, id,
 										entry.path)));
@@ -144,7 +143,7 @@ public class TreePage extends RepositoryPage {
 								getShortObjectId(submoduleId), TreePage.class,
 								WicketUtils.newPathParameter(submodulePath, submoduleId, "")).setEnabled(hasSubmodule));
 
-						Fragment links = new Fragment("pathLinks", "submoduleLinks", this);
+						Fragment links = new Fragment("pathLinks", "submoduleLinks", TreePage.this);
 						links.add(new BookmarkablePageLink<Void>("view", SummaryPage.class,
 								WicketUtils.newRepositoryParameter(submodulePath)).setEnabled(hasSubmodule));
 						links.add(new BookmarkablePageLink<Void>("tree", TreePage.class,
@@ -168,7 +167,7 @@ public class TreePage extends RepositoryPage {
 						item.add(new Label("pathSize", byteFormat.format(entry.size)));
 						
 						// links
-						Fragment links = new Fragment("pathLinks", "blobLinks", this);
+						Fragment links = new Fragment("pathLinks", "blobLinks", TreePage.this);
 						
 						if (entry.isFilestoreItem()) {
 							item.add(new LinkPanel("pathName", "list", displayPath, new Link<Object>("link", null) {
@@ -179,7 +178,7 @@ public class TreePage extends RepositoryPage {
 							    public void onClick() {
 							 
 							    	 IResourceStream resourceStream = new AbstractResourceStreamWriter() {
-							    		 								    	
+
 										private static final long serialVersionUID = 1L;
 
 										@Override 
@@ -190,9 +189,9 @@ public class TreePage extends RepositoryPage {
 							    	        app().filestore().downloadBlob(entry.getFilestoreOid(), user, getRepositoryModel(), output);
 							    	      }
 							    	  };
-							    	      
-							    	
-							    	getRequestCycle().setRequestTarget(new ResourceStreamRequestTarget(resourceStream, entry.path));
+
+
+							    	getRequestCycle().scheduleRequestHandlerAfterCurrent(new ResourceStreamRequestHandler(resourceStream, entry.path));
 							    }}));
 							
 							links.add(new Link<Object>("view", null) {
@@ -214,9 +213,9 @@ public class TreePage extends RepositoryPage {
 							    	        app().filestore().downloadBlob(entry.getFilestoreOid(), user, getRepositoryModel(), output);
 							    	      }
 							    	  };
-							    	      
-							    	
-							    	getRequestCycle().setRequestTarget(new ResourceStreamRequestTarget(resourceStream, entry.path));
+
+
+									getRequestCycle().scheduleRequestHandlerAfterCurrent(new ResourceStreamRequestHandler(resourceStream, entry.path));
 							    }});
 							
 							links.add(new Link<Object>("raw", null) {
@@ -240,7 +239,7 @@ public class TreePage extends RepositoryPage {
 							    	  };
 							    	      
 							    	
-							    	getRequestCycle().setRequestTarget(new ResourceStreamRequestTarget(resourceStream, entry.path));
+							    	getRequestCycle().scheduleRequestHandlerAfterCurrent(new ResourceStreamRequestHandler(resourceStream, entry.path));
 							    }});
 							
 						} else {

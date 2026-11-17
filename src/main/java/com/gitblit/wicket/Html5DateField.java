@@ -2,6 +2,7 @@ package com.gitblit.wicket;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
@@ -10,7 +11,7 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.form.AbstractTextComponent.ITextFormatProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.convert.IConverter;
-import org.apache.wicket.util.convert.converters.DateConverter;
+import org.apache.wicket.util.convert.converter.DateConverter;
 
 public class Html5DateField extends TextField<Date> implements ITextFormatProvider {
 
@@ -20,7 +21,7 @@ public class Html5DateField extends TextField<Date> implements ITextFormatProvid
 
 	private String datePattern = null;
 
-	private IConverter converter = null;
+	private IConverter<Date> converter = null;
 
 	/**
 	 * Creates a new Html5DateField, without a specified pattern. This is the same as calling
@@ -105,7 +106,7 @@ public class Html5DateField extends TextField<Date> implements ITextFormatProvid
 	 * @return A pattern-specific converter
 	 */
 	@Override
-	public IConverter getConverter(Class<?> type)
+	public <C> IConverter<C> getConverter(Class<C> type)
 	{
 		if (converter == null)
 		{
@@ -113,7 +114,7 @@ public class Html5DateField extends TextField<Date> implements ITextFormatProvid
 		}
 		else
 		{
-			return converter;
+			return (IConverter<C>) converter;
 		}
 	}
 
@@ -148,9 +149,9 @@ public class Html5DateField extends TextField<Date> implements ITextFormatProvid
 	}
 	
 	@Override
-	protected String getInputType()
+	protected String[] getInputTypes()
 	{
-		return "date";
+		return new String[] {"date"};
 	}
 	
 }

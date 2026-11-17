@@ -29,14 +29,17 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import net.i2p.crypto.eddsa.EdDSAPrivateKey;
+import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import org.apache.sshd.common.config.keys.KeyEntryResolver;
 import org.apache.sshd.common.io.IoServiceFactoryFactory;
-import org.apache.sshd.common.io.mina.MinaServiceFactoryFactory;
+import org.apache.sshd.mina.MinaServiceFactoryFactory;
 import org.apache.sshd.common.io.nio2.Nio2ServiceFactoryFactory;
 import org.apache.sshd.common.util.security.SecurityUtils;
 import org.apache.sshd.common.util.security.bouncycastle.BouncyCastleSecurityProviderRegistrar;
 import org.apache.sshd.common.util.security.eddsa.EdDSASecurityProviderRegistrar;
 import org.apache.sshd.common.util.security.eddsa.OpenSSHEd25519PrivateKeyEntryDecoder;
+import org.apache.sshd.common.util.io.output.SecureByteArrayOutputStream;
+import org.apache.sshd.core.CoreModuleProperties;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.auth.pubkey.CachingPublicKeyAuthenticator;
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
@@ -189,7 +192,7 @@ public class SshDaemon {
 		//   ssh-keyscan -t rsa,dsa -p 29418 localhost
 		String version = String.format("%s (%s-%s)", Constants.getGitBlitVersion().replace(' ', '_'),
 				sshd.getVersion(), sshBackendStr);
-		sshd.getProperties().put(SshServer.SERVER_IDENTIFICATION, version);
+		CoreModuleProperties.SERVER_IDENTIFICATION.set(sshd, version);
 
 		run = new AtomicBoolean(false);
 	}
@@ -299,12 +302,13 @@ public class SshDaemon {
 					EdDSAPrivateKey dsaPrivateKey = (EdDSAPrivateKey)privateKey;
 					// Jumping through some hoops here, because the decoder expects the key type as a string at the
 					// start, but the encoder doesn't put it in. So we have to put it in ourselves.
-					ByteArrayOutputStream encos = new ByteArrayOutputStream();
-					String type = encoder.encodePrivateKey(encos, dsaPrivateKey);
-					ByteArrayOutputStream bos = new ByteArrayOutputStream();
-					KeyEntryResolver.encodeString(bos, type);
-					encos.writeTo(bos);
-					w.writeObject(new PemObject("EDDSA PRIVATE KEY", bos.toByteArray()));
+					try (SecureByteArrayOutputStream encos = new SecureByteArrayOutputStream()) {
+						String type = encoder.encodePrivateKey(encos, dsaPrivateKey, (EdDSAPublicKey) kp.getPublic());
+						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+						KeyEntryResolver.encodeString(bos, type);
+						encos.writeTo(bos);
+						w.writeObject(new PemObject("EDDSA PRIVATE KEY", bos.toByteArray()));
+					}
 				}
 				else {
 					log.warn("Unable to encode EdDSA key, got key type " + privateKey.getClass().getCanonicalName());

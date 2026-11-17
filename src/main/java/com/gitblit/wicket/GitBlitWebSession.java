@@ -15,22 +15,23 @@
  */
 package com.gitblit.wicket;
 
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.wicket.Page;
-import org.apache.wicket.PageParameters;
-import org.apache.wicket.RedirectToUrlException;
-import org.apache.wicket.Request;
 import org.apache.wicket.Session;
-import org.apache.wicket.protocol.http.RequestUtils;
-import org.apache.wicket.protocol.http.WebRequestCycle;
 import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.protocol.http.request.WebClientInfo;
 
 import com.gitblit.models.UserModel;
+import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.Request;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.flow.RedirectToUrlException;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.util.string.StringValue;
 
 public final class GitBlitWebSession extends WebSession {
 
@@ -57,6 +58,31 @@ public final class GitBlitWebSession extends WebSession {
 		user = null;
 	}
 
+	public static PageParameters fromRequest(IRequestParameters requestParameters) {
+		PageParameters pageParameters = new PageParameters();
+
+		if (requestParameters.getParameterNames() != null) {
+			for (String paramName : requestParameters.getParameterNames()) {
+				List<StringValue> values = requestParameters.getParameterValues(paramName);
+				if (values != null) {
+					for (StringValue value : values) {
+						pageParameters.add(paramName, value);
+					}
+				}
+			}
+		}
+
+//		if (requestParameters.getIndexedCount() > 0) {
+//			for (int i = 0; i < requestParameters.getIndexedCount(); i++) {
+//				String value = requestParameters.getIndexedValue(i);
+//				if (value != null) {
+//					pageParameters.set(i, value);
+//				}
+//			}
+//		}
+		return pageParameters;
+	}
+
 	/**
 	 * Cache the requested protected resource pending successful authentication.
 	 *
@@ -64,11 +90,11 @@ public final class GitBlitWebSession extends WebSession {
 	 */
 	public void cacheRequest(Class<? extends Page> pageClass) {
 		// build absolute url with correctly encoded parameters?!
-		Request req = WebRequestCycle.get().getRequest();
-		Map<String, ?> params = req.getRequestParameters().getParameters();
+		Request req = RequestCycle.get().getRequest();
+		PageParameters params = fromRequest(req.getRequestParameters());
 		PageParameters pageParams = new PageParameters(params);
-		String relativeUrl = WebRequestCycle.get().urlFor(pageClass, pageParams).toString();
-		requestUrl = RequestUtils.toAbsolutePath(relativeUrl);
+		String relativeUrl = RequestCycle.get().urlFor(pageClass, pageParams).toString();
+		requestUrl = WicketUtils.toAbsoluteUrl(relativeUrl);
 		if (isTemporary())
 		{
 			// we must bind the temporary session into the session store

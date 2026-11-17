@@ -21,13 +21,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.apache.wicket.Application;
-import org.apache.wicket.Request;
-import org.apache.wicket.Response;
+import org.apache.wicket.RuntimeConfigurationType;
 import org.apache.wicket.Session;
 import org.apache.wicket.application.IClassResolver;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.protocol.http.WebApplication;
+import org.apache.wicket.request.Request;
+import org.apache.wicket.request.Response;
+import org.apache.wicket.util.time.Duration;
 
 import ro.fortsoft.pf4j.PluginState;
 import ro.fortsoft.pf4j.PluginWrapper;
@@ -191,7 +192,7 @@ public class GitBlitWebApp extends WebApplication implements GitblitWicketApp {
 
 		// configure the resource cache duration to 90 days for deployment
 		if (!isDebugMode()) {
-			getResourceSettings().setDefaultCacheDuration(90 * 86400);
+			getResourceSettings().setDefaultCacheDuration(Duration.days(90));
 		}
 
 		// setup the standard gitweb-ish urls
@@ -280,7 +281,7 @@ public class GitBlitWebApp extends WebApplication implements GitblitWicketApp {
 		if (!settings.getBoolean(Keys.web.mountParameters, true)) {
 			parameters = new String[] {};
 		}
-		mount(new GitblitParamUrlCodingStrategy(settings, xssFilter, location, clazz, parameters));
+		mount(new GitblitParamUrlRequestMapper(settings, xssFilter, location, clazz, parameters));
 
 		// map the mount point to the cache control definition
 		if (clazz.isAnnotationPresent(CacheControl.class)) {
@@ -477,11 +478,11 @@ public class GitBlitWebApp extends WebApplication implements GitblitWicketApp {
 	}
 
 	@Override
-	public final String getConfigurationType() {
+	public final RuntimeConfigurationType getConfigurationType() {
 		if (runtimeManager.isDebugMode()) {
-			return Application.DEVELOPMENT;
+			return RuntimeConfigurationType.DEVELOPMENT;
 		}
-		return Application.DEPLOYMENT;
+		return RuntimeConfigurationType.DEPLOYMENT;
 	}
 
 	public static GitBlitWebApp get() {

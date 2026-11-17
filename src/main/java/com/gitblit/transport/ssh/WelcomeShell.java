@@ -24,10 +24,12 @@ import java.net.URL;
 import java.text.MessageFormat;
 
 import org.apache.sshd.common.Factory;
-import org.apache.sshd.server.Command;
+import org.apache.sshd.server.shell.ShellFactory;
+import org.apache.sshd.server.command.Command;
 import org.apache.sshd.server.Environment;
+import org.apache.sshd.server.channel.ChannelSession;
 import org.apache.sshd.server.ExitCallback;
-import org.apache.sshd.server.SessionAware;
+import org.apache.sshd.server.session.ServerSessionAware;
 import org.apache.sshd.server.session.ServerSession;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.util.SystemReader;
@@ -44,12 +46,17 @@ import com.gitblit.utils.StringUtils;
  * Class that displays a welcome message for any shell requests.
  *
  */
-public class WelcomeShell implements Factory<Command> {
+public class WelcomeShell implements Factory<Command>, ShellFactory {
 
 	private final IGitblit gitblit;
 
 	public WelcomeShell(IGitblit gitblit) {
 		this.gitblit = gitblit;
+	}
+
+	@Override
+	public Command createShell(ChannelSession channel) {
+		return create();
 	}
 
 	@Override
@@ -62,7 +69,7 @@ public class WelcomeShell implements Factory<Command> {
 		return create();
 	}
 
-	private static class SendMessage implements Command, SessionAware {
+	private static class SendMessage implements Command, ServerSessionAware {
 
 		private final IPublicKeyManager km;
 		private final IStoredSettings settings;
@@ -104,7 +111,7 @@ public class WelcomeShell implements Factory<Command> {
 		}
 
 		@Override
-		public void start(final Environment env) throws IOException {
+		public void start(ChannelSession channel, final Environment env) throws IOException {
 			err.write(Constants.encode(getMessage()));
 			err.flush();
 
@@ -115,7 +122,7 @@ public class WelcomeShell implements Factory<Command> {
 		}
 
 		@Override
-		public void destroy() {
+		public void destroy(ChannelSession channel) {
 			this.session = null;
 		}
 

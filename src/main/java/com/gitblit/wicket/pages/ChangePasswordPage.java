@@ -22,8 +22,6 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.protocol.http.WebRequest;
-import org.apache.wicket.protocol.http.WebResponse;
 
 import com.gitblit.GitBlitException;
 import com.gitblit.Keys;
@@ -31,6 +29,11 @@ import com.gitblit.models.UserModel;
 import com.gitblit.utils.PasswordHash;
 import com.gitblit.wicket.GitBlitWebSession;
 import com.gitblit.wicket.NonTrimmedPasswordTextField;
+import org.apache.wicket.request.http.WebRequest;
+import org.apache.wicket.request.http.WebResponse;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 public class ChangePasswordPage extends RootSubPage {
 
@@ -98,14 +101,13 @@ public class ChangePasswordPage extends RootSubPage {
 					if (app().settings().getBoolean(Keys.web.allowCookieAuthentication, false)) {
 						WebRequest request = (WebRequest) getRequestCycle().getRequest();
 						WebResponse response = (WebResponse) getRequestCycle().getResponse();
-						app().authentication().setCookie(request.getHttpServletRequest(),
-								response.getHttpServletResponse(), user);
+						app().authentication().setCookie((HttpServletRequest) request.getContainerRequest(),
+                                (HttpServletResponse) response.getContainerResponse(), user);
 					}
 				} catch (GitBlitException e) {
 					error(e.getMessage());
 					return;
 				}
-				setRedirect(false);
 				info(getString("gb.passwordChanged"));
 				setResponsePage(RepositoriesPage.class);
 			}
@@ -124,7 +126,6 @@ public class ChangePasswordPage extends RootSubPage {
 
 			@Override
 			public void onSubmit() {
-				setRedirect(false);
 				error(getString("gb.passwordChangeAborted"));
 				setResponsePage(RepositoriesPage.class);
 			}

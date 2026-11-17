@@ -1,6 +1,23 @@
 buildscript {
     repositories {
-        mavenCentral()
+        def localNexusProperties = new Properties()
+        def localNexusFile = rootProject.file('nexus.properties')
+        if (localNexusFile.isFile()) {
+            localNexusFile.withInputStream { localNexusProperties.load(it) }
+        }
+
+        def nexusUrl = providers.gradleProperty('nexusUrl')
+                .orElse(providers.environmentVariable('NEXUS_URL'))
+                .getOrElse(localNexusProperties.getProperty('nexusUrl', '')).trim().replaceAll('/+$', '')
+        if (nexusUrl) {
+            maven {
+                name = 'nexusMavenPublic'
+                url = uri("${nexusUrl}/repository/maven-public/")
+                allowInsecureProtocol = nexusUrl.startsWith('http://')
+            }
+        } else {
+            mavenCentral()
+        }
     }
     dependencies {
         classpath 'org.ow2.asm:asm:9.5'

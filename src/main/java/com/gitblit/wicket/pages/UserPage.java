@@ -22,7 +22,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.wicket.PageParameters;
+import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.basic.Label;
@@ -297,9 +298,7 @@ public class UserPage extends RootPage {
 
 				try {
 					app().gitblit().reviseUser(user.username, user);
-
-					setRedirect(true);
-					setResponsePage(UserPage.class, WicketUtils.newUsernameParameter(user.username));
+					throw new RestartResponseException(UserPage.class, WicketUtils.newUsernameParameter(user.username));
 				} catch (GitBlitException e) {
 					// logger.error("Failed to update user " + user.username, e);
 					// error(getString("gb.failedToUpdateUser"), false);
@@ -308,18 +307,18 @@ public class UserPage extends RootPage {
 		});
 
 		// add the preferences tab
-		add(new Fragment("preferencesLink", "preferencesLinkFragment", this).setRenderBodyOnly(true));
-		Fragment fragment = new Fragment("preferencesTab", "preferencesTabFragment", this);
+		add(new Fragment("preferencesLink", "preferencesLinkFragment", UserPage.this).setRenderBodyOnly(true));
+		Fragment fragment = new Fragment("preferencesTab", "preferencesTabFragment", UserPage.this);
 		fragment.add(prefs);
 		add(fragment.setRenderBodyOnly(true));
 	}
 
 	private void addSshKeys(final UserModel user) {
-		Fragment keysTab = new Fragment("sshKeysTab", "sshKeysTabFragment", this);
+		Fragment keysTab = new Fragment("sshKeysTab", "sshKeysTabFragment", UserPage.this);
 		keysTab.add(new SshKeysPanel("sshKeysPanel", user));
 
 		// add the SSH keys tab
-		add(new Fragment("sshKeysLink", "sshKeysLinkFragment", this).setRenderBodyOnly(true));
+		add(new Fragment("sshKeysLink", "sshKeysLinkFragment", UserPage.this).setRenderBodyOnly(true));
 		add(keysTab.setRenderBodyOnly(true));
 	}
 }

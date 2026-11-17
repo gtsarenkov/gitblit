@@ -3,7 +3,7 @@ package com.gitblit.wicket.panels;
 import java.util.Map;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.PageParameters;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -39,7 +39,7 @@ public class NestedRepositoryTreePanel extends BasePanel {
 		final boolean showSwatch = app().settings().getBoolean(Keys.web.repositoryListSwatches, true);
 
 		final TreeNodeModel node = model.getObject();
-		Fragment nodeHeader = new Fragment("nodeHeader", "groupRepositoryRow", this);
+		Fragment nodeHeader = new Fragment("nodeHeader", "groupRepositoryRow", this.getParent());
 		add(nodeHeader);
 		WebMarkupContainer firstColumn = new WebMarkupContainer("firstColumn");
 		nodeHeader.add(firstColumn);
@@ -48,7 +48,7 @@ public class NestedRepositoryTreePanel extends BasePanel {
 			depth.add(new WebMarkupContainer(depth.newChildId()));
 		}
 		firstColumn.add(depth);
-		firstColumn.add(new Fragment("groupCollapsible", "tableGroupMinusCollapsible", this));
+		firstColumn.add(new Fragment("groupCollapsible", "tableGroupMinusCollapsible", NestedRepositoryTreePanel.this));
 		if(node.getParent()!=null) {
 			addChildOfNodeIdCssClassesToRow(nodeHeader, node.getParent());
 		}
@@ -96,13 +96,13 @@ public class NestedRepositoryTreePanel extends BasePanel {
 				// show colored repository type icon
 				Fragment iconFragment;
 				if (entry.isMirror) {
-					iconFragment = new Fragment("repoIcon", "mirrorIconFragment", this);
+					iconFragment = new Fragment("repoIcon", "mirrorIconFragment", NestedRepositoryTreePanel.this);
 				} else if (entry.isFork()) {
-					iconFragment = new Fragment("repoIcon", "forkIconFragment", this);
+					iconFragment = new Fragment("repoIcon", "forkIconFragment", NestedRepositoryTreePanel.this);
 				} else if (entry.isBare) {
-					iconFragment = new Fragment("repoIcon", "repoIconFragment", this);
+					iconFragment = new Fragment("repoIcon", "repoIconFragment", NestedRepositoryTreePanel.this);
 				} else {
-					iconFragment = new Fragment("repoIcon", "cloneIconFragment", this);
+					iconFragment = new Fragment("repoIcon", "cloneIconFragment", NestedRepositoryTreePanel.this);
 				}
 				if (showSwatch) {
 					WicketUtils.setCssStyle(iconFragment, "color:" + StringUtils.getColor(entry.toString()));
