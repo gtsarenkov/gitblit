@@ -171,9 +171,9 @@ public abstract class RepositoryPage extends RootPage {
 		searchForm.setTranslatedAttributes();
 
 		// load clipboard library to copy repository URL
-		addBottomScript("../../clipboard/clipboard.min.js");
+		addBottomScriptUrl(getRequest().getContextPath() + "/clipboard/clipboard.min.js");
 		// instantiate clipboard
-		addBottomScript("../../clipboard/gitblit-ctcbtn.js");
+		addBottomScriptUrl(getRequest().getContextPath() + "/clipboard/gitblit-ctcbtn.js");
 
 		// set stateless page preference
 		setStatelessHint(true);
@@ -354,7 +354,7 @@ public abstract class RepositoryPage extends RootPage {
 		// (un)star link allows a user to star a repository
 		if (user.isAuthenticated && model.hasCommits) {
 			PageParameters starParams = DeepCopier.copy(getPageParameters());
-			starParams.add(PARAM_STAR, !user.getPreferences().isStarredRepository(model.name));
+			starParams.set(PARAM_STAR, !user.getPreferences().isStarredRepository(model.name));
 			String toggleStarUrl = getRequestCycle().urlFor(getClass(), starParams).toString();
 			if (user.getPreferences().isStarredRepository(model.name)) {
 				// show unstar button

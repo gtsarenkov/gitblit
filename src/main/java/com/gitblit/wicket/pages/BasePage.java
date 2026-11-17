@@ -43,13 +43,11 @@ import org.apache.wicket.markup.html.pages.RedirectPage;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
-import org.apache.wicket.request.Url;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
-import org.apache.wicket.request.resource.UrlResourceReference;
 import org.apache.wicket.util.time.Duration;
 import org.apache.wicket.util.time.Time;
 import org.slf4j.Logger;
@@ -537,9 +535,14 @@ public abstract class BasePage extends SessionPage {
 	 *            page-relative path to the Javascript resource; normally starts with "scripts/"
 	 */
 	protected void addBottomScript(String scriptPath) {
+		addBottomScriptUrl(urlFor(new JavaScriptResourceReference(getClass(), scriptPath), new PageParameters()).toString());
+	}
+
+	/** Adds a bottom script whose URL has already been resolved. */
+	protected void addBottomScriptUrl(String url) {
 		RepeatingView bottomScripts = getBottomScriptContainer();
 		Label script = new Label(bottomScripts.newChildId(), "<script type='text/javascript' src='"
-				+ urlFor(new UrlResourceReference(Url.parse(scriptPath)), new PageParameters()) + "'></script>\n");
+				+ url + "'></script>\n");
 		bottomScripts.add(script.setEscapeModelStrings(false).setRenderBodyOnly(true));
 	}
 

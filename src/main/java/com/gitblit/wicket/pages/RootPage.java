@@ -108,7 +108,6 @@ public abstract class RootPage extends BasePage {
 			@Override
 			public void renderHead(IHeaderResponse response) {
 				StringBuilder buffer = new StringBuilder();
-				buffer.append("<style type=\"text/css\">\n");
 				buffer.append(".navbar-inner {\n");
 				final String headerBackground = app().settings().getString(Keys.web.headerBackgroundColor, null);
 				if (!StringUtils.isEmpty(headerBackground)) {
@@ -140,7 +139,6 @@ public abstract class RootPage extends BasePage {
 					buffer.append(MessageFormat.format("color: {0} !important;\n", headerHover));
 					buffer.append("}\n");
 				}
-				buffer.append("</style>\n");
 				response.render(CssHeaderItem.forCSS(buffer.toString(),null));
 				}
 			}));

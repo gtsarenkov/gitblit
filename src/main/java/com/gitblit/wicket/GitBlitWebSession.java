@@ -22,11 +22,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.wicket.Page;
 import org.apache.wicket.Session;
+import org.apache.wicket.core.request.handler.IPageClassRequestHandler;
 import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.protocol.http.request.WebClientInfo;
 
 import com.gitblit.models.UserModel;
 import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.flow.RedirectToUrlException;
@@ -89,11 +91,17 @@ public final class GitBlitWebSession extends WebSession {
 	 * @param pageClass
 	 */
 	public void cacheRequest(Class<? extends Page> pageClass) {
-		// build absolute url with correctly encoded parameters?!
-		Request req = RequestCycle.get().getRequest();
-		PageParameters params = fromRequest(req.getRequestParameters());
-		PageParameters pageParams = new PageParameters(params);
-		String relativeUrl = RequestCycle.get().urlFor(pageClass, pageParams).toString();
+		RequestCycle cycle = RequestCycle.get();
+		IRequestHandler handler = cycle.getActiveRequestHandler();
+		PageParameters pageParams;
+		if (handler instanceof IPageClassRequestHandler
+				&& pageClass.equals(((IPageClassRequestHandler) handler).getPageClass())) {
+			// Mounted path parameters are held by the handler, not the raw request.
+			pageParams = new PageParameters(((IPageClassRequestHandler) handler).getPageParameters());
+		} else {
+			pageParams = fromRequest(cycle.getRequest().getRequestParameters());
+		}
+		String relativeUrl = cycle.urlFor(pageClass, pageParams).toString();
 		requestUrl = WicketUtils.toAbsoluteUrl(relativeUrl);
 		if (isTemporary())
 		{
