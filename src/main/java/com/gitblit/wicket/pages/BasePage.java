@@ -56,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -505,7 +506,7 @@ public abstract class BasePage extends SessionPage {
 			for (String line : lines) {
 				sb.append(line).append('\n');
 			}
-		} catch (IOException e) {
+		} catch (UncheckedIOException e) {
 
 		} finally {
 			if (is != null) {
