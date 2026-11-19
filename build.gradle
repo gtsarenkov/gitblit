@@ -49,9 +49,8 @@ sourceSets {
             srcDir 'src/main/bugtraq'
         }
         resources {
-            srcDir 'src/main/distrib'
+            setSrcDirs(['src/main/distrib'])
         }
-        output.resourcesDir = "build/classes/java/main"
     }
     test {
         java {
@@ -118,18 +117,20 @@ java {
     }
 }
 
-tasks.register("processResourcesFromJavaSources", Copy) {
+tasks.register("processWebRootResources", Copy) {
+    // Embedded Jetty serves the classes directory when running without a JAR.
+    from('src/main/resources')
+    into sourceSets.main.output.classesDirs.singleFile
     sourceSets.main.java.srcDirs.forEach { srcDir ->
         from(srcDir) {
             exclude '**/*.java'
+            filter ReplaceTokens, tokens: [
+                    'gb.version': project.property('gb.version').toString()
+            ]
         }
-        into sourceSets.main.output.classesDirs.singleFile
-        filter ReplaceTokens, tokens: [
-                'gb.version': project.property('gb.version').toString()
-        ]
     }
 }
-processResources.dependsOn processResourcesFromJavaSources
+processResources.dependsOn processWebRootResources
 
 tasks.register("processFederationClientResourcesFromDistribution", Copy) {
     from(layout.projectDirectory.file("src/main/distrib/federation.properties"))

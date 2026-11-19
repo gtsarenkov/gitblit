@@ -20,14 +20,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.IHeaderContributor;
 import org.apache.wicket.markup.head.IHeaderResponse;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
-import org.apache.wicket.request.resource.ResourceReference;
 
 /**
  * Simple AngularJS data controller which injects scoped objects as static,
@@ -72,7 +70,8 @@ public class NgController implements IHeaderContributor {
 		}
 		line(sb, "}");
 
-		response.render(OnDomReadyHeaderItem.forScript(sb.toString()));
+		// AngularJS resolves ng-controller names in global scope at startup.
+		response.render(JavaScriptHeaderItem.forScript(sb.toString(), null));
 	}
 
 	private void line(StringBuilder sb, String line) {
