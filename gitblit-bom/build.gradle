@@ -2,7 +2,7 @@ apply plugin: 'java-platform'
 apply plugin: 'maven-publish'
 
 ext['bouncycastle.version'] = 'latest.release' // 1.69
-ext['wicket.version'] = 'latest.release' // 1.4.22 // TODO
+ext['wicket.version'] = '8.20.0'
 ext['lucene.version'] = 'latest.release' // '5.5.2'
 ext['sshd.version'] = '2.20.1'
 ext['mina.version'] = 'latest.release' // 2.0.25
@@ -10,7 +10,7 @@ ext['groovy.version'] = 'latest.release' // 2.4.4
 ext['jetty.version'] = '9.4.57.v20241219' // TODO 'latest.release' // 9.4.49.v20220914
 ext['guice-servlet.version'] = 'latest.release' // 5.1.0-gb2
 ext['wikitext.version'] = 'latest.release' // 1.4
-ext['selenium.version'] = '2.28.0'
+ext['selenium.version'] = '4.52.0'
 
 javaPlatform {
     allowDependencies()
@@ -31,8 +31,7 @@ ext.luceneVersionConfig = {
 }
 ext.wicketVersionDef = {
     version {
-        strictly '[1.4,8.0['
-        prefer property('wicket.version')
+        strictly property('wicket.version')
     }
 }
 ext.slf4jVersionDef = latestReleaseDef
@@ -160,9 +159,12 @@ dependencies {
         api('org.eclipse.jgit:org.eclipse.jgit.http.server', jgitVersionDef)
         api('org.eclipse.jgit:org.eclipse.jgit.ssh.jsch', jgitVersionDef)
 
-        api("org.apache.wicket:wicket", wicketVersionDef)
+        api("org.apache.wicket:wicket-core", wicketVersionDef)
         api("org.apache.wicket:wicket-auth-roles", wicketVersionDef)
         api("org.apache.wicket:wicket-extensions", wicketVersionDef)
+
+        api("org.seleniumhq.selenium:selenium-support:${property('selenium.version')}")
+        api("org.seleniumhq.selenium:selenium-firefox-driver:${property('selenium.version')}")
 
         api('com.google.inject.extensions:guice-servlet', guiceServletVersionDef)
 

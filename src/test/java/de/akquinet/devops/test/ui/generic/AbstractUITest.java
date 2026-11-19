@@ -19,7 +19,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.firefox.FirefoxOptions;
 
 import com.gitblit.GitBlitServer;
 
@@ -52,27 +52,19 @@ public abstract class AbstractUITest {
 	 */
 	@BeforeClass
 	public static void setUpClass() {
+		FirefoxOptions options = new FirefoxOptions()
+				.addArguments("-headless")
+				.setAcceptInsecureCerts(true)
+				.addPreference("browser.download.folderList", 2)
+				.addPreference("browser.download.dir", System.getProperty("java.io.tmpdir"))
+				.addPreference("browser.helperApps.neverAsk.saveToDisk",
+						"text/csv,text/plain,application/zip,application/pdf");
+		driver = new FirefoxDriver(options);
+
 		Runnable gitblitRunnable = new GitblitRunnable(HTTP_PORT, HTTPS_PORT,
 				SHUTDOWN_PORT, GITBLIT_PROPERTIES_PATH, USERS_PROPERTIES_PATH);
-
 		serverThread = new Thread(gitblitRunnable);
 		serverThread.start();
-		FirefoxProfile firefoxProfile = new FirefoxProfile();
-		firefoxProfile.setPreference("startup.homepage_welcome_url",
-				"https://www.google.de");
-
-		firefoxProfile.setPreference("browser.download.folderList", 2);
-		firefoxProfile.setPreference(
-				"browser.download.manager.showWhenStarting", false);
-		String downloadDir = System.getProperty("java.io.tmpdir");
-		firefoxProfile.setPreference("browser.download.dir", downloadDir);
-		firefoxProfile.setPreference("browser.helperApps.neverAsk.saveToDisk",
-				"text/csv,text/plain,application/zip,application/pdf");
-		firefoxProfile.setPreference("browser.helperApps.alwaysAsk.force",
-				false);
-		System.out.println("Saving all attachments to: " + downloadDir);
-
-		driver = new FirefoxDriver(firefoxProfile);
 	}
 
 	/**
@@ -81,13 +73,18 @@ public abstract class AbstractUITest {
 	 */
 	@AfterClass
 	public static void tearDownClass() throws InterruptedException {
-		driver.close();
-		// Stop Gitblit
-		GitBlitServer.main("--stop", "--shutdownPort", "" + SHUTDOWN_PORT);
-
-		// Wait a few seconds for it to be running completely including thread
-		// destruction
-		Thread.sleep(1000);
+		try {
+			if (driver != null) {
+				driver.quit();
+			}
+		} finally {
+			driver = null;
+			if (serverThread != null) {
+				GitBlitServer.main("--stop", "--shutdownPort", Integer.toString(SHUTDOWN_PORT));
+				serverThread = null;
+				Thread.sleep(1000);
+			}
+		}
 	}
 
 	public static WebDriver getDriver() {

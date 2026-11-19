@@ -81,13 +81,12 @@ public class NewMilestonePage extends RepositoryPage {
 		form.add(new Html5DateField("due", dueModel, "yyyy-MM-dd"));
 		form.add(new Label("dueFormat", "yyyy-MM-dd"));
 		addBottomScriptInline("{var e=document.createElement('input');e.type='date';if(e.type=='date'){$('[name=\"due\"]~.help-inline').hide()}}");
-		addBottomScript("scripts/wicketHtml5Patch.js");
 		form.add(new AjaxButton("create") {
 
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+			protected void onSubmit(AjaxRequestTarget target) {
 				String name = nameModel.getObject();
 				if (StringUtils.isEmpty(name)) {
 					// invalid name

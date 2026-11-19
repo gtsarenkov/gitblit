@@ -5,8 +5,6 @@
       lang="en"> 
 
 <wicket:extend>
-<body onload="document.getElementById('title').focus();">
-	
 <div class="container">
 	<!-- page header -->
 	<div class="title" style="font-size: 22px; color: rgb(0, 32, 96);padding: 3px 0px 7px;">
@@ -18,7 +16,7 @@
 	<div class="span12">
 		<!-- Edit Ticket Table -->
 		<table class="ticket">
-			<tr><th><wicket:message key="gb.title"></wicket:message></th><td class="edit"><input class="input-xxlarge" type="text" wicket:id="title" id="title"></input></td></tr>
+			<tr><th><wicket:message key="gb.title"></wicket:message></th><td class="edit"><input class="input-xxlarge" type="text" wicket:id="title" id="title" autofocus="autofocus"></input></td></tr>
 			<tr><th><wicket:message key="gb.topic"></wicket:message></th><td class="edit"><input class="input-large" type="text" wicket:id="topic"></input></td></tr>
 			<tr><th style="vertical-align: top;"><wicket:message key="gb.description"></wicket:message></th><td class="edit">
 				<div style="background-color:#fbfbfb;border:1px solid #ccc;">
@@ -55,7 +53,6 @@
 	</div>
 	</form>
 </div>
-</body>
 
 <wicket:fragment wicket:id="statusFragment">
 	<tr><th><wicket:message key="gb.status"></wicket:message><span style="color:red;">*</span></th><td class="edit"><select class="input-large" wicket:id="status"></select></td></tr>

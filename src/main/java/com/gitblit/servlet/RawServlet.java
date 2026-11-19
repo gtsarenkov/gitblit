@@ -124,7 +124,8 @@ public class RawServlet extends HttpServlet {
 		}
 		String encodedPath = path == null ? "" : path.replace('/', fsc);
 		String fullPath = repository + "/" + (branch == null ? "" : (branch + "/" + encodedPath));
-		return baseURL + Constants.RAW_PATH + UrlEncoder.FULL_PATH_INSTANCE.encode(fullPath, RequestCycle.get().getRequest().getCharset());
+		String encodedFullPath = UrlEncoder.PATH_INSTANCE.encode(fullPath, RequestCycle.get().getRequest().getCharset());
+		return baseURL + Constants.RAW_PATH + encodedFullPath.replace("%2F", "/");
 	}
 
 

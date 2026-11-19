@@ -15,6 +15,7 @@
  */
 package de.akquinet.devops.test.ui.view;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -149,7 +150,7 @@ public class RepoEditView extends GitblitDashboardView {
 			return false;
 		}
 		found.get(0).click();
-		WebDriverWait webDriverWait = new WebDriverWait(getDriver(), 1);
+		WebDriverWait webDriverWait = new WebDriverWait(getDriver(), Duration.ofSeconds(1));
 		webDriverWait.until(new Exp.RepoListViewLoaded());
 		return true;
 	}

@@ -15,6 +15,7 @@
  */
 package de.akquinet.devops.test.ui.view;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -63,7 +64,7 @@ public class GitblitDashboardView extends GitblitPageView {
 			+ WICKET_PAGES_PACKAGE_NAME;
 
 	synchronized public void waitToLoadFor(int sec) {
-		WebDriverWait webDriverWait = new WebDriverWait(getDriver(), sec);
+		WebDriverWait webDriverWait = new WebDriverWait(getDriver(), Duration.ofSeconds(sec));
 		webDriverWait.until(new ExpectedCondition<Boolean>() {
 			public Boolean apply(WebDriver d) {
 				return d.getTitle().toLowerCase()

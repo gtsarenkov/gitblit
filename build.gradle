@@ -103,13 +103,11 @@ subprojects {
 }
 
 ext['gb.version'] = "${version} with modern SSH algorithms"
-ext['selenium.version'] = '2.28.0'
 ext['asm.version'] = '9.7.1'
 
 //project(':gitblit-bom').properties.each {
 //    logger.lifecycle "Property ${project(':gitblit-bom').name}.${it.key}=${it.value}"
 //}
-//ext['selenium.version'] = project(':gitblit-bom').property('selenium.version')
 
 java {
     toolchain {
@@ -239,7 +237,7 @@ dependencies {
     implementation('org.eclipse.jetty:jetty-webapp')
     implementation('org.eclipse.jetty:jetty-xml')
 
-    implementation('org.apache.wicket:wicket')
+    implementation('org.apache.wicket:wicket-core')
     implementation('org.apache.wicket:wicket-auth-roles')
     implementation('org.apache.wicket:wicket-extensions')
     implementation('ro.fortsoft.pf4j:pf4j')
@@ -258,9 +256,8 @@ dependencies {
     federationClient('com.sun.activation:javax.activation:1.2.0')
 
     testImplementation('org.mockito:mockito-core:2.28.2')
-    testImplementation("org.seleniumhq.selenium:selenium-java:${property('selenium.version')}")
-    testImplementation("org.seleniumhq.selenium:selenium-support:${property('selenium.version')}")
-    testImplementation("org.seleniumhq.selenium:selenium-firefox-driver:${property('selenium.version')}")
+    testImplementation('org.seleniumhq.selenium:selenium-support')
+    testImplementation('org.seleniumhq.selenium:selenium-firefox-driver')
     testImplementation('org.apache.httpcomponents:httpclient:4.5.13')
     testImplementation('org.eclipse.jgit:org.eclipse.jgit.ssh.jsch')
 

@@ -110,7 +110,6 @@ public class EditMilestonePage extends RepositoryPage {
 		form.add(new Label("dueFormat", "yyyy-MM-dd"));
 		form.add(new CheckBox("notify", notificationModel));
 		addBottomScriptInline("{var e=document.createElement('input');e.type='date';if(e.type=='date'){$('[name=\"due\"]~.help-inline').hide()}}");
-		addBottomScript("scripts/wicketHtml5Patch.js");
 		
 		List<Status> statusChoices = Arrays.asList(Status.Open, Status.Closed);
 		form.add(new DropDownChoice<TicketModel.Status>("status", statusModel, statusChoices));
@@ -120,7 +119,7 @@ public class EditMilestonePage extends RepositoryPage {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+			protected void onSubmit(AjaxRequestTarget target) {
 				String name = nameModel.getObject();
 				if (StringUtils.isEmpty(name)) {
 					return;

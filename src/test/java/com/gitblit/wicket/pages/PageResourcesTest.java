@@ -33,17 +33,14 @@ public class PageResourcesTest {
         try {
             BasePage page = mock(BasePage.class);
             doCallRealMethod().when(page).addBottomScript(any(String.class));
-            for (String path : new String[] { "scripts/imgdiff.js", "scripts/wicketHtml5Patch.js" }) {
-                clearInvocations(page);
-                page.addBottomScript(path);
-                ArgumentCaptor<String> scriptUrl = ArgumentCaptor.forClass(String.class);
-                verify(page).addBottomScriptUrl(scriptUrl.capture());
-                String url = scriptUrl.getValue();
-                assertTrue(url, url.contains("wicket/resource/"));
-                tester.executeUrl(url);
-                assertEquals(200, tester.getLastResponse().getStatus());
-                assertFalse(tester.getLastResponseAsString().isEmpty());
-            }
+            page.addBottomScript("scripts/imgdiff.js");
+            ArgumentCaptor<String> scriptUrl = ArgumentCaptor.forClass(String.class);
+            verify(page).addBottomScriptUrl(scriptUrl.capture());
+            String url = scriptUrl.getValue();
+            assertTrue(url, url.contains("wicket/resource/"));
+            tester.executeUrl(url);
+            assertEquals(200, tester.getLastResponse().getStatus());
+            assertFalse(tester.getLastResponseAsString().isEmpty());
         } finally {
             tester.destroy();
         }

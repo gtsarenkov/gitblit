@@ -15,6 +15,7 @@
  */
 package de.akquinet.devops.test.ui.view;
 
+import java.time.Duration;
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -63,7 +64,7 @@ public class RepoListView extends GitblitDashboardView {
 		}
 		found.get(0).click();
 		WebDriverWait webDriverWait = new WebDriverWait(getDriver(),
-				waitSecToLoad);
+				Duration.ofSeconds(waitSecToLoad));
 		webDriverWait.until(new Exp.EditRepoViewLoaded());
 		return true;
 	}
@@ -85,7 +86,7 @@ public class RepoListView extends GitblitDashboardView {
 			int waitSecToLoad) {
 		boolean result = checkOrDoEditRepo(fullyQualifiedRepoName, true);
 		WebDriverWait webDriverWait = new WebDriverWait(getDriver(),
-				waitSecToLoad);
+				Duration.ofSeconds(waitSecToLoad));
 		webDriverWait.until(new Exp.EditRepoViewLoaded());
 		return result;
 	}

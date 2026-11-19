@@ -113,12 +113,12 @@ repositories: central, eclipse-snapshots, eclipse, gitblit
 properties: {
   jetty.version  : 9.4.57.v20241219
   slf4j.version  : 1.7.36
-  wicket.version : 1.4.22
+  wicket.version : 8.20.0
   lucene.version : 5.5.2
   jgit.version   : 6.10.0.202406032230-r
   groovy.version : 2.4.21
   bouncycastle.version : 1.81
-  selenium.version : 2.28.0
+  selenium.version : 4.52.0
   wikitext.version : 1.4
   sshd.version: 1.7.0
   mina.version: 2.0.27
@@ -158,7 +158,7 @@ dependencies:
 - compile 'org.eclipse.jetty:jetty-util:${jetty.version}' @jar
 - compile 'org.eclipse.jetty:jetty-webapp:${jetty.version}' @jar
 - compile 'org.eclipse.jetty:jetty-xml:${jetty.version}' @jar
-- compile 'org.apache.wicket:wicket:${wicket.version}' :war !org.mockito
+- compile 'org.apache.wicket:wicket-core:${wicket.version}' :war !org.mockito
 - compile 'org.apache.wicket:wicket-auth-roles:${wicket.version}' :war !org.mockito
 - compile 'org.apache.wicket:wicket-extensions:${wicket.version}' :war !org.mockito
 - compile 'org.apache.lucene:lucene-core:${lucene.version}' :war :fedclient
@@ -205,7 +205,6 @@ dependencies:
 - test 'org.apache.httpcomponents:httpclient:4.5.13'
 - test 'org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:${jgit.version}'
 # Dependencies for Selenium web page testing
-- test 'org.seleniumhq.selenium:selenium-java:${selenium.version}' @jar
 - test 'org.seleniumhq.selenium:selenium-support:${selenium.version}' @jar
 - test 'org.seleniumhq.selenium:selenium-firefox-driver:${selenium.version}'
 - test 'org.mockito:mockito-core:2.28.2'

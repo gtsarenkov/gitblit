@@ -18,6 +18,7 @@ package com.gitblit.wicket.pages;
 import java.text.MessageFormat;
 import java.util.*;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -359,8 +360,8 @@ public class EditRepositoryPage extends RootSubPage {
 
 					// custom fields
 					repositoryModel.customFields = new LinkedHashMap<String, String>();
-					for (int i = 0; i < customFieldsListView.size(); i++) {
-						ListItem<String> child = (ListItem<String>) customFieldsListView.get(i);
+					for (Component component : customFieldsListView) {
+						ListItem<String> child = (ListItem<String>) component;
 						String key = child.getModelObject();
 
 						TextField<String> field = (TextField<String>) child.get("customFieldValue");

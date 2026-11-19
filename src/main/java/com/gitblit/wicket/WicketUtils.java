@@ -277,7 +277,9 @@ public class WicketUtils {
 	public static String toAbsoluteUrl(String relativeUrl) {
 		RequestCycle cycle = RequestCycle.get();
 		Url url = Url.parse(relativeUrl, cycle.getRequest().getCharset());
-		return cycle.getUrlRenderer().renderFullUrl(url);
+		// Keep locally generated links rooted at the application even when Wicket adds an origin.
+		String absoluteUrl = cycle.getUrlRenderer().renderFullUrl(url);
+		return Url.parse(absoluteUrl, url.getCharset()).toString(Url.StringMode.LOCAL);
 	}
 
 	public static String getGitblitURL(Request request) {
