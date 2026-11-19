@@ -91,14 +91,13 @@ public class MetricUtils {
 	public static List<Metric> getDateMetrics(Repository repository, String objectId,
 			boolean includeTotal, String dateFormat, TimeZone timezone) {
 		Metric total = new Metric("TOTAL");
+		List<Metric> metrics = new ArrayList<Metric>();
+		if (includeTotal) {
+			metrics.add(total);
+		}
 		final Map<String, Metric> metricMap = new HashMap<String, Metric>();
 
 		if (JGitUtils.hasCommits(repository)) {
-			final List<RefModel> tags = JGitUtils.getTags(repository, true, -1);
-			final Map<ObjectId, RefModel> tagMap = new HashMap<ObjectId, RefModel>();
-			for (RefModel tag : tags) {
-				tagMap.put(tag.getReferencedObjectId(), tag);
-			}
 			RevWalk revWalk = null;
 			try {
 				// resolve branch
@@ -107,6 +106,15 @@ public class MetricUtils {
 					branchObject = JGitUtils.getDefaultBranch(repository);
 				} else {
 					branchObject = repository.resolve(objectId);
+				}
+				if (branchObject == null) {
+					// Ticket metadata or other objects can exist without a default branch.
+					return metrics;
+				}
+
+				final Map<ObjectId, RefModel> tagMap = new HashMap<ObjectId, RefModel>();
+				for (RefModel tag : JGitUtils.getTags(repository, true, -1)) {
+					tagMap.put(tag.getReferencedObjectId(), tag);
 				}
 
 				revWalk = new RevWalk(repository);
@@ -160,12 +168,8 @@ public class MetricUtils {
 		}
 		List<String> keys = new ArrayList<String>(metricMap.keySet());
 		Collections.sort(keys);
-		List<Metric> metrics = new ArrayList<Metric>();
 		for (String key : keys) {
 			metrics.add(metricMap.get(key));
-		}
-		if (includeTotal) {
-			metrics.add(0, total);
 		}
 		return metrics;
 	}
@@ -184,14 +188,16 @@ public class MetricUtils {
 			boolean byEmailAddress) {
 		final Map<String, Metric> metricMap = new HashMap<String, Metric>();
 		if (JGitUtils.hasCommits(repository)) {
-			try {
-				RevWalk walk = new RevWalk(repository);
+			try (RevWalk walk = new RevWalk(repository)) {
 				// resolve branch
 				ObjectId branchObject;
 				if (StringUtils.isEmpty(objectId)) {
 					branchObject = JGitUtils.getDefaultBranch(repository);
 				} else {
 					branchObject = repository.resolve(objectId);
+				}
+				if (branchObject == null) {
+					return new ArrayList<Metric>();
 				}
 				RevCommit lastCommit = walk.parseCommit(branchObject);
 				walk.markStart(lastCommit);
