@@ -1,5 +1,8 @@
 package com.gitblit.wicket.pages;
 
+import java.io.InputStream;
+import javax.imageio.ImageIO;
+
 import com.gitblit.Keys;
 import com.gitblit.tests.mock.MemorySettings;
 import com.gitblit.wicket.GitBlitWebApp;
@@ -16,6 +19,14 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class PageResourcesTest {
+    @Test
+    public void bundledHeaderLogoIsAReadablePng() throws Exception {
+        try (InputStream logo = getClass().getResourceAsStream("/logo.png")) {
+            assertNotNull("Bundled logo is missing", logo);
+            assertNotNull("Bundled logo is not a readable image", ImageIO.read(logo));
+        }
+    }
+
     @Test
     public void packagedBottomScriptsCanBeFetched() {
         WicketTester tester = new WicketTester();

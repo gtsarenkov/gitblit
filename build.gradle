@@ -118,15 +118,20 @@ java {
 }
 
 tasks.register("processWebRootResources", Copy) {
+    def versionDescriptor = 'WEB-INF/web.xml'
+    def gitblitVersion = project.property('gb.version').toString()
+    inputs.property('versionDescriptor', versionDescriptor)
+    inputs.property('gitblitVersion', gitblitVersion)
+
     // Embedded Jetty serves the classes directory when running without a JAR.
     from('src/main/resources')
     into sourceSets.main.output.classesDirs.singleFile
     sourceSets.main.java.srcDirs.forEach { srcDir ->
         from(srcDir) {
             exclude '**/*.java'
-            filter ReplaceTokens, tokens: [
-                    'gb.version': project.property('gb.version').toString()
-            ]
+            filesMatching(versionDescriptor) {
+                filter ReplaceTokens, tokens: ['gb.version': gitblitVersion]
+            }
         }
     }
 }
