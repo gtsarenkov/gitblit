@@ -24,6 +24,13 @@ public class GitblitParamUrlRequestMapperTest {
     }
 
     @Test
+    public void keepsLegacyQueryParameterWhenMountEndsWithSlash() {
+        TestMapper mapper = new TestMapper(new MemorySettings(), "r");
+        assertEquals("example.git", mapper.decode("summary/?r=example.git").get("r").toString());
+        assertEquals("example.git", mapper.decode("summary/example.git?r=other.git").get("r").toString());
+    }
+
+    @Test
     public void roundTripsPathsAndRepeatedQueryParameters() {
         MemorySettings settings = new MemorySettings();
         settings.put(Keys.web.forwardSlashCharacter, "!");

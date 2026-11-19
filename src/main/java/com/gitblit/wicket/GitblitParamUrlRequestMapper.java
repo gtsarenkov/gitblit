@@ -88,6 +88,11 @@ public class GitblitParamUrlRequestMapper extends MountedMapper {
             char slash = settings.getChar(Keys.web.forwardSlashCharacter, '/');
             for (int i = 0; i < count; i++) {
                 String value = url.getSegments().get(i);
+                // A trailing slash in a legacy query URL is not a path value.
+                if (value.isEmpty() && i == url.getSegments().size() - 1
+                        && parameters.getNamedKeys().contains(parameterNames[i])) {
+                    continue;
+                }
                 parameters.set(parameterNames[i], slash == '/' ? value : value.replace(slash, '/'));
             }
 
