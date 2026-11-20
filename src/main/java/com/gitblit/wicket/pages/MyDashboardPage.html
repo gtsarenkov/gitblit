@@ -8,9 +8,9 @@
 <wicket:extend>
 <div class="container">
 
-	<div class="row" style="padding-top:10px;">
+	<div class="row dashboard-content">
 		<div class="span7">
-			<div class="hidden-phone hidden-tablet markdown" style="padding-bottom: 10px;" wicket:id="repositoriesMessage">[repositories message]</div>
+			<div class="hidden-phone hidden-tablet markdown dashboard-intro" wicket:id="repositoriesMessage">[repositories message]</div>
 			<div ng-non-bindable wicket:id="activity"></div>
 		</div>
 		<div class="span5">
@@ -59,7 +59,7 @@
 
 <wicket:fragment wicket:id="activityFragment">
 	<div class="dashboardTitle"><span class="hidden-phone hidden-tablet" wicket:id="feedTitle"></span> <small><span wicket:id="feedheader"></span></small></div>
-	<div class="hidden-phone hidden-tablet"  style="text-align:center;">
+	<div class="hidden-phone hidden-tablet dashboard-charts">
 		<div wicket:id="charts"></div>
 	</div>
 	<div wicket:id="digests"></div>
@@ -68,8 +68,8 @@
 <wicket:fragment wicket:id="chartsFragment">
 	<table>
 		<tr>
-			<td><div id="chartRepositories" style="display:inline-block;width: 250px; height:175px"></div></td>
-			<td><div id="chartAuthors" style="display:inline-block;width: 250px; height: 175px;"></div></td>
+			<td><div id="chartRepositories" class="dashboard-chart"></div></td>
+			<td><div id="chartAuthors" class="dashboard-chart"></div></td>
 		</tr>
 	</table>
 </wicket:fragment>

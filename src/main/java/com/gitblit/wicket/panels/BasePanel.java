@@ -20,6 +20,8 @@ import java.util.TimeZone;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
+import org.apache.wicket.behavior.Behavior;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.Model;
 import org.slf4j.Logger;
@@ -89,38 +91,28 @@ public abstract class BasePanel extends Panel {
 
 		private static final long serialVersionUID = 1L;
 
-		public JavascriptEventConfirmation(String event, String msg) {
-			super(event, new Model<String>(msg));
-		}
-
-		@Override
-		protected String newValue(final String currentValue, final String replacementValue) {
-			String prefix = "var conf = confirm('" + replacementValue + "'); "
-					+ "if (!conf) return false; ";
-			String result = prefix;
-			if (currentValue != null) {
-				result = prefix + currentValue;
-			}
-			return result;
+		public JavascriptEventConfirmation(String message) {
+			super("data-confirm-message", Model.of(message));
 		}
 	}
 
-	public static class JavascriptTextPrompt extends AttributeModifier {
+	public static class JavascriptTextPrompt extends Behavior {
 
 		private static final long serialVersionUID = 1L;
+		private final String message;
+		private final String initialValue;
 
-		private String initialValue = "";
-
-		public JavascriptTextPrompt(String event, String msg, String value) {
-			super(event, new Model<String>(msg));
-			initialValue = value;
+		public JavascriptTextPrompt(String message, String initialValue) {
+			this.message = message;
+			this.initialValue = initialValue;
 		}
 
 		@Override
-		protected String newValue(final String currentValue, final String message) {
-			String result = "var userText = prompt('" + message + "','"
-					+ (initialValue == null ? "" : initialValue) + "'); " + "return userText; ";
-			return result;
+		public void onComponentTag(Component component, ComponentTag tag) {
+			tag.put("data-prompt-message", message);
+			if (initialValue != null) {
+				tag.put("data-prompt-value", initialValue);
+			}
 		}
 	}
 }

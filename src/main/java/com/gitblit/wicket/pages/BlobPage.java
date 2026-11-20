@@ -51,6 +51,19 @@ public class BlobPage extends RepositoryPage {
 
 	public BlobPage(PageParameters params) {
 		super(params);
+		String prettifyPath = getRequest().getContextPath() + "/prettify/";
+		for (String script : new String[] {
+				"prettify.js", "lang-apollo.js", "lang-basic.js", "lang-clj.js",
+				"lang-css.js", "lang-dart.js", "lang-erlang.js", "lang-go.js",
+				"lang-hs.js", "lang-lisp.js", "lang-llvm.js", "lang-lua.js",
+				"lang-matlab.js", "lang-ml.js", "lang-mumps.js", "lang-n.js",
+				"lang-pascal.js", "lang-proto.js", "lang-r.js", "lang-rd.js",
+				"lang-scala.js", "lang-sql.js", "lang-tcl.js", "lang-tex.js",
+				"lang-vb.js", "lang-vhdl.js", "lang-wiki.js", "lang-xq.js",
+				"lang-yaml.js"
+		}) {
+			addBottomScriptUrl(prettifyPath + script);
+		}
 
 		Repository r = getRepository();
 		final String blobPath = WicketUtils.getPath(params);

@@ -8,12 +8,10 @@
 <wicket:head>
   <wicket:link>
    	<link href="prettify/prettify.css" type="text/css" rel="stylesheet" />
-	<script type="text/javascript" src="prettify/prettify.js"></script>
   </wicket:link>
 </wicket:head>
       
 <wicket:extend>
-<body onload="document.getElementById('query').focus(); prettyPrint();">
 <div class="container">
 	<!-- page header -->
 	<div class="dashboardTitle">
@@ -29,7 +27,7 @@
 			<div class="span9" style="margin-left:10px">
 				<div>
 					<h3><wicket:message key="gb.query"></wicket:message></h3>
-					<input class="span8" id="query" type="text" wicket:id="query" placeholder="enter search text"></input>
+					<input class="span8" id="query" autofocus="autofocus" type="text" wicket:id="query" placeholder="enter search text"></input>
 					<button class="btn btn-primary" type="submit" value="Search"><wicket:message key="gb.search"></wicket:message></button>
 				</div>
 				<div style="margin-top:10px;">
@@ -86,7 +84,6 @@
 
 	</div>
 	</div>
-</body>
 
 	<wicket:fragment wicket:id="tagsPanel">
 		<span wicket:id="tag">

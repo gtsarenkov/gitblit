@@ -3,7 +3,7 @@
       xmlns:wicket="https://wicket.apache.org/dtds.data/wicket-7.xsd"
       xml:lang="en"  
       lang="en"
-      ng-app> 
+      ng-app ng-csp>
 
 	<!-- Head -->
 	<wicket:head>
@@ -11,13 +11,6 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
    		<title wicket:id="title">[page title]</title>
 		<link rel="icon" href="gitblt-favicon.png" type="image/png" />
-		
-		<link rel="stylesheet" href="bootstrap/css/bootstrap.css"/>
-		<link rel="stylesheet" href="bootstrap/css/iconic.css"/>
-		<link rel="stylesheet" href="fontawesome/css/font-awesome.min.css"/>
-        <link rel="stylesheet" href="octicons/octicons.css"/>
-		<link rel="stylesheet" type="text/css" href="gitblit.css"/>
-		<link rel="stylesheet" type="text/css" href="bootstrap-fixes.css"/>
 	</wicket:head>
 
 	<body>
@@ -35,24 +28,6 @@
 				</p>
 			</footer>
 		</div>
-
-		<!-- Override Bootstrap's responsive menu background highlighting -->
-		<style>
-		@media (max-width: 979px) {
-			.nav-collapse .nav > li > a:hover, .nav-collapse .dropdown-menu a:hover {
-				background-color: #002060;
-			}
-			
-			.navbar div > ul .dropdown-menu li a {
-				color: #ccc;
-			}
-		}
-		</style>
-		
-		<!-- Include scripts at end for faster page loading -->
-		<script type="text/javascript" src="bootstrap/js/jquery.js"></script>
-		<script type="text/javascript" src="bootstrap/js/bootstrap.js"></script>	
-		<script type="text/javascript" src="gitblit/js/collapsible-table.js"></script>
 		<wicket:container wicket:id="bottomScripts"></wicket:container>
 	</body>
 </html>

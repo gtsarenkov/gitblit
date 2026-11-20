@@ -5,7 +5,6 @@
       lang="en"> 
 
 <wicket:extend>
-<body onload="document.getElementById('username').focus();">
 <!-- User Table -->
 <form style="padding-top:5px;" wicket:id="editForm">
 
@@ -26,7 +25,7 @@
 		<div class="tab-pane active" id="general">
 		<table class="plain">
 			<tbody class="settings">
-				<tr><th><wicket:message key="gb.username"></wicket:message></th><td class="edit"><input type="text" wicket:id="username" id="username" size="30" tabindex="1" /></td></tr>
+				<tr><th><wicket:message key="gb.username"></wicket:message></th><td class="edit"><input type="text" wicket:id="username" id="username" autofocus="autofocus" size="30" tabindex="1" /></td></tr>
 				<tr><th><wicket:message key="gb.password"></wicket:message></th><td class="edit"><input type="password" wicket:id="password" size="30" tabindex="2" /></td></tr>
 				<tr><th><wicket:message key="gb.confirmPassword"></wicket:message></th><td class="edit"><input type="password" wicket:id="confirmPassword" size="30" tabindex="3" /></td></tr>
 				<tr><th><wicket:message key="gb.displayName"></wicket:message></th><td class="edit"><input type="text" wicket:id="displayName" size="30" tabindex="4" /></td></tr>
@@ -80,7 +79,6 @@
 </div>
 
 </form>
-</body>
 
 </wicket:extend>
 </html>

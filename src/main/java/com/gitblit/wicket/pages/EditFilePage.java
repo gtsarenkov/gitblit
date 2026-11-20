@@ -57,6 +57,7 @@ public class EditFilePage extends RepositoryPage {
 
 	public EditFilePage(final PageParameters params) {
 		super(params);
+		addBottomScriptUrl(getRequest().getContextPath() + "/gitblit-editor.min.js");
 
 		final UserModel currentUser = (GitBlitWebSession.get().getUser() != null) ? GitBlitWebSession.get().getUser() : UserModel.ANONYMOUS;
 		
@@ -173,6 +174,8 @@ public class EditFilePage extends RepositoryPage {
 			form.setOutputMarkupId(false);
 			form.add(docIO);
 			
+			addBottomScriptInline("document.getElementById('commitChanges').addEventListener('click', function (event) { "
+					+ "event.preventDefault(); commitChanges(); });");
 			addBottomScriptInline("attachDocumentEditor(document.querySelector('textarea#editor'), $('#commitDialog'));");
 			
 	        fragment.add(form);

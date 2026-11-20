@@ -64,6 +64,8 @@ public class LuceneSearchPage extends RootPage {
 	}
 
 	private void setup(PageParameters params) {
+		addBottomScriptUrl(getRequest().getContextPath() + "/prettify/prettify.js");
+		addBottomScriptInline("jQuery(prettyPrint);");
 		setupPage("", "");
 
 		// default values

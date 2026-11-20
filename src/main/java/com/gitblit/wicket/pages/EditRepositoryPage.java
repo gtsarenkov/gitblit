@@ -700,7 +700,7 @@ public class EditRepositoryPage extends RootSubPage {
 		};
 
 		if (canDelete) {
-			delete.add(new JavascriptEventConfirmation("onclick", MessageFormat.format(
+			delete.add(new JavascriptEventConfirmation(MessageFormat.format(
 				getString("gb.deleteRepository"), repositoryModel)));
 		}
 		form.add(delete.setVisible(canDelete));

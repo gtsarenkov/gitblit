@@ -2579,3 +2579,60 @@ table.filestore-status {
 .fullscreen-overlay-enabled.dark-theme .tooltipped.tooltipped-w:before {
     border-left-color:rgba(200, 200, 200, .8)
 }
+
+.page-feedback,
+.dashboard-charts {
+	text-align: center;
+}
+
+.account-menu-toggle {
+	text-decoration: none;
+}
+
+.account-menu-subtitle {
+	color: #ccc;
+	padding-left: 15px;
+	font-weight: bold;
+}
+
+.subpage-title {
+	font-size: 22px;
+	color: #002060;
+	padding: 3px 0 7px;
+}
+
+.dashboard-content {
+	padding-top: 10px;
+}
+
+.dashboard-intro {
+	padding-bottom: 10px;
+}
+
+.repositories-intro {
+	padding: 10px 0 5px;
+}
+
+.dashboard-chart {
+	display: inline-block;
+	width: 250px;
+	height: 175px;
+}
+
+.fork-progress-logo {
+	opacity: 0.2;
+}
+
+.fork-progress-logo img {
+	padding: 10px;
+}
+
+.fork-progress-title {
+	border: 0;
+	font-weight: bold;
+	text-align: center;
+}
+
+.fork-progress-bar {
+	width: 100%;
+}

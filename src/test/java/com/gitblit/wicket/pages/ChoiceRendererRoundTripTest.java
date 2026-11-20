@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -32,7 +33,10 @@ public class ChoiceRendererRoundTripTest {
 
         assertRoundTrip(renderer, Arrays.asList(AccessPermission.values()));
         // The add-permission dropdown uses a subset with its own indexes.
-        assertRoundTrip(renderer, Arrays.asList(AccessPermission.NEWPERMISSIONS));
+        List<AccessPermission> newPermissions = Arrays.asList(AccessPermission.NEWPERMISSIONS);
+        assertRoundTrip(renderer, newPermissions);
+        assertNull(renderer.getObject("", Model.ofList(newPermissions)));
+        assertNull(renderer.getObject(Integer.toString(newPermissions.size()), Model.ofList(newPermissions)));
     }
 
     @Test

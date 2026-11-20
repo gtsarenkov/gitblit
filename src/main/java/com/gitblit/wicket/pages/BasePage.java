@@ -34,7 +34,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
-import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
@@ -42,22 +41,25 @@ import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.pages.RedirectPage;
 import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.apache.wicket.request.flow.RedirectToUrlException;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
-import org.apache.wicket.util.time.Duration;
-import org.apache.wicket.util.time.Time;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
+import org.apache.wicket.util.string.Strings;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.text.MessageFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -69,12 +71,12 @@ public abstract class BasePage extends SessionPage {
 
 	public BasePage() {
 		super();
-		customizeHeader();
+		addCommonScripts();
 	}
 
 	public BasePage(PageParameters params) {
 		super(params);
-		customizeHeader();
+		addCommonScripts();
 	}
 
 	protected Logger logger() {
@@ -91,25 +93,29 @@ public abstract class BasePage extends SessionPage {
 		}
 	}
 
-	private void customizeHeader() {
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		String context = getRequest().getContextPath();
+		for (String stylesheet : List.of("/bootstrap/css/bootstrap.css", "/bootstrap/css/iconic.css",
+				"/fontawesome/css/font-awesome.min.css", "/octicons/octicons.css",
+				"/gitblit.css", "/bootstrap-fixes.css")) {
+			response.render(CssHeaderItem.forUrl(context + stylesheet));
+		}
 		if (app().settings().getBoolean(Keys.web.useResponsiveLayout, true)) {
-			add(new Behavior() {
-				@Override
-				public void renderHead(Component component, IHeaderResponse response) {
-					super.renderHead(component, response);
-					response.render(CssHeaderItem.forUrl(getRequest().getContextPath() + "/bootstrap/css/bootstrap-responsive.css"));
-				}
-			});
+			response.render(CssHeaderItem.forUrl(context + "/bootstrap/css/bootstrap-responsive.css"));
 		}
 		if (app().settings().getBoolean(Keys.web.hideHeader, false)) {
-			add(new Behavior() {
-					@Override
-					public void renderHead(Component component, IHeaderResponse response) {
-						super.renderHead(component, response);
-						response.render(CssHeaderItem.forUrl(getRequest().getContextPath() + "/hideheader.css"));
-					}
-				});
+			response.render(CssHeaderItem.forUrl(context + "/hideheader.css"));
 		}
+	}
+
+	private void addCommonScripts() {
+		String context = getRequest().getContextPath();
+		addBottomScriptUrl(context + "/bootstrap/js/jquery.js");
+		addBottomScriptUrl(context + "/bootstrap/js/bootstrap.js");
+		addBottomScriptUrl(context + "/gitblit/js/collapsible-table.js");
+		addBottomScriptUrl(context + "/gitblit/js/dialogs.js");
 	}
 
 	protected String getContextUrl() {
@@ -237,8 +243,8 @@ public abstract class BasePage extends SessionPage {
 
 		int expires = app().settings().getInteger(Keys.web.pageCacheExpires, 0);
 		WebResponse response = (WebResponse) getResponse();
-		response.setLastModifiedTime(Time.valueOf(when));
-		response.setDateHeader("Expires", Time.millis(System.currentTimeMillis() + Duration.minutes(expires).getMilliseconds()));
+		response.setLastModifiedTime(when.toInstant());
+		response.setDateHeader("Expires", Instant.now().plus(expires, ChronoUnit.MINUTES));
 	}
 
 	protected String getPageTitle(String repositoryName) {
@@ -541,23 +547,21 @@ public abstract class BasePage extends SessionPage {
 
 	/** Adds a bottom script whose URL has already been resolved. */
 	protected void addBottomScriptUrl(String url) {
-		RepeatingView bottomScripts = getBottomScriptContainer();
-		Label script = new Label(bottomScripts.newChildId(), "<script type='text/javascript' src='"
-				+ url + "'></script>\n");
-		bottomScripts.add(script.setEscapeModelStrings(false).setRenderBodyOnly(true));
+		addBottomScriptTag(" src=\"" + Strings.escapeMarkup(url) + "\"", "");
 	}
 
-	/**
-	 * Adds a HTML script element containing the given code.
-	 *
-	 * @param code
-	 *            inline script code
-	 */
+	/** Adds inline JavaScript contributed by the page. */
 	protected void addBottomScriptInline(String code) {
+		addBottomScriptTag("", "/*<![CDATA[*/\n" + code + "\n//]]>\n");
+	}
+
+	private void addBottomScriptTag(String attributes, String code) {
 		RepeatingView bottomScripts = getBottomScriptContainer();
-		Label script = new Label(bottomScripts.newChildId(),
-				"<script type='text/javascript'>/*<![CDATA[*/\n" + code + "\n//]]>\n</script>\n");
-		bottomScripts.add(script.setEscapeModelStrings(false).setRenderBodyOnly(true));
+		IModel<String> markup = () -> "<script nonce=\""
+				+ app().getCspSettings().getNonce(getRequestCycle()) + "\""
+				+ attributes + ">" + code + "</script>\n";
+		bottomScripts.add(new Label(bottomScripts.newChildId(), markup)
+				.setEscapeModelStrings(false).setRenderBodyOnly(true));
 	}
 
 }

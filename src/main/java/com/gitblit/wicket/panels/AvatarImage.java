@@ -15,6 +15,10 @@
  */
 package com.gitblit.wicket.panels;
 
+import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.gitblit.AvatarGenerator;
@@ -24,7 +28,7 @@ import com.gitblit.wicket.ExternalImage;
 import com.gitblit.wicket.WicketUtils;
 
 /**
- * Represents a Gravatar image.
+ * Renders an avatar with a local fallback.
  *
  * @author James Moger
  *
@@ -55,12 +59,24 @@ public class AvatarImage extends BasePanel {
 		AvatarGenerator avatarGenerator = app().runtime().getInjector().getInstance(AvatarGenerator.class);
 		String url = avatarGenerator.getURL(username, emailaddress, identicon, width);
 		ExternalImage image = new ExternalImage("image", url);
+		image.add(AttributeModifier.replace("alt", username));
+		image.add(AttributeModifier.replace("data-avatar-fallback", getRequest().getContextPath() + "/user_16x16.png"));
+		if (width > 0) {
+			image.add(AttributeModifier.replace("width", width));
+		}
 		if (cssClass != null) {
 			WicketUtils.setCssClass(image, cssClass);
 		}
 		add(image);
 		WicketUtils.setHtmlTooltip(image, username);
 		setVisible(app().settings().getBoolean(Keys.web.allowGravatar, true));
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(JavaScriptHeaderItem.forReference(
+				new JavaScriptResourceReference(AvatarImage.class, "avatar-fallback.js")));
 	}
 
 	public void setTooltip(String tooltip) {

@@ -300,16 +300,6 @@ public class RegistrantPermissionsPanel extends BasePanel {
         public String getDisplayValue(AccessPermission type) {
             return map.get(type);
         }
-
-        @Override
-        public String getIdValue(AccessPermission type, int index) {
-            return Integer.toString(index);
-        }
-
-        @Override
-        public AccessPermission getObject(String id, IModel<? extends List<? extends AccessPermission>> choices) {
-            return choices.getObject().get(Integer.parseInt(id));
-        }
     }
 
     private class ShowStateButton extends AjaxButton {

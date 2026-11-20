@@ -5,7 +5,6 @@
       lang="en"> 
 
 <wicket:extend>
-<body onload="document.getElementById('name').focus();">
 <!-- Team Table -->
 <form style="padding-top:5px;" wicket:id="editForm">
 <div class="row">
@@ -24,7 +23,7 @@
 		<div class="tab-pane active" id="general">
 		<table class="plain">
 			<tbody class="settings">
-				<tr><th><wicket:message key="gb.teamName"></wicket:message></th><td class="edit"><input type="text" wicket:id="name" id="name" size="30" tabindex="1" /></td></tr>
+				<tr><th><wicket:message key="gb.teamName"></wicket:message></th><td class="edit"><input type="text" wicket:id="name" id="name" autofocus="autofocus" size="30" tabindex="1" /></td></tr>
 				<tr><th><wicket:message key="gb.canAdmin"></wicket:message></th><td class="edit"><label class="checkbox"><input type="checkbox" wicket:id="canAdmin" tabindex="2" /> &nbsp;<span class="help-inline"><wicket:message key="gb.canAdminDescription"></wicket:message></span></label></td></tr>				
 				<tr><th><wicket:message key="gb.canCreate"></wicket:message></th><td class="edit"><label class="checkbox"><input type="checkbox" wicket:id="canCreate" tabindex="3" /> &nbsp;<span class="help-inline"><wicket:message key="gb.canCreateDescription"></wicket:message></span></label></td></tr>				
 				<tr><th><wicket:message key="gb.canFork"></wicket:message></th><td class="edit"><label class="checkbox"><input type="checkbox" wicket:id="canFork" tabindex="4" /> &nbsp;<span class="help-inline"><wicket:message key="gb.canForkDescription"></wicket:message></span></label></td></tr>				
@@ -66,6 +65,5 @@
 </div>
 
 </form>	
-</body>
 </wicket:extend>
 </html>

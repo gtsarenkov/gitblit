@@ -2,7 +2,7 @@ apply plugin: 'java-platform'
 apply plugin: 'maven-publish'
 
 ext['bouncycastle.version'] = 'latest.release' // 1.69
-ext['wicket.version'] = '8.20.0'
+ext['wicket.version'] = '9.25.0'
 ext['lucene.version'] = 'latest.release' // '5.5.2'
 ext['sshd.version'] = '2.20.1'
 ext['mina.version'] = 'latest.release' // 2.0.25

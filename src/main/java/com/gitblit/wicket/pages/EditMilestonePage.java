@@ -179,7 +179,7 @@ public class EditMilestonePage extends RepositoryPage {
 			}
 		};
 
-		delete.add(new JavascriptEventConfirmation("onclick", MessageFormat.format(
+		delete.add(new JavascriptEventConfirmation(MessageFormat.format(
 			getString("gb.deleteMilestone"), oldName)));
 
 		form.add(delete);

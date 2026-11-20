@@ -33,6 +33,7 @@ public class ForkPage extends RepositoryPage {
 
 	public ForkPage(PageParameters params) {
 		super(params);
+		addBottomScriptInline("window.setTimeout(() => window.location.reload(), 5000);");
 
 		setVersioned(false);
 

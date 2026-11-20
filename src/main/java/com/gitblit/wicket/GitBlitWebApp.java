@@ -15,6 +15,7 @@
  */
 package com.gitblit.wicket;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -28,7 +29,6 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Response;
-import org.apache.wicket.util.time.Duration;
 
 import ro.fortsoft.pf4j.PluginState;
 import ro.fortsoft.pf4j.PluginWrapper;
@@ -192,7 +192,7 @@ public class GitBlitWebApp extends WebApplication implements GitblitWicketApp {
 
 		// configure the resource cache duration to 90 days for deployment
 		if (!isDebugMode()) {
-			getResourceSettings().setDefaultCacheDuration(Duration.days(90));
+			getResourceSettings().setDefaultCacheDuration(Duration.ofDays(90));
 		}
 
 		// setup the standard gitweb-ish urls

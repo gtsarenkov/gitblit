@@ -27,6 +27,7 @@ import org.apache.wicket.protocol.http.ClientProperties;
 import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.protocol.http.request.WebClientInfo;
 import org.apache.wicket.request.Response;
+import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.apache.wicket.request.resource.SharedResourceReference;
@@ -105,7 +106,7 @@ public abstract class ObjectContainer extends WebMarkupContainer {
 			attributeMap.put(ATTRIBUTE_CONTENTTYPE, contentType);
 
 		// set clsid and codebase for IE
-		if (getClientProperties().isBrowserInternetExplorer()) {
+		if (isInternetExplorer()) {
 			String clsid = getClsid();
 			String codeBase = getCodebase();
 
@@ -141,6 +142,11 @@ public abstract class ObjectContainer extends WebMarkupContainer {
 		}
 
 		super.onComponentTagBody(markupStream, openTag);
+	}
+
+	protected boolean isInternetExplorer() {
+		String userAgent = ((WebRequest) getRequest()).getHeader("User-Agent");
+		return userAgent != null && (userAgent.contains("MSIE ") || userAgent.contains("Trident/"));
 	}
 
 	// shortcut to the client properties:

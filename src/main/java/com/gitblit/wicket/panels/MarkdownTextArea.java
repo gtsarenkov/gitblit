@@ -15,6 +15,8 @@
  */
 package com.gitblit.wicket.panels;
 
+import java.time.Duration;
+
 import org.apache.wicket.ajax.AbstractAjaxTimerBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -22,7 +24,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.util.time.Duration;
 
 import com.gitblit.utils.MarkdownUtils;
 import com.gitblit.wicket.GitBlitWebApp;
@@ -106,7 +107,7 @@ public class MarkdownTextArea extends TextArea {
 		private static final long serialVersionUID = 1L;
 
 		public KeepAliveBehavior() {
-			super(Duration.minutes(5));
+			super(Duration.ofMinutes(5));
 		}
 
 		@Override

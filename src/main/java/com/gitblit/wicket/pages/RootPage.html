@@ -29,7 +29,7 @@
 				
 	<!-- subclass content -->
 	<div class="container">
-		<div style="text-align:center" wicket:id="feedback">[Feedback Panel]</div>
+		<div class="page-feedback" wicket:id="feedback">[Feedback Panel]</div>
 	</div>
 	
 	<wicket:child/>
@@ -49,7 +49,7 @@
 	<!-- user fragment -->
 	<wicket:fragment wicket:id="userMenuFragment">
 		<li class="dropdown">
-			<a data-toggle="dropdown" class="dropdown-toggle" style="text-decoration: none;" href="#"><span wicket:id="username"></span> <b class="caret"></b></a>
+			<a data-toggle="dropdown" class="dropdown-toggle account-menu-toggle" href="#"><span wicket:id="username"></span> <b class="caret"></b></a>
         	<ul class="dropdown-menu">
             	<span wicket:id="standardMenu"></span>
             	<span wicket:id="adminMenu"></span>
@@ -60,7 +60,7 @@
 	</wicket:fragment>
 
 	<wicket:fragment wicket:id="submenuFragment">
-		<li style="color:#ccc;padding-left:15px;font-weight:bold;"><span wicket:id="submenuTitle"></span></li>
+		<li class="account-menu-subtitle"><span wicket:id="submenuTitle"></span></li>
 		<li wicket:id="submenuItem"><span wicket:id="submenuLink"></span></li>
 	</wicket:fragment>
 	
