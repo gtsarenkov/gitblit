@@ -19,6 +19,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
@@ -925,7 +926,7 @@ public class TicketReferenceTest extends GitblitUnitTest {
 	
 	private static RevCommit makeCommit(String message) throws Exception {
 		File file = new File(workingCopy, "testFile.txt");
-		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		BufferedWriter w = new BufferedWriter(os);
 		w.write("// " + new Date().toString() + "\n");
 		w.close();
@@ -936,7 +937,7 @@ public class TicketReferenceTest extends GitblitUnitTest {
 	
 	private static String amendCommit(String message) throws Exception {
 		File file = new File(workingCopy, "testFile.txt");
-		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		BufferedWriter w = new BufferedWriter(os);
 		w.write("// " + new Date().toString() + "\n");
 		w.close();

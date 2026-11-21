@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServlet;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -145,11 +145,11 @@ public class SyndicationServlet extends HttpServlet {
 	 *
 	 * @param request
 	 * @param response
-	 * @throws javax.servlet.ServletException
+	 * @throws jakarta.servlet.ServletException
 	 * @throws java.io.IOException
 	 */
-	private void processRequest(javax.servlet.http.HttpServletRequest request,
-			javax.servlet.http.HttpServletResponse response) throws javax.servlet.ServletException,
+	private void processRequest(jakarta.servlet.http.HttpServletRequest request,
+			jakarta.servlet.http.HttpServletResponse response) throws jakarta.servlet.ServletException,
 			java.io.IOException {
 
 		String servletUrl = request.getContextPath() + request.getServletPath();
@@ -385,15 +385,15 @@ public class SyndicationServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void doPost(javax.servlet.http.HttpServletRequest request,
-			javax.servlet.http.HttpServletResponse response) throws javax.servlet.ServletException,
+	protected void doPost(jakarta.servlet.http.HttpServletRequest request,
+			jakarta.servlet.http.HttpServletResponse response) throws jakarta.servlet.ServletException,
 			java.io.IOException {
 		processRequest(request, response);
 	}
 
 	@Override
-	protected void doGet(javax.servlet.http.HttpServletRequest request,
-			javax.servlet.http.HttpServletResponse response) throws javax.servlet.ServletException,
+	protected void doGet(jakarta.servlet.http.HttpServletRequest request,
+			jakarta.servlet.http.HttpServletResponse response) throws jakarta.servlet.ServletException,
 			java.io.IOException {
 		processRequest(request, response);
 	}

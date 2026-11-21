@@ -70,12 +70,14 @@ public class GitblitParamUrlRequestMapperTest {
     }
 
     @Test
-    public void handlesEncodedSlashesWithoutAReplacementCharacter() {
+    public void keepsSlashContainingParametersInQueryWithoutAReplacementCharacter() {
         TestMapper mapper = new TestMapper(new MemorySettings(), "r", "h");
         PageParameters parameters = new PageParameters().add("r", "group/example.git").add("h", "main");
         String url = mapper.encode(parameters);
-        assertEquals("summary/group%2Fexample.git/main", url);
+        assertEquals("summary?r=group/example.git&h=main", url);
         assertEquals("group/example.git", mapper.decode(url).get("r").toString());
+        assertEquals("main", mapper.decode(url).get("h").toString());
+        assertEquals("group/example.git", mapper.decode("summary/group%2Fexample.git/main").get("r").toString());
     }
 
     @Test

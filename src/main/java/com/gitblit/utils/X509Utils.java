@@ -87,6 +87,7 @@ import org.bouncycastle.openssl.jcajce.JcePEMEncryptorBuilder;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.util.IPAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -563,15 +564,16 @@ public class X509Utils {
 			certBuilder.addExtension(Extension.basicConstraints, false, new BasicConstraints(false));
 			certBuilder.addExtension(Extension.authorityKeyIdentifier, false, extUtils.createAuthorityKeyIdentifier(caCert.getPublicKey()));
 
-			// support alternateSubjectNames for SSL certificates
-			List<GeneralName> altNames = new ArrayList<GeneralName>();
-			if (HttpUtils.isIpAddress(sslMetadata.commonName)) {
-				altNames.add(new GeneralName(GeneralName.iPAddress, sslMetadata.commonName));
+			String host = sslMetadata.commonName;
+			int hostType = IPAddress.isValid(host) ? GeneralName.iPAddress : GeneralName.dNSName;
+			List<GeneralName> altNames = new ArrayList<>();
+			altNames.add(new GeneralName(hostType, host));
+			if ("localhost".equalsIgnoreCase(host)) {
+				altNames.add(new GeneralName(GeneralName.iPAddress, "127.0.0.1"));
+				altNames.add(new GeneralName(GeneralName.iPAddress, "::1"));
 			}
-			if (altNames.size() > 0) {
-				GeneralNames subjectAltName = new GeneralNames(altNames.toArray(new GeneralName [altNames.size()]));
-				certBuilder.addExtension(Extension.subjectAlternativeName, false, subjectAltName);
-			}
+			certBuilder.addExtension(Extension.subjectAlternativeName, false,
+					new GeneralNames(altNames.toArray(new GeneralName[0])));
 
 			ContentSigner caSigner = new JcaContentSignerBuilder(SIGNING_ALGORITHM)
 					.setProvider(BC).build(caPrivateKey);

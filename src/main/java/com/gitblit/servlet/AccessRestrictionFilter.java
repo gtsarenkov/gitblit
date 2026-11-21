@@ -20,12 +20,12 @@ import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Iterator;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.gitblit.manager.IAuthenticationManager;
 import com.gitblit.manager.IRepositoryManager;
@@ -154,8 +154,8 @@ public abstract class AccessRestrictionFilter extends AuthenticationFilter {
 	 * doFilter does the actual work of preprocessing the request to ensure that
 	 * the user may proceed.
 	 *
-	 * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest,
-	 *      javax.servlet.ServletResponse, javax.servlet.FilterChain)
+	 * @see jakarta.servlet.Filter#doFilter(jakarta.servlet.ServletRequest,
+	 *      jakarta.servlet.ServletResponse, jakarta.servlet.FilterChain)
 	 */
 	@Override
 	public void doFilter(final ServletRequest request, final ServletResponse response,

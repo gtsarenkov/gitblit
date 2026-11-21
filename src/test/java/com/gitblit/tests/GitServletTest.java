@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
@@ -258,7 +259,7 @@ public class GitServletTest extends GitblitUnitTest {
 
 		Git git = Git.open(ticgitFolder);
 		File file = new File(ticgitFolder, "TODO");
-		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		BufferedWriter w = new BufferedWriter(os);
 		w.write("// hellol中文 " + new Date().toString() + "\n");
 		w.close();
@@ -291,7 +292,7 @@ public class GitServletTest extends GitblitUnitTest {
 
 		Git git = Git.open(jgitFolder);
 		File file = new File(jgitFolder, "TODO");
-		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		BufferedWriter w = new BufferedWriter(os);
 		w.write("// " + new Date().toString() + "\n");
 		w.close();
@@ -329,7 +330,7 @@ public class GitServletTest extends GitblitUnitTest {
 
 		Git git = Git.open(jgitFolder);
 		File file = new File(jgitFolder, "TODO");
-		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		BufferedWriter w = new BufferedWriter(os);
 		w.write("// " + new Date().toString() + "\n");
 		w.close();
@@ -369,7 +370,7 @@ public class GitServletTest extends GitblitUnitTest {
 
 		Git git = Git.open(jgit2Folder);
 		File file = new File(jgit2Folder, "NONBARE");
-		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		BufferedWriter w = new BufferedWriter(os);
 		w.write("// " + new Date().toString() + "\n");
 		w.close();
@@ -452,7 +453,7 @@ public class GitServletTest extends GitblitUnitTest {
 
 		// commit a file and push it
 		File file = new File(local, "PUSHCHK");
-		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		BufferedWriter w = new BufferedWriter(os);
 		w.write("// " + new Date().toString() + "\n");
 		w.close();
@@ -540,7 +541,7 @@ public class GitServletTest extends GitblitUnitTest {
 
 		// commit a file
 		File file = new File(local, "MERGECHK2");
-		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		BufferedWriter w = new BufferedWriter(os);
 		w.write("// " + new Date().toString() + "\n");
 		w.close();
@@ -559,7 +560,7 @@ public class GitServletTest extends GitblitUnitTest {
 
 		// commit a file
 		file = new File(local, "MERGECHK1");
-		os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		w = new BufferedWriter(os);
 		w.write("// " + new Date().toString() + "\n");
 		w.close();
@@ -699,7 +700,7 @@ public class GitServletTest extends GitblitUnitTest {
 
 		// commit a file and push it
 		File file = new File(local, "PUSHCHK");
-		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		BufferedWriter w = new BufferedWriter(os);
 		w.write("// " + new Date().toString() + "\n");
 		w.close();
@@ -785,7 +786,7 @@ public class GitServletTest extends GitblitUnitTest {
 
 		// commit a change on this detached HEAD
 		file = new File(local, "REWINDCHK");
-		os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		w = new BufferedWriter(os);
 		w.write("// " + new Date().toString() + "\n");
 		w.close();

@@ -16,6 +16,7 @@
 package com.gitblit.tickets;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -317,7 +318,7 @@ public class BranchTicketService extends ITicketService implements RefsChangedLi
 			// create an index entry for the revised index
 			final DirCacheEntry idIndexEntry = new DirCacheEntry(file);
 			idIndexEntry.setLength(content.length());
-			idIndexEntry.setLastModified(System.currentTimeMillis());
+			idIndexEntry.setLastModified(Instant.now());
 			idIndexEntry.setFileMode(FileMode.REGULAR_FILE);
 
 			// insert new ticket index
@@ -764,7 +765,7 @@ public class BranchTicketService extends ITicketService implements RefsChangedLi
 			String journalPath = ticketPath + "/" + JOURNAL;
 			final DirCacheEntry journalEntry = new DirCacheEntry(journalPath);
 			journalEntry.setLength(journalBytes.length);
-			journalEntry.setLastModified(change.date.getTime());
+			journalEntry.setLastModified(change.date.toInstant());
 			journalEntry.setFileMode(FileMode.REGULAR_FILE);
 			journalEntry.setObjectId(inserter.insert(org.eclipse.jgit.lib.Constants.OBJ_BLOB, journalBytes));
 
@@ -782,7 +783,7 @@ public class BranchTicketService extends ITicketService implements RefsChangedLi
 					// create an index entry for this attachment
 					final DirCacheEntry entry = new DirCacheEntry(path);
 					entry.setLength(attachment.content.length);
-					entry.setLastModified(change.date.getTime());
+					entry.setLastModified(change.date.toInstant());
 					entry.setFileMode(FileMode.REGULAR_FILE);
 
 					// insert object

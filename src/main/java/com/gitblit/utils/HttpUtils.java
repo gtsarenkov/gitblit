@@ -21,7 +21,7 @@ import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
 import java.util.Date;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.slf4j.LoggerFactory;
 
@@ -128,9 +128,9 @@ public class HttpUtils {
 	 * @return a UserModel, if a valid certificate is in the request, null otherwise
 	 */
 	public static UserModel getUserModelFromCertificate(HttpServletRequest httpRequest, boolean checkValidity, String... usernameOIDs) {
-		if (httpRequest.getAttribute("javax.servlet.request.X509Certificate") != null) {
+		if (httpRequest.getAttribute("jakarta.servlet.request.X509Certificate") != null) {
 			X509Certificate[] certChain = (X509Certificate[]) httpRequest
-					.getAttribute("javax.servlet.request.X509Certificate");
+					.getAttribute("jakarta.servlet.request.X509Certificate");
 			if (certChain != null) {
 				X509Certificate cert = certChain[0];
 				// ensure certificate is valid
@@ -182,9 +182,9 @@ public class HttpUtils {
 	}
 
 	public static X509Metadata getCertificateMetadata(HttpServletRequest httpRequest) {
-		if (httpRequest.getAttribute("javax.servlet.request.X509Certificate") != null) {
+		if (httpRequest.getAttribute("jakarta.servlet.request.X509Certificate") != null) {
 			X509Certificate[] certChain = (X509Certificate[]) httpRequest
-					.getAttribute("javax.servlet.request.X509Certificate");
+					.getAttribute("jakarta.servlet.request.X509Certificate");
 			if (certChain != null) {
 				X509Certificate cert = certChain[0];
 				return X509Utils.getMetadata(cert);

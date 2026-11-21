@@ -19,10 +19,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.MessageFormat;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.gitblit.IStoredSettings;
 import com.gitblit.Keys;
@@ -79,8 +79,8 @@ public class SparkleShareInviteServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 
-	protected void processRequest(javax.servlet.http.HttpServletRequest request,
-			javax.servlet.http.HttpServletResponse response) throws javax.servlet.ServletException,
+	protected void processRequest(jakarta.servlet.http.HttpServletRequest request,
+			jakarta.servlet.http.HttpServletResponse response) throws jakarta.servlet.ServletException,
 			java.io.IOException {
 
 		int sshPort = settings.getInteger(Keys.git.sshPort, 0);

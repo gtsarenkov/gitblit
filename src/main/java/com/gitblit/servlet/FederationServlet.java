@@ -27,7 +27,7 @@ import java.util.Set;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.gitblit.Constants.FederationRequest;
 import com.gitblit.IStoredSettings;
@@ -82,13 +82,13 @@ public class FederationServlet extends JsonServlet {
 	 *
 	 * @param request
 	 * @param response
-	 * @throws javax.servlet.ServletException
+	 * @throws jakarta.servlet.ServletException
 	 * @throws java.io.IOException
 	 */
 
 	@Override
-	protected void processRequest(javax.servlet.http.HttpServletRequest request,
-			javax.servlet.http.HttpServletResponse response) throws javax.servlet.ServletException,
+	protected void processRequest(jakarta.servlet.http.HttpServletRequest request,
+			jakarta.servlet.http.HttpServletResponse response) throws jakarta.servlet.ServletException,
 			java.io.IOException {
 
 		FederationRequest reqType = FederationRequest.fromName(request.getParameter("req"));

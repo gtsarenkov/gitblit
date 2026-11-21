@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -33,7 +34,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.Constants;
 
 import com.gitblit.Keys;
 import com.gitblit.models.ProjectModel;
@@ -212,7 +212,7 @@ public class MyDashboardPage extends DashboardPage {
 					try {
 						FileInputStream fis = new FileInputStream(file);
 						InputStreamReader reader = new InputStreamReader(fis,
-								Constants.CHARACTER_ENCODING);
+								StandardCharsets.UTF_8);
 						message = MarkdownUtils.transformMarkdown(reader);
 						reader.close();
 					} catch (Throwable t) {
@@ -252,7 +252,7 @@ public class MyDashboardPage extends DashboardPage {
 				if (is == null) {
 					continue;
 				}
-				reader = new InputStreamReader(is, Constants.CHARACTER_ENCODING);
+				reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 				message = MarkdownUtils.transformMarkdown(reader);
 				reader.close();
 				return message;

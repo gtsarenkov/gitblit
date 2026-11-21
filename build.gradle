@@ -227,14 +227,11 @@ dependencies {
 
     implementation('com.google.inject.extensions:guice-servlet')
 
-    implementation('org.eclipse.jetty:jetty-servlet')
-    implementation('org.eclipse.jetty:jetty-security')
+    implementation('org.eclipse.jetty.ee11:jetty-ee11-webapp')
     implementation('org.eclipse.jetty:jetty-server')
-    implementation('org.eclipse.jetty:jetty-continuation')
     implementation('org.eclipse.jetty:jetty-http')
     implementation('org.eclipse.jetty:jetty-io')
     implementation('org.eclipse.jetty:jetty-util')
-    implementation('org.eclipse.jetty:jetty-webapp')
     implementation('org.eclipse.jetty:jetty-xml')
 
     implementation('org.apache.wicket:wicket-core')
@@ -242,7 +239,7 @@ dependencies {
     implementation('org.apache.wicket:wicket-extensions')
     implementation('ro.fortsoft.pf4j:pf4j')
     implementation('javax.mail:mail:latest.release')
-    implementation('javax.servlet:javax.servlet-api')
+    implementation('jakarta.servlet:jakarta.servlet-api')
 
     federationClient platform(project(":gitblit-bom"))
     federationClient('org.apache.lucene:lucene-core')
@@ -262,6 +259,7 @@ dependencies {
     testImplementation('org.eclipse.jgit:org.eclipse.jgit.ssh.jsch')
 
     testImplementation('junit:junit:4.13.1')
+    testImplementation('org.apache.wicket:wicket-tester')
 }
 
 tasks.register('federationClassList', ClassListDependency) {

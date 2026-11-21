@@ -15,8 +15,8 @@
  */
 package com.gitblit.manager;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.gitblit.Constants.Role;
 import com.gitblit.models.TeamModel;

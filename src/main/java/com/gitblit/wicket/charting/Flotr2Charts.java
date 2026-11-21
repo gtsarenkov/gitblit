@@ -15,7 +15,7 @@
  */
 package com.gitblit.wicket.charting;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.apache.wicket.markup.head.*;
 import org.apache.wicket.protocol.http.WebApplication;

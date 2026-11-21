@@ -20,10 +20,10 @@ import java.io.IOException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.gitblit.Keys;
 import com.gitblit.manager.IRuntimeManager;
@@ -59,8 +59,8 @@ public class RobotsTxtServlet extends HttpServlet {
 		processRequest(request, response);
 	}
 
-	protected void processRequest(javax.servlet.http.HttpServletRequest request,
-			javax.servlet.http.HttpServletResponse response) throws javax.servlet.ServletException,
+	protected void processRequest(jakarta.servlet.http.HttpServletRequest request,
+			jakarta.servlet.http.HttpServletResponse response) throws jakarta.servlet.ServletException,
 			java.io.IOException {
 		File file = runtimeManager.getFileOrFolder(Keys.web.robots.txt, null);
 		String content = "";

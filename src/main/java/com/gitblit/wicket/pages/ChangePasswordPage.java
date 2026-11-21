@@ -32,8 +32,8 @@ import com.gitblit.wicket.NonTrimmedPasswordTextField;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class ChangePasswordPage extends RootSubPage {
 

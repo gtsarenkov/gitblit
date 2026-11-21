@@ -17,8 +17,8 @@ package com.gitblit.servlet;
 
 import java.util.Enumeration;
 
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletContext;
 
 import com.gitblit.IStoredSettings;
 import com.gitblit.manager.IRuntimeManager;

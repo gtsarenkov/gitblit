@@ -25,6 +25,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.eclipse.jgit.util.FileUtils;
+import org.eclipse.jetty.util.ssl.X509;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -76,6 +77,16 @@ public class X509UtilsTest extends GitblitUnitTest {
 		X509Utils.getPrivateKey(X509Utils.CA_ALIAS, storeFile, caPassword);
 		X509Certificate cert = X509Utils.getCertificate(X509Utils.CA_ALIAS, storeFile, caPassword);
 		assertEquals("O=Gitblit,OU=Gitblit,CN=Gitblit Certificate Authority", cert.getIssuerDN().getName());
+	}
+
+	@Test
+	public void testDefaultServerCertificateMatchesLoopbackHosts() throws Exception {
+		File storeFile = new File(folder, X509Utils.SERVER_KEY_STORE);
+		X509Certificate cert = X509Utils.getCertificate("localhost", storeFile, caPassword);
+		X509 serverCertificate = new X509("localhost", cert);
+		assertTrue(serverCertificate.matches("localhost"));
+		assertTrue(serverCertificate.matches("127.0.0.1"));
+		assertTrue(serverCertificate.matches("::1"));
 	}
 
 	@Test

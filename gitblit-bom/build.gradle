@@ -2,13 +2,13 @@ apply plugin: 'java-platform'
 apply plugin: 'maven-publish'
 
 ext['bouncycastle.version'] = 'latest.release' // 1.69
-ext['wicket.version'] = '9.25.0'
+ext['wicket.version'] = '10.12.0'
 ext['lucene.version'] = 'latest.release' // '5.5.2'
 ext['sshd.version'] = '2.20.1'
 ext['mina.version'] = 'latest.release' // 2.0.25
 ext['groovy.version'] = 'latest.release' // 2.4.4
-ext['jetty.version'] = '9.4.57.v20241219' // TODO 'latest.release' // 9.4.49.v20220914
-ext['guice-servlet.version'] = 'latest.release' // 5.1.0-gb2
+ext['jetty.version'] = '12.1.15'
+ext['guice.version'] = '7.0.0'
 ext['wikitext.version'] = 'latest.release' // 1.4
 ext['selenium.version'] = '4.52.0'
 
@@ -35,11 +35,9 @@ ext.wicketVersionDef = {
     }
 }
 ext.slf4jVersionDef = latestReleaseDef
-ext.jettyVersionDef = latestReleaseDef
-ext.guiceServletVersionDef = {
+ext.guiceVersionDef = {
     version {
-        strictly '[5.0,7.0['
-        prefer property('guice-servlet.version')
+        strictly property('guice.version')
     }
 }
 ext.sshdVersionDef = {
@@ -56,8 +54,7 @@ ext.minaVersionDef = {
 }
 ext.jgitVersionDef = {
     version {
-        strictly '[4.0.0,7.0.0['
-        //prefer 'latest.version'
+        strictly '7.8.1.202611041320-r'
     }
 }
 ext.redisVersionDef = {
@@ -109,7 +106,7 @@ dependencies {
     constraints {
         api("org.slf4j:slf4j-api", slf4jVersionDef)
         api('org.kohsuke.args4j:args4j-maven-plugin', latestReleaseDef)
-        api('com.google.inject:guice', latestReleaseDef) // 5.1.0
+        api('com.google.inject:guice', guiceVersionDef)
         api('com.unboundid:unboundid-ldapsdk', latestReleaseDef) // 2.3.8
         api('commons-io:commons-io', commonsIoVersionDef) // 2.11.0
         api('com.google.code.gson:gson:latest.release') // 2.10
@@ -162,11 +159,13 @@ dependencies {
         api("org.apache.wicket:wicket-core", wicketVersionDef)
         api("org.apache.wicket:wicket-auth-roles", wicketVersionDef)
         api("org.apache.wicket:wicket-extensions", wicketVersionDef)
+        api("org.apache.wicket:wicket-tester", wicketVersionDef)
 
         api("org.seleniumhq.selenium:selenium-support:${property('selenium.version')}")
         api("org.seleniumhq.selenium:selenium-firefox-driver:${property('selenium.version')}")
 
-        api('com.google.inject.extensions:guice-servlet', guiceServletVersionDef)
+        api('com.google.inject.extensions:guice-servlet', guiceVersionDef)
+        api("org.eclipse.jetty.ee11:jetty-ee11-webapp:${property('jetty.version')}")
 
         api('ro.fortsoft.pf4j:pf4j:latest.release') {
             version {
@@ -176,7 +175,7 @@ dependencies {
         }
 
         api('javax.mail:mail:latest.release') //implementation('com.sun.mail:javax.mail:1.5.6')
-        api 'javax.servlet:javax.servlet-api:3.1.0'
+        api 'jakarta.servlet:jakarta.servlet-api:6.1.0'
         api('args4j:args4j:latest.release') // 2.37
     }
 }

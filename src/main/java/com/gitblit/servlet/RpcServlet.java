@@ -25,9 +25,9 @@ import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.eclipse.jgit.lib.Repository;
 
@@ -76,7 +76,7 @@ public class RpcServlet extends JsonServlet {
 	 *
 	 * @param request
 	 * @param response
-	 * @throws javax.servlet.ServletException
+	 * @throws jakarta.servlet.ServletException
 	 * @throws java.io.IOException
 	 */
 	@Override

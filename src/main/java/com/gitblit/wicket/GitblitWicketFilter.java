@@ -19,7 +19,7 @@ import java.util.Date;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.wicket.protocol.http.IWebApplicationFactory;
 import org.apache.wicket.protocol.http.WebApplication;

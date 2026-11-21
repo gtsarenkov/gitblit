@@ -21,21 +21,21 @@ import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.*;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionContext;
-import javax.servlet.http.HttpUpgradeHandler;
-import javax.servlet.http.Part;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletConnection;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpUpgradeHandler;
+import jakarta.servlet.http.Part;
 
 import com.gitblit.utils.PasswordHash;
 import org.junit.Test;
@@ -65,6 +65,21 @@ public class AuthenticationManagerTest extends GitblitUnitTest {
 	UserManager users;
 
 	private static final class DummyHttpServletRequest implements HttpServletRequest {
+
+		@Override
+		public String getRequestId() {
+			return "";
+		}
+
+		@Override
+		public String getProtocolRequestId() {
+			return "";
+		}
+
+		@Override
+		public ServletConnection getServletConnection() {
+			throw new UnsupportedOperationException();
+		}
 
 		@Override
 		public Object getAttribute(String name) {
@@ -186,11 +201,6 @@ public class AuthenticationManagerTest extends GitblitUnitTest {
 
 		@Override
 		public RequestDispatcher getRequestDispatcher(String path) {
-			return null;
-		}
-
-		@Override
-		public String getRealPath(String path) {
 			return null;
 		}
 
@@ -395,18 +405,8 @@ public class AuthenticationManagerTest extends GitblitUnitTest {
 				}
 
 				@Override
-				public HttpSessionContext getSessionContext() {
-					return null;
-				}
-
-				@Override
 				public Object getAttribute(String name) {
 					return sessionAttributes.get(name);
-				}
-
-				@Override
-				public Object getValue(String name) {
-					return null;
 				}
 
 				@Override
@@ -415,25 +415,12 @@ public class AuthenticationManagerTest extends GitblitUnitTest {
 				}
 
 				@Override
-				public String[] getValueNames() {
-					return null;
-				}
-
-				@Override
 				public void setAttribute(String name,
 						Object value) {
 				}
 
 				@Override
-				public void putValue(String name, Object value) {
-				}
-
-				@Override
 				public void removeAttribute(String name) {
-				}
-
-				@Override
-				public void removeValue(String name) {
 				}
 
 				@Override
@@ -465,11 +452,6 @@ public class AuthenticationManagerTest extends GitblitUnitTest {
 
 		@Override
 		public boolean isRequestedSessionIdFromURL() {
-			return false;
-		}
-
-		@Override
-		public boolean isRequestedSessionIdFromUrl() {
 			return false;
 		}
 

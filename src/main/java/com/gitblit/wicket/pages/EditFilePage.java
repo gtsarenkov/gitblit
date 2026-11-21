@@ -18,6 +18,7 @@ package com.gitblit.wicket.pages;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -132,7 +133,7 @@ public class EditFilePage extends RepositoryPage {
 						
 						final DirCacheEntry fileUpdate = new DirCacheEntry(path);
 						fileUpdate.setLength(bytes.length);
-						fileUpdate.setLastModified(System.currentTimeMillis());
+						fileUpdate.setLastModified(Instant.now());
 						fileUpdate.setFileMode(FileMode.REGULAR_FILE);
 						fileUpdate.setObjectId(repository.newObjectInserter().insert( org.eclipse.jgit.lib.Constants.OBJ_BLOB, bytes ));
 						builder.add(fileUpdate);

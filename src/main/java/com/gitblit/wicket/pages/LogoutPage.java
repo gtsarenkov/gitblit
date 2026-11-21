@@ -20,8 +20,8 @@ import org.apache.wicket.RestartResponseAtInterceptPageException;
 import com.gitblit.models.UserModel;
 import com.gitblit.wicket.GitBlitWebSession;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public class LogoutPage extends BasePage {
 

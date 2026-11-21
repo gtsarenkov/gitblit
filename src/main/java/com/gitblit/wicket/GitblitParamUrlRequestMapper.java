@@ -63,8 +63,18 @@ public class GitblitParamUrlRequestMapper extends MountedMapper {
                 lastSpecified--;
             }
 
-            Url path = new Url();
             char slash = settings.getChar(Keys.web.forwardSlashCharacter, '/');
+            // Servlet containers may reject encoded slashes in path segments. Keep these
+            // parameters in the query unless a slash replacement character is configured.
+            if (slash == '/') {
+                for (int i = 0; i <= lastSpecified; i++) {
+                    if (remaining.get(parameterNames[i]).toString("").contains("/")) {
+                        return super.encodePageParameters(remaining);
+                    }
+                }
+            }
+
+            Url path = new Url();
             for (int i = 0; i <= lastSpecified; i++) {
                 String value = remaining.get(parameterNames[i]).toString("");
                 path.getSegments().add(slash == '/' ? value : value.replace('/', slash));

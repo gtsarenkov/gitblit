@@ -18,7 +18,7 @@ package com.gitblit.git;
 import java.io.IOException;
 import java.text.MessageFormat;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.lib.Repository;

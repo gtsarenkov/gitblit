@@ -29,11 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.apache.tika.Tika;
 import org.apache.wicket.util.encoding.UrlEncoder;
@@ -212,7 +212,7 @@ public class RawServlet extends HttpServlet {
 	 *
 	 * @param request
 	 * @param response
-	 * @throws javax.servlet.ServletException
+	 * @throws jakarta.servlet.ServletException
 	 * @throws java.io.IOException
 	 */
 	private void processRequest(HttpServletRequest request, HttpServletResponse response)

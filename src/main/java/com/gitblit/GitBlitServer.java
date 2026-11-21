@@ -38,17 +38,18 @@ import java.util.Properties;
 import java.util.Scanner;
 
 import org.apache.log4j.PropertyConfigurator;
-import org.eclipse.jetty.security.ConstraintMapping;
-import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.ee11.servlet.ListenerHolder;
+import org.eclipse.jetty.ee11.servlet.security.ConstraintMapping;
+import org.eclipse.jetty.ee11.servlet.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.ee11.webapp.WebAppContext;
+import org.eclipse.jetty.security.Constraint;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.servlet.ListenerHolder;
-import org.eclipse.jetty.util.security.Constraint;
+import org.eclipse.jetty.server.SslConnectionFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.eclipse.jetty.webapp.WebAppContext;
 import org.eclipse.jgit.storage.file.FileBasedConfig;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.FileUtils;
@@ -302,7 +303,11 @@ public class GitBlitServer {
 					factory.setWantClientAuth(false);
 				}
 
-				ServerConnector connector = new ServerConnector(server, factory);
+				HttpConfiguration httpsConfig = new HttpConfiguration();
+				httpsConfig.addCustomizer(new SecureRequestCustomizer());
+				HttpConnectionFactory http = new HttpConnectionFactory(httpsConfig);
+				ServerConnector connector = new ServerConnector(server,
+						new SslConnectionFactory(factory, http.getProtocol()), http);
 				connector.setIdleTimeout(settings.getLong(Keys.server.httpIdleTimeout, 30000L));
 				connector.setPort(params.securePort);
 				String bindInterface = settings.getString(Keys.server.httpsBindInterface, null);
@@ -381,12 +386,10 @@ public class GitBlitServer {
 		rootContext.setTempDirectory(tempDir);
 
 
-		// Set cookies HttpOnly so they are not accessible to JavaScript engines
-		SessionHandler sessionHandler = rootContext.getSessionHandler();
-		sessionHandler.setHttpOnly(true);
-		// Use secure cookies if only serving https
-		sessionHandler.setSecureRequestOnly( (params.port <= 0 && params.securePort > 0) ||
-											 (params.port > 0 && params.securePort > 0 && settings.getBoolean(Keys.server.redirectToHttpsPort, true)) );
+		// Keep session cookies inaccessible to scripts and require HTTPS when it is mandatory.
+		rootContext.getServletContext().getSessionCookieConfig().setHttpOnly(true);
+		rootContext.getServletContext().getSessionCookieConfig().setSecure(params.securePort > 0
+				&& (params.port <= 0 || settings.getBoolean(Keys.server.redirectToHttpsPort, true)));
 
 		// Ensure there is a defined User Service
 		String realmUsers = params.userService;
@@ -441,11 +444,9 @@ public class GitBlitServer {
 		if (params.port > 0 && params.securePort > 0 && settings.getBoolean(Keys.server.redirectToHttpsPort, true)) {
 			logger.info(String.format("Configuring automatic http(%1$s) -> https(%2$s) redirects", params.port, params.securePort));
 			// Create the internal mechanisms to handle secure connections and redirects
-			Constraint constraint = new Constraint();
-			constraint.setDataConstraint(Constraint.DC_CONFIDENTIAL);
 
 			ConstraintMapping cm = new ConstraintMapping();
-			cm.setConstraint(constraint);
+			cm.setConstraint(Constraint.SECURE_TRANSPORT);
 			cm.setPathSpec("/*");
 
 			ConstraintSecurityHandler sh = new ConstraintSecurityHandler();

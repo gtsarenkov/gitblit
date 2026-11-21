@@ -20,7 +20,7 @@ import java.text.MessageFormat;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import com.gitblit.Constants.AccessRestrictionType;
 import com.gitblit.Constants.AuthorizationControl;

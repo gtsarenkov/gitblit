@@ -23,9 +23,9 @@ import java.util.Date;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -113,11 +113,11 @@ public class DownloadZipServlet extends HttpServlet {
 	 *
 	 * @param request
 	 * @param response
-	 * @throws javax.servlet.ServletException
+	 * @throws jakarta.servlet.ServletException
 	 * @throws java.io.IOException
 	 */
-	private void processRequest(javax.servlet.http.HttpServletRequest request,
-			javax.servlet.http.HttpServletResponse response) throws javax.servlet.ServletException,
+	private void processRequest(jakarta.servlet.http.HttpServletRequest request,
+			jakarta.servlet.http.HttpServletResponse response) throws jakarta.servlet.ServletException,
 			java.io.IOException {
 		if (!settings.getBoolean(Keys.web.allowZipDownloads, true)) {
 			logger.warn("Zip downloads are disabled");
@@ -221,15 +221,15 @@ public class DownloadZipServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void doPost(javax.servlet.http.HttpServletRequest request,
-			javax.servlet.http.HttpServletResponse response) throws javax.servlet.ServletException,
+	protected void doPost(jakarta.servlet.http.HttpServletRequest request,
+			jakarta.servlet.http.HttpServletResponse response) throws jakarta.servlet.ServletException,
 			java.io.IOException {
 		processRequest(request, response);
 	}
 
 	@Override
-	protected void doGet(javax.servlet.http.HttpServletRequest request,
-			javax.servlet.http.HttpServletResponse response) throws javax.servlet.ServletException,
+	protected void doGet(jakarta.servlet.http.HttpServletRequest request,
+			jakarta.servlet.http.HttpServletResponse response) throws jakarta.servlet.ServletException,
 			java.io.IOException {
 		processRequest(request, response);
 	}

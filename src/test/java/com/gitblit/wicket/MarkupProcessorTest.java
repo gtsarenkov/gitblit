@@ -75,33 +75,31 @@ public class MarkupProcessorTest
 		MarkupDocument mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String href = doc.getElementsByAttribute("href").attr("href");
-		assertEquals("Incorrect link rendered","doc/testrepo/12345abcde/file.md", href);
+		assertEquals("Incorrect link rendered","./doc/testrepo/12345abcde/file.md", href);
 	}
 
 	@Test
 	public void testParseMdRepoRelativeLinkSubfolder()
 	{
-		String psep ="%2F";
 		MarkupProcessor mp = new MarkupProcessor(getSettings(), new JSoupXssFilter());
 
 		String markup =  "link: [a file](folder/file.md)";
 		MarkupDocument mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String href = doc.getElementsByAttribute("href").attr("href");
-		assertEquals("Incorrect link rendered","doc/testrepo/12345abcde/folder"+psep+"file.md", href);
+		assertEquals("Incorrect link rendered","./doc?r=testrepo&h=12345abcde&f=folder/file.md", href);
 	}
 
 	@Test
 	public void testParseMdRepoRelativeLinkSubSubfolder()
 	{
-		String psep ="%2F";
 		MarkupProcessor mp = new MarkupProcessor(getSettings(), new JSoupXssFilter());
 
 		String markup =  "link: [a file](sub/folder/file.md)";
 		MarkupDocument mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String href = doc.getElementsByAttribute("href").attr("href");
-		assertEquals("Incorrect link rendered","doc/testrepo/12345abcde/sub"+psep+"folder"+psep+"file.md", href);
+		assertEquals("Incorrect link rendered","./doc?r=testrepo&h=12345abcde&f=sub/folder/file.md", href);
 	}
 
 	@Test
@@ -113,20 +111,19 @@ public class MarkupProcessorTest
 		MarkupDocument mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String href = doc.getElementsByAttribute("href").attr("href");
-		assertEquals("Incorrect link rendered","doc/testrepo/12345abcde/%E6%97%A5%E6%9C%AC%E8%AA%9E.md", href);
+		assertEquals("Incorrect link rendered","./doc/testrepo/12345abcde/%E6%97%A5%E6%9C%AC%E8%AA%9E.md", href);
 	}
 
 	@Test
 	public void testParseMdRepoRelativeLinkSubfolderUtf8()
 	{
-		String psep ="%2F";
 		MarkupProcessor mp = new MarkupProcessor(getSettings(), new JSoupXssFilter());
 
 		String markup =  "link: [a file](folder/receitas_de_culinária/file.md)";
 		MarkupDocument mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String href = doc.getElementsByAttribute("href").attr("href");
-		assertEquals("Incorrect link rendered","doc/testrepo/12345abcde/folder"+psep+"receitas_de_culin%C3%A1ria"+psep+"file.md", href);
+		assertEquals("Incorrect link rendered","./doc?r=testrepo&h=12345abcde&f=folder/receitas_de_culin%C3%A1ria/file.md", href);
 	}
 
 
@@ -179,33 +176,31 @@ public class MarkupProcessorTest
 		MarkupDocument mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String href = doc.getElementsByAttribute("href").attr("href");
-		assertEquals("Incorrect link rendered","doc/testrepo/12345abcde/file.md", href);
+		assertEquals("Incorrect link rendered","./doc/testrepo/12345abcde/file.md", href);
 	}
 
 	@Test
 	public void testParseMdRepoRelativeRefLinkSubfolder()
 	{
-		String psep ="%2F";
 		MarkupProcessor mp = new MarkupProcessor(getSettings(), new JSoupXssFilter());
 
 		String markup =  "link: [a file][file]\n\n[file]: folder/file.md";
 		MarkupDocument mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String href = doc.getElementsByAttribute("href").attr("href");
-		assertEquals("Incorrect link rendered","doc/testrepo/12345abcde/folder"+psep+"file.md", href);
+		assertEquals("Incorrect link rendered","./doc?r=testrepo&h=12345abcde&f=folder/file.md", href);
 	}
 
 	@Test
 	public void testParseMdRepoRelativeRefLinkSubSubfolder()
 	{
-		String psep ="%2F";
 		MarkupProcessor mp = new MarkupProcessor(getSettings(), new JSoupXssFilter());
 
 		String markup =  "link: [a file][l1] \n\n[l1]: sub/folder/file.md";
 		MarkupDocument mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String href = doc.getElementsByAttribute("href").attr("href");
-		assertEquals("Incorrect link rendered","doc/testrepo/12345abcde/sub"+psep+"folder"+psep+"file.md", href);
+		assertEquals("Incorrect link rendered","./doc?r=testrepo&h=12345abcde&f=sub/folder/file.md", href);
 	}
 
 	@Test
@@ -217,20 +212,19 @@ public class MarkupProcessorTest
 		MarkupDocument mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String href = doc.getElementsByAttribute("href").attr("href");
-		assertEquals("Incorrect link rendered","doc/testrepo/12345abcde/%E6%97%A5%E6%9C%AC%E8%AA%9E.md", href);
+		assertEquals("Incorrect link rendered","./doc/testrepo/12345abcde/%E6%97%A5%E6%9C%AC%E8%AA%9E.md", href);
 	}
 
 	@Test
 	public void testParseMdRepoRelativeRefLinkSubfolderUtf8()
 	{
-		String psep ="%2F";
 		MarkupProcessor mp = new MarkupProcessor(getSettings(), new JSoupXssFilter());
 
 		String markup =  "link: [a file][xy]\n\n[xy]: folder/receitas_de_culinária/file.md";
 		MarkupDocument mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String href = doc.getElementsByAttribute("href").attr("href");
-		assertEquals("Incorrect link rendered","doc/testrepo/12345abcde/folder"+psep+"receitas_de_culin%C3%A1ria"+psep+"file.md", href);
+		assertEquals("Incorrect link rendered","./doc?r=testrepo&h=12345abcde&f=folder/receitas_de_culin%C3%A1ria/file.md", href);
 	}
 
 
@@ -277,14 +271,14 @@ public class MarkupProcessorTest
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/graphic.gif", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/graphic.gif", ref);
 
 		markup =  "image: ![a graphic](graphic.gif \"Some graphic\")";
 		mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		doc = Jsoup.parseBodyFragment(mdoc.html);
 		ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/graphic.gif", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/graphic.gif", ref);
 	}
 
 	@Test
@@ -297,14 +291,14 @@ public class MarkupProcessorTest
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/%E3%83%89%E3%83%83%E3%82%B0.gif", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/%E3%83%89%E3%83%83%E3%82%B0.gif", ref);
 
 		markup =  "image: ![look the dog](ドッグ.gif \"シーバ\")";
 		mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		doc = Jsoup.parseBodyFragment(mdoc.html);
 		ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/%E3%83%89%E3%83%83%E3%82%B0.gif", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/%E3%83%89%E3%83%83%E3%82%B0.gif", ref);
 	}
 
 	@Test
@@ -318,14 +312,14 @@ public class MarkupProcessorTest
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/results"+psep+"graphic.gif", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/results"+psep+"graphic.gif", ref);
 
 		markup =  "image: ![a graphic](results/graphic.gif \"Some graphic\")";
 		mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		doc = Jsoup.parseBodyFragment(mdoc.html);
 		ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/results"+psep+"graphic.gif", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/results"+psep+"graphic.gif", ref);
 	}
 
 	@Test
@@ -339,14 +333,14 @@ public class MarkupProcessorTest
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/folder"+psep+"%D0%BA%D0%B0%D1%80%D1%82%D0%B8%D0%BD%D0%BA%D0%B8"+psep+"cat.jpg", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/folder"+psep+"%D0%BA%D0%B0%D1%80%D1%82%D0%B8%D0%BD%D0%BA%D0%B8"+psep+"cat.jpg", ref);
 
 		markup =  "image: ![a cat](folder/картинки/cat.jpg \"Кошка\")";
 		mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		doc = Jsoup.parseBodyFragment(mdoc.html);
 		ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/folder"+psep+"%D0%BA%D0%B0%D1%80%D1%82%D0%B8%D0%BD%D0%BA%D0%B8"+psep+"cat.jpg", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/folder"+psep+"%D0%BA%D0%B0%D1%80%D1%82%D0%B8%D0%BD%D0%BA%D0%B8"+psep+"cat.jpg", ref);
 	}
 
 
@@ -385,14 +379,14 @@ public class MarkupProcessorTest
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/graphic.gif", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/graphic.gif", ref);
 
 		markup =  "image: ![a graphic][2]\n\n[2]: graphic.gif \"Some graphic\"";
 		mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		doc = Jsoup.parseBodyFragment(mdoc.html);
 		ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/graphic.gif", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/graphic.gif", ref);
 	}
 
 	@Test
@@ -405,14 +399,14 @@ public class MarkupProcessorTest
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/%E3%83%89%E3%83%83%E3%82%B0.gif", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/%E3%83%89%E3%83%83%E3%82%B0.gif", ref);
 
 		markup =  "image: ![look the dog][1]\n\n[1]: ドッグ.gif \"シーバ\"";
 		mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		doc = Jsoup.parseBodyFragment(mdoc.html);
 		ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/%E3%83%89%E3%83%83%E3%82%B0.gif", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/%E3%83%89%E3%83%83%E3%82%B0.gif", ref);
 	}
 
 	@Test
@@ -426,14 +420,14 @@ public class MarkupProcessorTest
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/folder"+psep+"cat.jpg", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/folder"+psep+"cat.jpg", ref);
 
 		markup =  "image: ![a cat][cat]\n\n[cat]: folder/cat.jpg \"Кошка\"";
 		mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		doc = Jsoup.parseBodyFragment(mdoc.html);
 		ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/folder"+psep+"cat.jpg", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/folder"+psep+"cat.jpg", ref);
 	}
 
 	@Test
@@ -447,14 +441,14 @@ public class MarkupProcessorTest
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/folder"+psep+"%D0%BA%D0%B0%D1%80%D1%82%D0%B8%D0%BD%D0%BA%D0%B8"+psep+"cat.jpg", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/folder"+psep+"%D0%BA%D0%B0%D1%80%D1%82%D0%B8%D0%BD%D0%BA%D0%B8"+psep+"cat.jpg", ref);
 
 		markup =  "image: ![a cat][i1]\n\n[i1]: folder/картинки/cat.jpg \"Кошка\"";
 		mdoc = mp.parse("testrepo", "12345abcde", "main.md", markup);
 		doc = Jsoup.parseBodyFragment(mdoc.html);
 		ref = doc.getElementsByAttribute("src").attr("src");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect image src rendered","../raw/testrepo/12345abcde/folder"+psep+"%D0%BA%D0%B0%D1%80%D1%82%D0%B8%D0%BD%D0%BA%D0%B8"+psep+"cat.jpg", ref);
+		assertEquals("Incorrect image src rendered","/raw/testrepo/12345abcde/folder"+psep+"%D0%BA%D0%B0%D1%80%D1%82%D0%B8%D0%BD%D0%BA%D0%B8"+psep+"cat.jpg", ref);
 	}
 
 
@@ -487,13 +481,12 @@ public class MarkupProcessorTest
 	{
 		MarkupProcessor mp = new MarkupProcessor(getSettings(), new JSoupXssFilter());
 
-		String psep = "%2F";
 		String markup =  "link: [[document]]";
 		MarkupDocument mdoc = mp.parse("wikirepo", "12345abcde", "main.mw", markup);
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String ref = doc.getElementsByAttribute("href").attr("href");
 		assertFalse("No reference attribute found: " + mdoc.html, ref.isEmpty());
-		assertEquals("Incorrect link href rendered","doc/wikirepo/12345abcde/wiki"+ psep + "document", ref);
+		assertEquals("Incorrect link href rendered","./doc?r=wikirepo&h=12345abcde&f=wiki/document", ref);
 
 	}
 
@@ -502,12 +495,11 @@ public class MarkupProcessorTest
 	{
 		MarkupProcessor mp = new MarkupProcessor(getSettings(), new JSoupXssFilter());
 
-		String psep = "%2F";
 		String markup =  "link: [[日本語]]";
 		MarkupDocument mdoc = mp.parse("wikirepo", "12345abcde", "main.mw", markup);
 		Document doc = Jsoup.parseBodyFragment(mdoc.html);
 		String href = doc.getElementsByAttribute("href").attr("href");
-		assertEquals("Incorrect link rendered","doc/wikirepo/12345abcde/wiki" + psep + "%E6%97%A5%E6%9C%AC%E8%AA%9E", href);
+		assertEquals("Incorrect link rendered","./doc?r=wikirepo&h=12345abcde&f=wiki/%E6%97%A5%E6%9C%AC%E8%AA%9E", href);
 	}
 
 

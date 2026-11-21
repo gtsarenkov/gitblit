@@ -18,6 +18,8 @@ package com.gitblit.wicket.pages;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -258,7 +260,7 @@ public class NewRepositoryPage extends RootSubPage {
 
 				DirCacheEntry entry = new DirCacheEntry("README.md");
 				entry.setLength(bytes.length);
-				entry.setLastModified(System.currentTimeMillis());
+				entry.setLastModified(Instant.now());
 				entry.setFileMode(FileMode.REGULAR_FILE);
 				entry.setObjectId(odi.insert(org.eclipse.jgit.lib.Constants.OBJ_BLOB, bytes));
 
@@ -274,7 +276,7 @@ public class NewRepositoryPage extends RootSubPage {
 					if (!ArrayUtils.isEmpty(bytes)) {
 						DirCacheEntry entry = new DirCacheEntry(".gitignore");
 						entry.setLength(bytes.length);
-						entry.setLastModified(System.currentTimeMillis());
+						entry.setLastModified(Instant.now());
 						entry.setFileMode(FileMode.REGULAR_FILE);
 						entry.setObjectId(odi.insert(org.eclipse.jgit.lib.Constants.OBJ_BLOB, bytes));
 
@@ -298,7 +300,7 @@ public class NewRepositoryPage extends RootSubPage {
 
 				DirCacheEntry entry = new DirCacheEntry(".gitflow");
 				entry.setLength(bytes.length);
-				entry.setLastModified(System.currentTimeMillis());
+				entry.setLastModified(Instant.now());
 				entry.setFileMode(FileMode.REGULAR_FILE);
 				entry.setObjectId(odi.insert(org.eclipse.jgit.lib.Constants.OBJ_BLOB, bytes));
 
@@ -318,7 +320,7 @@ public class NewRepositoryPage extends RootSubPage {
 			CommitBuilder commit = new CommitBuilder();
 			commit.setAuthor(author);
 			commit.setCommitter(author);
-			commit.setEncoding(Constants.ENCODING);
+			commit.setEncoding(StandardCharsets.UTF_8);
 			commit.setMessage("Initial commit");
 			commit.setTreeId(treeId);
 

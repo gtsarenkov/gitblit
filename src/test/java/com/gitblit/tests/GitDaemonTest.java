@@ -19,6 +19,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -171,7 +172,7 @@ public class GitDaemonTest extends GitblitUnitTest {
 
 		Git git = Git.open(ticgitFolder);
 		File file = new File(ticgitFolder, "TODO");
-		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		BufferedWriter w = new BufferedWriter(os);
 		w.write("// hellol中文 " + new Date().toString() + "\n");
 		w.close();
@@ -209,7 +210,7 @@ public class GitDaemonTest extends GitblitUnitTest {
 
 		Git git = Git.open(ticgitFolder);
 		File file = new File(ticgitFolder, "TODO");
-		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		BufferedWriter w = new BufferedWriter(os);
 		w.write("// hellol中文 " + new Date().toString() + "\n");
 		w.close();
@@ -246,7 +247,7 @@ public class GitDaemonTest extends GitblitUnitTest {
 
 		Git git = Git.open(jgitFolder);
 		File file = new File(jgitFolder, "TODO");
-		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		BufferedWriter w = new BufferedWriter(os);
 		w.write("// " + new Date().toString() + "\n");
 		w.close();
@@ -290,7 +291,7 @@ public class GitDaemonTest extends GitblitUnitTest {
 
 		Git git = Git.open(jgit2Folder);
 		File file = new File(jgit2Folder, "NONBARE");
-		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), Constants.CHARSET);
+		OutputStreamWriter os = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 		BufferedWriter w = new BufferedWriter(os);
 		w.write("// " + new Date().toString() + "\n");
 		w.close();

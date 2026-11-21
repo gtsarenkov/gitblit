@@ -38,14 +38,16 @@ public class CachedRequestTest {
         });
         try {
             tester.setFollowRedirects(false);
-            tester.executeUrl("blob/group%2Frepo.git/feature%2Fbranch/docs%2FREADME.md?s=first&s=second");
+            tester.executeUrl("blob?f=docs/README.md&h=feature/branch&r=group/repo.git&s=first&s=second");
+            assertEquals("Initial response status " + tester.getLastResponse().getStatus(), "login",
+                    tester.getLastResponse().getRedirectLocation());
             GitBlitWebSession session = (GitBlitWebSession) tester.getSession();
             try {
                 session.continueRequest();
                 fail("Expected the cached request to redirect after login");
             } catch (RedirectToUrlException redirect) {
                 String url = ((RedirectRequestHandler) redirect.getReplacementRequestHandler()).getRedirectUrl();
-                assertTrue(url, url.endsWith("/blob/group%2Frepo.git/feature%2Fbranch/docs%2FREADME.md?s=first&s=second"));
+                assertTrue(url, url.endsWith("/blob?f=docs/README.md&h=feature/branch&r=group/repo.git&s=first&s=second"));
             }
             assertFalse(session.continueRequest());
         } finally {

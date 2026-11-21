@@ -16,9 +16,11 @@
 package com.gitblit.utils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -261,7 +263,7 @@ public class RefLogUtils {
 				CommitBuilder commit = new CommitBuilder();
 				commit.setAuthor(ident);
 				commit.setCommitter(ident);
-				commit.setEncoding(Constants.ENCODING);
+				commit.setEncoding(StandardCharsets.UTF_8);
 				commit.setMessage(message);
 				commit.setParentId(headId);
 				commit.setTreeId(indexTreeId);
@@ -357,7 +359,7 @@ public class RefLogUtils {
 				// create an index entry for this attachment
 				final DirCacheEntry dcEntry = new DirCacheEntry(path);
 				dcEntry.setLength(content.length());
-				dcEntry.setLastModified(now);
+				dcEntry.setLastModified(Instant.ofEpochMilli(now));
 				dcEntry.setFileMode(FileMode.REGULAR_FILE);
 
 				// insert object
