@@ -20,8 +20,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.nio.file.Files;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -113,7 +115,7 @@ public class GitBlitSuite {
 	public static String account = "admin";
 	public static String password = "admin";
 
-	private static AtomicBoolean started = new AtomicBoolean(false);
+	private static Thread serverThread;
 
 	public static Repository getHelloworldRepository() {
 		return getRepository("helloworld.git");
@@ -151,44 +153,59 @@ public class GitBlitSuite {
 		return null;
 	}
 
-	public static boolean startGitblit() throws Exception {
-		if (started.get()) {
-			// already started
+	public static synchronized boolean startGitblit() throws Exception {
+		if (serverThread != null && serverThread.isAlive()) {
 			return false;
 		}
 
+		Files.createDirectories(BASEFOLDER.toPath());
 		GitServletTest.deleteWorkingFolders();
 
-		// Start a Gitblit instance
-		Executors.newSingleThreadExecutor().execute(new Runnable() {
-			@Override
-			public void run() {
-				GitBlitServer.main(
-						"--httpPort", "" + port,
-						"--httpsPort", "0",
-						"--shutdownPort", "" + shutdownPort,
-						"--gitPort", "" + gitPort,
-						"--sshPort", "" + sshPort,
-						"--repositoriesFolder", GitBlitSuite.REPOSITORIES.getAbsolutePath(),
-						"--userService", GitBlitSuite.USERSCONF.getAbsolutePath(),
-						"--settings", GitBlitSuite.SETTINGS.getAbsolutePath(),
-						"--baseFolder", "data");
+		serverThread = new Thread(() -> GitBlitServer.main(
+				"--httpPort", "" + port,
+				"--httpsPort", "0",
+				"--shutdownPort", "" + shutdownPort,
+				"--gitPort", "" + gitPort,
+				"--sshPort", "" + sshPort,
+				"--repositoriesFolder", REPOSITORIES.getAbsolutePath(),
+				"--userService", USERSCONF.getAbsolutePath(),
+				"--settings", SETTINGS.getAbsolutePath(),
+				"--baseFolder", BASEFOLDER.getPath()), "Gitblit integration test server");
+		serverThread.setDaemon(true);
+		serverThread.start();
+
+		long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(30);
+		IOException lastConnectionError = null;
+		URI readinessUrl = URI.create(gitServletUrl + "/ticgit.git/info/refs?service=git-upload-pack");
+		while (serverThread.isAlive() && System.nanoTime() < deadline) {
+			HttpURLConnection connection = (HttpURLConnection) readinessUrl.toURL().openConnection();
+			connection.setConnectTimeout(500);
+			connection.setReadTimeout(500);
+			try {
+				int status = connection.getResponseCode();
+				if (status >= 200 && status < 500) {
+					return true;
+				}
+			} catch (IOException e) {
+				lastConnectionError = e;
+			} finally {
+				connection.disconnect();
 			}
-		});
-
-		// Wait a few seconds for it to be running
-		Thread.sleep(5000);
-
-		started.set(true);
-		return true;
+			Thread.sleep(100);
+		}
+		stopGitblit();
+		throw new IOException("Gitblit test server did not start on port " + port, lastConnectionError);
 	}
 
-	public static void stopGitblit() throws Exception {
-		// Stop Gitblit
-		GitBlitServer.main("--stop", "--shutdownPort", "" + shutdownPort);
-
-		// Wait a few seconds for it to be running
-		Thread.sleep(5000);
+	public static synchronized void stopGitblit() throws Exception {
+		if (serverThread != null && serverThread.isAlive()) {
+			GitBlitServer.main("--stop", "--shutdownPort", "" + shutdownPort);
+			serverThread.join(TimeUnit.SECONDS.toMillis(30));
+			if (serverThread.isAlive()) {
+				throw new IOException("Gitblit test server did not stop");
+			}
+		}
+		serverThread = null;
 	}
 
 	public static void deleteRefChecksFolder() throws IOException {
@@ -235,6 +252,22 @@ public class GitBlitSuite {
 	@AfterClass
 	public static void tearDown() throws Exception {
 		stopGitblit();
+	}
+
+	static void ensureGitServletRepositories() throws Exception {
+		if (FileKey.resolve(new File(REPOSITORIES, "ticgit.git"), FS.DETECTED) == null) {
+			if (!TICGIT_REPO_SOURCE.exists()) {
+				unzipRepository(TICGIT_REPO_SOURCE.getPath() + ".zip", TICGIT_REPO_SOURCE.getParentFile());
+			}
+			JGitUtils.cloneRepository(REPOSITORIES, "ticgit.git", TICGIT_REPO_SOURCE.getAbsolutePath());
+		}
+		if (FileKey.resolve(new File(REPOSITORIES, "test/jgit.git"), FS.DETECTED) == null) {
+			JGitUtils.cloneRepository(REPOSITORIES, "test/jgit.git", "https://github.com/eclipse-jgit/jgit.git");
+		}
+		showRemoteBranches("ticgit.git");
+		automaticallyTagBranchTips("ticgit.git");
+		showRemoteBranches("test/jgit.git");
+		automaticallyTagBranchTips("test/jgit.git");
 	}
 
 	private static void cloneOrFetch(String name, String fromUrl) throws Exception {

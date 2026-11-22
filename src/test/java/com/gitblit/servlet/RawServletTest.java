@@ -6,6 +6,12 @@ import com.gitblit.Keys;
 import com.gitblit.manager.IRepositoryManager;
 import com.gitblit.tests.mock.MockGitblitContext;
 import com.gitblit.tests.mock.MockRuntimeManager;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.wicket.ThreadContext;
+import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.eclipse.jetty.http.HttpURI;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -14,6 +20,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RawServletTest
 {
@@ -45,6 +52,27 @@ public class RawServletTest
     }
 
 
+
+    @Test
+    public void asLinkUsesUtf8WithEitherRequestBodyCharset()
+    {
+        HttpServletRequest servletRequest = mock(HttpServletRequest.class);
+        ServletWebRequest request = new ServletWebRequest(servletRequest, "", Url.parse("/"));
+        RequestCycle cycle = mock(RequestCycle.class);
+        when(cycle.getRequest()).thenReturn(request);
+
+        RequestCycle previousCycle = RequestCycle.get();
+        ThreadContext.setRequestCycle(cycle);
+        try {
+            for (String bodyCharset : new String[] { "ISO-8859-1", "UTF-8" }) {
+                when(servletRequest.getCharacterEncoding()).thenReturn(bodyCharset);
+                assertEquals(bodyCharset, "http://localhost/raw/repo.git/main/caf%C3%A9.txt",
+                        RawServlet.asLink("http://localhost", "repo.git", "main", "caf\u00e9.txt"));
+            }
+        } finally {
+            ThreadContext.setRequestCycle(previousCycle);
+        }
+    }
 
     @Test
     public void asLink_HttpUrlRepo()
@@ -557,7 +585,7 @@ public class RawServletTest
 
         assertNotNull(link);
         assertEquals(baseUrl + Constants.RAW_PATH + repository + "/"
-                + branch.replaceAll("/", "|") + "/", link);
+                + branch.replace("/", "%7C") + "/", link);
     }
 
     @Test
@@ -637,7 +665,7 @@ public class RawServletTest
 
         assertNotNull(link);
         assertEquals(baseUrl + Constants.RAW_PATH + repository + "/"
-                + branch.replaceAll("/", "|") + "/" + path, link);
+                + branch.replace("/", "%7C") + "/" + path, link);
     }
 
     @Test
@@ -669,7 +697,20 @@ public class RawServletTest
 
         assertNotNull(link);
         assertEquals(baseUrl + Constants.RAW_PATH + repository + "/"
-                + branch.replaceAll("/", "|") + "/" + path.replaceAll("/", "|"), link);
+                + branch.replace("/", "%7C") + "/" + path.replace("/", "%7C"), link);
+    }
+
+    @Test
+    public void asLinkRoundTripsMixedSlashSubstitutes()
+    {
+        settings.overrideSetting(Keys.web.forwardSlashCharacter, "|");
+        String repository = "group/repo.git";
+        String link = RawServlet.asLink("http://localhost", repository, "some/feature!in/here",
+                "large!stuff/folder/file!16");
+        String pathInfo = HttpURI.from(link).getDecodedPath().substring(Constants.RAW_PATH.length());
+
+        assertEquals("some/feature/in/here", rawServlet.getBranch(repository, pathInfo));
+        assertEquals("large/stuff/folder/file/16", rawServlet.getPath(repository, pathInfo));
     }
 
 
@@ -1046,7 +1087,7 @@ public class RawServletTest
     @Test
     public void getPath_Repo()
     {
-        String path = rawServlet.getPath("test.git", "", "test.git/");
+        String path = rawServlet.getPath("test.git", "test.git/");
 
         assertEquals("Path was supposed to be empty as no path was given.", "", path);
     }
@@ -1054,7 +1095,7 @@ public class RawServletTest
     @Test
     public void getPath_PiNull()
     {
-        String path = rawServlet.getPath("test.git", "", null);
+        String path = rawServlet.getPath("test.git", null);
 
         assertEquals("Path was supposed to be empty as path info is null.", "", path);
     }
@@ -1063,7 +1104,7 @@ public class RawServletTest
     @Test
     public void getPath_PiEmpty()
     {
-        String path = rawServlet.getPath("test.git", "", "");
+        String path = rawServlet.getPath("test.git", "");
 
         assertEquals("Path was supposed to be empty as no path info exists.", "", path);
     }
@@ -1071,7 +1112,7 @@ public class RawServletTest
     @Test
     public void getPath_LeadinRepo()
     {
-        String path = rawServlet.getPath("test.git", "", "some/test.git/");
+        String path = rawServlet.getPath("test.git", "some/test.git/");
 
         assertEquals("Path was supposed to be empty as no path was given.", "", path);
     }
@@ -1079,7 +1120,7 @@ public class RawServletTest
     @Test
     public void getPath_ProjectRepo()
     {
-        String path = rawServlet.getPath("smack/dab.git", "", "smack/dab.git/");
+        String path = rawServlet.getPath("smack/dab.git", "smack/dab.git/");
 
         assertEquals("Path was supposed to be empty as no path was given.", "", path);
     }
@@ -1087,7 +1128,7 @@ public class RawServletTest
     @Test
     public void getPath_RepoBranch()
     {
-        String path = rawServlet.getPath("test.git", "bee", "test.git/bee");
+        String path = rawServlet.getPath("test.git", "test.git/bee");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1095,7 +1136,7 @@ public class RawServletTest
     @Test
     public void getPath_LeadinRepoBranch()
     {
-        String path = rawServlet.getPath("repo.git", "bae", "project/repo.git/bae");
+        String path = rawServlet.getPath("repo.git", "project/repo.git/bae");
 
         assertEquals("Expected path to be empty since no path was present","" , path);
     }
@@ -1103,7 +1144,7 @@ public class RawServletTest
     @Test
     public void getPath_ProjectRepoBranch()
     {
-        String path = rawServlet.getPath("test/r.git", "b", "test/r.git/b");
+        String path = rawServlet.getPath("test/r.git", "test/r.git/b");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1111,7 +1152,7 @@ public class RawServletTest
     @Test
     public void getPath_LeadinProjectRepoBranch()
     {
-        String path = rawServlet.getPath("test/r.git", "b", "a/b/test/r.git/b");
+        String path = rawServlet.getPath("test/r.git", "a/b/test/r.git/b");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1119,7 +1160,7 @@ public class RawServletTest
     @Test
     public void getPath_RepoBranchTrailingSlash()
     {
-        String path = rawServlet.getPath("test.git", "fixthis", "test.git/fixthis/");
+        String path = rawServlet.getPath("test.git", "test.git/fixthis/");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1127,7 +1168,7 @@ public class RawServletTest
     @Test
     public void getPath_RepoBranchFile()
     {
-        String path = rawServlet.getPath("/bob.git", "branch", "bob.git/branch/file.txt");
+        String path = rawServlet.getPath("/bob.git", "bob.git/branch/file.txt");
 
         assertEquals("file.txt", path);
     }
@@ -1135,7 +1176,7 @@ public class RawServletTest
     @Test
     public void getPath_RepoBranchFolderFile()
     {
-        String path = rawServlet.getPath("/bill.git", "flex", "bill.git/flex/fold" + FSC + "laundr.y");
+        String path = rawServlet.getPath("/bill.git", "bill.git/flex/fold" + FSC + "laundr.y");
 
         assertEquals("fold/laundr.y", path);
     }
@@ -1143,7 +1184,7 @@ public class RawServletTest
     @Test
     public void getPath_RepoBranchFoldersTrailingSlash()
     {
-        String path = rawServlet.getPath("bill.git", "flex", "bill.git/flex/fold"+ FSC + "gold/");
+        String path = rawServlet.getPath("bill.git", "bill.git/flex/fold"+ FSC + "gold/");
 
         assertEquals("fold/gold", path);
     }
@@ -1151,7 +1192,7 @@ public class RawServletTest
     @Test
     public void getPath_RepoBranchFoldersTrailingFsc()
     {
-        String path = rawServlet.getPath("bill.git", "flex", "bill.git/flex/fold"+ FSC + "gold" + FSC);
+        String path = rawServlet.getPath("bill.git", "bill.git/flex/fold"+ FSC + "gold" + FSC);
 
         assertEquals("fold/gold", path);
     }
@@ -1159,7 +1200,7 @@ public class RawServletTest
     @Test
     public void getPath_LeadinProjectRepoBranchFoldersTrailingSlash()
     {
-        String path = rawServlet.getPath("bam/bum.git", "klingeling", "bim/bam/bum.git/klingeling/dumm" + FSC + "di" + FSC + "dumm/");
+        String path = rawServlet.getPath("bam/bum.git", "bim/bam/bum.git/klingeling/dumm" + FSC + "di" + FSC + "dumm/");
 
         assertEquals("dumm/di/dumm", path);
     }
@@ -1167,7 +1208,7 @@ public class RawServletTest
     @Test
     public void getPath_LeadinProjectRepoBranchFoldersTrailingFsc()
     {
-        String path = rawServlet.getPath("bam/bum.git", "klingeling", "bim/bam/bum.git/klingeling/dumm" + FSC + "di" + FSC + "dumm" + FSC);
+        String path = rawServlet.getPath("bam/bum.git", "bim/bam/bum.git/klingeling/dumm" + FSC + "di" + FSC + "dumm" + FSC);
 
         assertEquals("dumm/di/dumm", path);
     }
@@ -1175,7 +1216,7 @@ public class RawServletTest
     @Test
     public void getPath_RepoCommitid()
     {
-        String path = rawServlet.getPath("/git.git", "a02159e6378d63d0e1ad3c04a05462d9fc62fe89", "git.git/a02159e6378d63d0e1ad3c04a05462d9fc62fe89/");
+        String path = rawServlet.getPath("/git.git", "git.git/a02159e6378d63d0e1ad3c04a05462d9fc62fe89/");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1183,7 +1224,7 @@ public class RawServletTest
     @Test
     public void getPath_RepoCommitidNoTrailingSlash()
     {
-        String path = rawServlet.getPath("/git.git", "a02159e6378d63d0e1ad3c04a05462d9fc62fe89", "git.git/a02159e6378d63d0e1ad3c04a05462d9fc62fe89");
+        String path = rawServlet.getPath("/git.git", "git.git/a02159e6378d63d0e1ad3c04a05462d9fc62fe89");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1191,7 +1232,7 @@ public class RawServletTest
     @Test
     public void getPath_ProjectRepoCommitidFolderTrailingSlash()
     {
-        String path = rawServlet.getPath("git/git.git", "a02159e6378d63d0e1ad3c04a05462d9fc62fe89", "git/git.git/a02159e6378d63d0e1ad3c04a05462d9fc62fe89/src/");
+        String path = rawServlet.getPath("git/git.git", "git/git.git/a02159e6378d63d0e1ad3c04a05462d9fc62fe89/src/");
 
         assertEquals("src", path);
     }
@@ -1199,7 +1240,7 @@ public class RawServletTest
     @Test
     public void getPath_ProjectRepoCommitidFolderTrailingFsc()
     {
-        String path = rawServlet.getPath("git/git.git", "a02159e6378d63d0e1ad3c04a05462d9fc62fe89", "git/git.git/a02159e6378d63d0e1ad3c04a05462d9fc62fe89/src" + FSC);
+        String path = rawServlet.getPath("git/git.git", "git/git.git/a02159e6378d63d0e1ad3c04a05462d9fc62fe89/src" + FSC);
 
         assertEquals("src", path);
     }
@@ -1207,7 +1248,7 @@ public class RawServletTest
     @Test
     public void getPath_ProjectSubRepoCommitidFolderFile()
     {
-        String path = rawServlet.getPath("git/git.git", "a02159e6378d63d0e1ad3c04a05462d9fc62fe89", "Git implementations/git/git.git/a02159e6378d63d0e1ad3c04a05462d9fc62fe89/src" + FSC + "README.md");
+        String path = rawServlet.getPath("git/git.git", "Git implementations/git/git.git/a02159e6378d63d0e1ad3c04a05462d9fc62fe89/src" + FSC + "README.md");
 
         assertEquals("src/README.md", path);
     }
@@ -1215,7 +1256,7 @@ public class RawServletTest
     @Test
     public void getPath_RepoBranchWithFsc()
     {
-        String path = rawServlet.getPath("git.git", "feature/rebase", "git.git/feature" + FSC + "rebase");
+        String path = rawServlet.getPath("git.git", "git.git/feature" + FSC + "rebase");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1223,7 +1264,7 @@ public class RawServletTest
     @Test
     public void getPath_RepoBranchWithTwoFsc()
     {
-        String path = rawServlet.getPath("git.git", "feature/rebase/onto", "git.git/feature" + FSC + "rebase" + FSC + "onto");
+        String path = rawServlet.getPath("git.git", "git.git/feature" + FSC + "rebase" + FSC + "onto");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1231,7 +1272,7 @@ public class RawServletTest
     @Test
     public void getPath_ProjectRepoBranchWithTwoFsc()
     {
-        String path = rawServlet.getPath("Java/git/git.git", "feature/rebase/onto", "Java/git/git.git/feature" + FSC + "rebase" + FSC + "onto");
+        String path = rawServlet.getPath("Java/git/git.git", "Java/git/git.git/feature" + FSC + "rebase" + FSC + "onto");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1239,7 +1280,7 @@ public class RawServletTest
     @Test
     public void getPath_RepoBranchWithTwoFscTrailingSlash()
     {
-        String path = rawServlet.getPath("git.git", "feature/rebase/onto", "git.git/feature" + FSC + "rebase" + FSC + "onto/");
+        String path = rawServlet.getPath("git.git", "git.git/feature" + FSC + "rebase" + FSC + "onto/");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1247,7 +1288,7 @@ public class RawServletTest
     @Test
     public void getPath_ProjectRepoBranchWithTwoFscTrailingSlash()
     {
-        String path = rawServlet.getPath("in Go/git.git", "feature/rebase/onto", "in Go/git.git/feature" + FSC + "rebase" + FSC + "onto/");
+        String path = rawServlet.getPath("in Go/git.git", "in Go/git.git/feature" + FSC + "rebase" + FSC + "onto/");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1255,7 +1296,7 @@ public class RawServletTest
     @Test
     public void getPath_LeadinProjectRepoBranchWithTwoFscTrailingSlash()
     {
-        String path = rawServlet.getPath("Go/git.git", "feature/rebase/onto", "all the gits/Go/git.git/feature" + FSC + "rebase" + FSC + "onto/");
+        String path = rawServlet.getPath("Go/git.git", "all the gits/Go/git.git/feature" + FSC + "rebase" + FSC + "onto/");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1263,7 +1304,7 @@ public class RawServletTest
     @Test
     public void getPath_RepoBranchWithFscFolder()
     {
-        String path = rawServlet.getPath("git.git", "feature/rebase", "git.git/feature" + FSC + "rebase/onto");
+        String path = rawServlet.getPath("git.git", "git.git/feature" + FSC + "rebase/onto");
 
         assertEquals("onto", path);
     }
@@ -1271,7 +1312,7 @@ public class RawServletTest
     @Test
     public void getPath_RepoBranchWithFscFolderFile()
     {
-        String path = rawServlet.getPath("git.git", "feature/rebase", "git.git/feature" + FSC + "rebase/onto" + FSC + "head");
+        String path = rawServlet.getPath("git.git", "git.git/feature" + FSC + "rebase/onto" + FSC + "head");
 
         assertEquals("onto/head", path);
     }
@@ -1281,7 +1322,7 @@ public class RawServletTest
     {
         settings.overrideSetting(Keys.web.forwardSlashCharacter, "|");
 
-        String path = rawServlet.getPath("git.git", "some/feature", "git.git/some|feature");
+        String path = rawServlet.getPath("git.git", "git.git/some|feature");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1291,7 +1332,7 @@ public class RawServletTest
     {
         settings.overrideSetting(Keys.web.forwardSlashCharacter, String.valueOf(FSC));
 
-        String path = rawServlet.getPath("git.git", "some/feature", "git.git/some" + FSC + "feature");
+        String path = rawServlet.getPath("git.git", "git.git/some" + FSC + "feature");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1301,7 +1342,7 @@ public class RawServletTest
     {
         settings.overrideSetting(Keys.web.forwardSlashCharacter, ":");
 
-        String path = rawServlet.getPath("git.git", "hotfix/1.2.3", "git.git/hotfix:1.2.3/src:main:java/");
+        String path = rawServlet.getPath("git.git", "git.git/hotfix:1.2.3/src:main:java/");
 
         assertEquals("src/main/java", path);
     }
@@ -1311,7 +1352,7 @@ public class RawServletTest
     {
         settings.overrideSetting(Keys.web.forwardSlashCharacter, String.valueOf(FSC));
 
-        String path = rawServlet.getPath("git.git", "some/feature", "IBM/git.git/some" + FSC + "feature/some" + FSC + "folder" + FSC + "file.dot");
+        String path = rawServlet.getPath("git.git", "IBM/git.git/some" + FSC + "feature/some" + FSC + "folder" + FSC + "file.dot");
 
         assertEquals("some/folder/file.dot", path);
     }
@@ -1321,7 +1362,7 @@ public class RawServletTest
     {
         settings.overrideSetting(Keys.web.forwardSlashCharacter, ";");
 
-        String path = rawServlet.getPath("git.git", "some" + FSC + "feature", "git.git/some" + FSC + "feature");
+        String path = rawServlet.getPath("git.git", "git.git/some" + FSC + "feature");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1332,7 +1373,7 @@ public class RawServletTest
     {
         settings.overrideSetting(Keys.web.forwardSlashCharacter, ";");
 
-        String path = rawServlet.getPath("git.git", "some" + FSC + "feature", "git.git/some" + FSC + "feature/");
+        String path = rawServlet.getPath("git.git", "git.git/some" + FSC + "feature/");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1343,7 +1384,7 @@ public class RawServletTest
     {
         settings.overrideSetting(Keys.web.forwardSlashCharacter, ";");
 
-        String path = rawServlet.getPath("git.git", "some/feature", "git.git/some;feature/path" + FSC + "to" + FSC + "file.txt");
+        String path = rawServlet.getPath("git.git", "git.git/some;feature/path" + FSC + "to" + FSC + "file.txt");
 
         assertEquals("path" + FSC + "to" + FSC + "file.txt", path);
     }
@@ -1353,7 +1394,7 @@ public class RawServletTest
     {
         settings.overrideSetting(Keys.web.forwardSlashCharacter, ":");
 
-        String path = rawServlet.getPath("git.git", "go" + FSC + "to/start", "git.git/go" + FSC + "to:start");
+        String path = rawServlet.getPath("git.git", "git.git/go" + FSC + "to:start");
 
         assertEquals("Expected returned path to be empty since no path was present", "", path);
     }
@@ -1364,7 +1405,7 @@ public class RawServletTest
     {
         settings.overrideSetting(Keys.web.forwardSlashCharacter, "+");
 
-        String path = rawServlet.getPath("git.git", "go" + FSC + "to/prison", "git.git/go" + FSC + "to+prison/dont" + FSC + "collect");
+        String path = rawServlet.getPath("git.git", "git.git/go" + FSC + "to+prison/dont" + FSC + "collect");
 
         assertEquals("dont" + FSC + "collect", path);
     }
@@ -1375,7 +1416,7 @@ public class RawServletTest
     {
         settings.overrideSetting(Keys.web.forwardSlashCharacter, "+");
 
-        String path = rawServlet.getPath("git.git", "go" + FSC + "to/prison", "git.git/go" + FSC + "to+prison/dont" + FSC + "collect/");
+        String path = rawServlet.getPath("git.git", "git.git/go" + FSC + "to+prison/dont" + FSC + "collect/");
 
         assertEquals("dont" + FSC + "collect", path);
     }
@@ -1386,7 +1427,7 @@ public class RawServletTest
     {
         settings.overrideSetting(Keys.web.forwardSlashCharacter, "+");
 
-        String path = rawServlet.getPath("git.git", "go" + FSC + "to/prison", "git.git/go" + FSC + "to+prison/dont" + FSC + "collect+");
+        String path = rawServlet.getPath("git.git", "git.git/go" + FSC + "to+prison/dont" + FSC + "collect+");
 
         assertEquals("dont" + FSC + "collect", path);
     }
@@ -1397,7 +1438,7 @@ public class RawServletTest
     {
         settings.overrideSetting(Keys.web.forwardSlashCharacter, "+");
 
-        String path = rawServlet.getPath("git.git", "go" + FSC + "to/prison", "git.git/go" + FSC + "to+prison/dont" + FSC + "collect" + FSC);
+        String path = rawServlet.getPath("git.git", "git.git/go" + FSC + "to+prison/dont" + FSC + "collect" + FSC);
 
         assertEquals("dont" + FSC + "collect" + FSC, path);
     }
@@ -1408,7 +1449,7 @@ public class RawServletTest
     {
         settings.overrideSetting(Keys.web.forwardSlashCharacter, "+");
 
-        String path = rawServlet.getPath("git.git", "go" + FSC + "to/prison", "git.git/go" + FSC + "to+prison/" + FSC + "dont" + FSC + "collect+money.eur");
+        String path = rawServlet.getPath("git.git", "git.git/go" + FSC + "to+prison/" + FSC + "dont" + FSC + "collect+money.eur");
 
         assertEquals(FSC + "dont" + FSC + "collect/money.eur", path);
     }
@@ -1419,7 +1460,7 @@ public class RawServletTest
     {
         settings.overrideSetting(Keys.web.forwardSlashCharacter, "+");
 
-        String path = rawServlet.getPath("games/Monopoly/git.git", "go" + FSC + "to/prison", "blah/games/Monopoly/git.git/go" + FSC + "to+prison/dont" + FSC + "collect+money.eur");
+        String path = rawServlet.getPath("games/Monopoly/git.git", "blah/games/Monopoly/git.git/go" + FSC + "to+prison/dont" + FSC + "collect+money.eur");
 
         assertEquals("dont" + FSC + "collect/money.eur", path);
     }

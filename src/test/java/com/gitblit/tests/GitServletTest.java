@@ -21,15 +21,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
@@ -40,7 +44,6 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
@@ -99,18 +102,21 @@ public class GitServletTest extends GitblitUnitTest {
 		//need be deleted before Gitblit server instance is started
 		GitBlitSuite.deleteRefChecksFolder();
 		started.set(GitBlitSuite.startGitblit());
+		GitBlitSuite.ensureGitServletRepositories();
 
 		delete(getUser());
 	}
 
 	@AfterClass
 	public static void stopGitblit() throws Exception {
-		if (started.get()) {
-			GitBlitSuite.stopGitblit();
-			deleteWorkingFolders();
+		try {
+			delete(getUser());
+		} finally {
+			if (started.getAndSet(false)) {
+				GitBlitSuite.stopGitblit();
+				deleteWorkingFolders();
+			}
 		}
-
-		delete(getUser());
 	}
 
 	public static void deleteWorkingFolders() throws Exception {
@@ -208,7 +214,7 @@ public class GitServletTest extends GitblitUnitTest {
 
 		assertFalse("Unauthorized login cloned a repository?!", cloned);
 
-		FileUtils.delete(ticgit2Folder, FileUtils.RECURSIVE);
+		FileUtils.delete(ticgit2Folder, FileUtils.RECURSIVE | FileUtils.SKIP_MISSING | FileUtils.RETRY);
 
 		// switch to authenticated
 		model.authorizationControl = AuthorizationControl.AUTHENTICATED;
@@ -926,16 +932,42 @@ public class GitServletTest extends GitblitUnitTest {
 	}
 
 	@Test
-	public void testPushLog() throws IOException {
-		String name = "refchecks/ticgit.git";
-		File refChecks = new File(GitBlitSuite.REPOSITORIES, name);
-		Repository repository = new FileRepositoryBuilder().setGitDir(refChecks).build();
-		List<RefLogEntry> pushes = RefLogUtils.getRefLog(name, repository);
-		GitBlitSuite.close(repository);
-		assertTrue("Repository has an empty push log!", pushes.size() > 0);
+	public void testPushLog() throws Exception {
+		String name = "ticgit.git";
+		String ref = "refs/heads/push-log-" + UUID.randomUUID();
+		CredentialsProvider credentials = new UsernamePasswordCredentialsProvider(account, password);
+		File workingCopy = Files.createTempDirectory("gitblit-push-log-").toFile();
+		try (Git git = Git.cloneRepository().setURI(url + "/" + name)
+				.setDirectory(workingCopy).setCredentialsProvider(credentials).call()) {
+			String commitId = git.getRepository().resolve(Constants.HEAD).name();
+			PushResult push = git.push().setCredentialsProvider(credentials)
+					.setRefSpecs(new RefSpec("HEAD:" + ref)).call().iterator().next();
+			assertEquals(Status.OK, push.getRemoteUpdate(ref).getStatus());
+			try (Repository repository = GitBlitSuite.getTicgitRepository()) {
+				List<RefLogEntry> pushes = RefLogUtils.getRefLog(name, repository);
+				assertTrue("Push log is missing " + ref,
+						pushes.stream().anyMatch(entry -> commitId.equals(entry.getNewId(ref))));
+			} finally {
+				git.push().setCredentialsProvider(credentials).setRefSpecs(new RefSpec(":" + ref)).call();
+			}
+		} finally {
+			FileUtils.delete(workingCopy, FileUtils.RECURSIVE | FileUtils.RETRY);
+		}
 	}
 
 
+
+	@Test
+	public void testUploadPackAdvertisementThroughShortAlias() throws IOException {
+		HttpGet request = new HttpGet(GitBlitSuite.url + com.gitblit.Constants.R_PATH
+				+ "ticgit.git/info/refs?service=git-upload-pack");
+		try (CloseableHttpClient client = HttpClientBuilder.create().build();
+				CloseableHttpResponse response = client.execute(request)) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals("application/x-git-upload-pack-advertisement",
+					response.getEntity().getContentType().getValue());
+		}
+	}
 
 	@Test
 	public void testInvalidURLNoRepoName() throws IOException {

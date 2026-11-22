@@ -15,6 +15,7 @@
  */
 package com.gitblit.servlet;
 
+import java.net.URI;
 import java.text.MessageFormat;
 
 import com.google.inject.Inject;
@@ -22,6 +23,7 @@ import com.google.inject.Singleton;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import com.gitblit.Constants;
 import com.gitblit.Constants.AccessRestrictionType;
 import com.gitblit.Constants.AuthorizationControl;
 import com.gitblit.GitBlitException;
@@ -73,6 +75,27 @@ public class GitFilter extends AccessRestrictionFilter {
 
 		this.settings = settings;
 		this.federationManager = federationManager;
+	}
+
+	@Override
+	protected String getFullUrl(HttpServletRequest request) {
+		// Guice supplies the Git servlet mapping after the authorization filter runs.
+		String path = request.getRequestURI().substring(request.getContextPath().length());
+		String prefix;
+		if (path.startsWith(Constants.GIT_PATH)) {
+			prefix = Constants.GIT_PATH;
+		} else if (path.startsWith(Constants.R_PATH)) {
+			prefix = Constants.R_PATH;
+		} else {
+			return "";
+		}
+		try {
+			path = URI.create(path).getPath();
+		} catch (IllegalArgumentException e) {
+			return "";
+		}
+		String query = request.getQueryString();
+		return path.substring(prefix.length()) + (StringUtils.isEmpty(query) ? "" : "?" + query);
 	}
 
 	/**

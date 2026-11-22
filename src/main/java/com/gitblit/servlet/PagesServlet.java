@@ -75,7 +75,7 @@ public class PagesServlet extends RawServlet {
 	}
 
 	@Override
-	String getPath(String repository, String branch, String pi)
+	String getPath(String repository, String pi)
 	{
 		if (pi.equals(repository)) {
 			return "";
