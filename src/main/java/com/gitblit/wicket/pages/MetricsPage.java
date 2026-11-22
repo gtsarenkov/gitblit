@@ -34,7 +34,6 @@ import com.gitblit.utils.MetricUtils;
 import com.gitblit.utils.StringUtils;
 import com.gitblit.wicket.CacheControl;
 import com.gitblit.wicket.CacheControl.LastModified;
-import com.gitblit.wicket.WicketUtils;
 import com.gitblit.wicket.charting.Chart;
 import com.gitblit.wicket.charting.Charts;
 import com.gitblit.wicket.charting.Flotr2Charts;
@@ -50,9 +49,8 @@ public class MetricsPage extends RepositoryPage {
 		} else {
 			add(new Label("branchTitle", objectId));
 		}
-		Metric metricsTotal = null;
 		List<Metric> metrics = MetricUtils.getDateMetrics(r, objectId, true, null, getTimeZone());
-		metricsTotal = metrics.remove(0);
+		Metric metricsTotal = metrics.isEmpty() ? null : metrics.remove(0);
 		if (metricsTotal == null) {
 			add(new Label("branchStats", ""));
 		} else {
@@ -62,10 +60,6 @@ public class MetricsPage extends RepositoryPage {
 		}
 
 		Charts charts =  new Flotr2Charts();
-
-		add(WicketUtils.newBlankImage("commitsChart"));
-		add(WicketUtils.newBlankImage("dayOfWeekChart"));
-		add(WicketUtils.newBlankImage("authorsChart"));
 
 		createLineChart(charts, "commitsChart", metrics);
 		createBarChart(charts, "dayOfWeekChart", getDayOfWeekMetrics(r, objectId));

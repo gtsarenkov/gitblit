@@ -902,9 +902,62 @@ div.ticket-text {
 	padding: 5px 0px;
 }
 
+.repository-metric-chart {
+	width: 400px;
+	height: 100px;
+}
+
+.repository-metric-authors {
+	width: 800px;
+	height: 200px;
+	margin: 0 auto;
+}
+
+.repository-commits-chart {
+	float: right;
+	width: 290px;
+	height: 120px;
+}
+
+.ticket-heading {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px 10px;
+	padding: 10px 0 15px;
+}
+
+.ticket-heading .ticket-title {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.ticket-heading-diffstat {
+	margin-left: auto;
+}
+
+.ticket-actions {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 8px 0 10px;
+}
+
+.ticket-actions .btn-group + .btn-group {
+	margin-left: 0;
+}
+
 .status-display {
 	text-align: center;
-	font-weight: bold;	
+	font-weight: bold;
+}
+
+.status-display .aui-lozenge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 8px;
 }
 
 .status-change {
@@ -1793,23 +1846,184 @@ table.repositories tr.group td a {
 	color: black;
 }
 
-table.palette { border:0; width: 0 !important; }
-table.palette td.header { 
-	font-weight: bold; 
-	background-color: #ffffff !important;
-	padding-top: 0px !important;
-	margin-bottom: 0 !important;	
-	border: 0 !important;
-	border-radius: 0 !important;
-	line-height: 1em;
-}
-table.palette td.pane {
-	padding: 0px;
-	width: 250px !important;
+.gitblit-palette {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	gap: 12px;
+	max-width: 650px;
 }
 
-table.palette td.pane select {
-	width: 250px !important;
+.gitblit-palette .palette-header {
+	display: block;
+	margin-bottom: 4px;
+	font-weight: bold;
+}
+
+.gitblit-palette select {
+	box-sizing: border-box;
+	width: 100%;
+	margin: 0;
+}
+
+.gitblit-palette .palette-buttons {
+	align-self: center;
+}
+
+.gitblit-palette .palette-buttons > div {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.gitblit-palette .palette-buttons button {
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+	width: 36px;
+	height: 34px;
+	padding: 0;
+	border: 1px solid #b7c4d2;
+	border-radius: 4px;
+	background: #f6f8fb;
+	color: #1d4b7b;
+	font-size: 19px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.gitblit-palette .palette-buttons button:hover:enabled {
+	border-color: #1d4b7b;
+	background: #e5eef8;
+}
+
+.gitblit-palette .palette-buttons button:focus-visible {
+	outline: 2px solid #1d4b7b;
+	outline-offset: 2px;
+}
+
+.gitblit-palette .palette-buttons button:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.gitblit-palette .palette-add div::after { content: '\2192'; }
+.gitblit-palette .palette-remove div::after { content: '\2190'; }
+.gitblit-palette .palette-up div::after { content: '\2191'; }
+.gitblit-palette .palette-down div::after { content: '\2193'; }
+.gitblit-palette .palette-addAll div::after { content: '\21D2'; }
+.gitblit-palette .palette-removeAll div::after { content: '\21D0'; }
+
+.gitblit-palette .palette-clearer {
+	display: none;
+}
+
+@media (max-width: 600px) {
+	.gitblit-palette {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.gitblit-palette .palette-buttons > div {
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
+
+	.gitblit-palette .palette-add div::after { content: '\2193'; }
+	.gitblit-palette .palette-remove div::after { content: '\2191'; }
+	.gitblit-palette .palette-addAll div::after { content: '\21D3'; }
+	.gitblit-palette .palette-removeAll div::after { content: '\21D1'; }
+}
+
+.permission-settings {
+	width: 100%;
+	max-width: 800px;
+}
+
+.permission-settings th,
+.permission-settings td {
+	padding: 1px 3px;
+}
+
+.permission-settings th {
+	width: 1%;
+	white-space: nowrap;
+}
+
+.permission-filters {
+	display: flex;
+	justify-content: flex-end;
+	margin: 0 0 10px;
+}
+
+.permission-filters .btn-group {
+	display: flex;
+}
+
+.permission-row,
+.permission-add {
+	display: grid;
+	align-items: center;
+	gap: 8px;
+}
+
+.permission-row {
+	grid-template-columns: minmax(0, 1fr) auto minmax(115px, 28%);
+	padding: 4px 0;
+}
+
+.permission-registrant {
+	overflow-wrap: anywhere;
+}
+
+.permission-type {
+	justify-self: end;
+}
+
+.permission-add {
+	grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) auto;
+	margin: 0;
+	padding: 12px;
+}
+
+.permission-row select,
+.permission-add select {
+	box-sizing: border-box;
+	width: 100%;
+	min-width: 0;
+	margin: 0;
+}
+
+@media (max-width: 600px) {
+	.permission-settings tr,
+	.permission-settings th,
+	.permission-settings td {
+		display: block;
+	}
+
+	.permission-settings th {
+		width: auto;
+		text-align: left;
+		white-space: normal;
+	}
+
+	.permission-filters {
+		justify-content: flex-start;
+	}
+
+	.permission-row {
+		grid-template-columns: minmax(0, 1fr) auto;
+	}
+
+	.permission-row select {
+		grid-column: 1 / -1;
+	}
+
+	.permission-add {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.permission-add .btn {
+		justify-self: start;
+	}
 }
 
 table.gitnotes {		
@@ -2024,21 +2238,6 @@ span.metricsTitle {
 .localBranch {
 	background-color: #ccffcc;
 	border-color: #00cc33;
-}
-
-table .palette td.buttons button {
-	-webkit-border-radius:3px;-moz-border-radius:3px;border-radius:3px;	
-	border: 1px solid #ccc !important;
-	padding: 10px;
-	margin-bottom: 10px;
-}
-
-table .palette td.buttons button:hover {
-	border: 1px solid #0069D6 !important;
-}
-
-table .palette td.buttons button:active {
-	border: 1px solid orange !important;
 }
 
 .feedbackPanelERROR, .feedbackPanelINFO {	

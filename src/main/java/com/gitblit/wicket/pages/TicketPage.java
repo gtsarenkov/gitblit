@@ -502,8 +502,8 @@ public class TicketPage extends RepositoryPage {
 				};
 				controls.add(milestoneView);
 
-				String editHref = urlFor(EditTicketPage.class, params).toString();
-				controls.add(new ExternalLink("editLink", editHref, getString("gb.edit")));
+				controls.add(new BookmarkablePageLink<Void>("editLink", EditTicketPage.class,
+						WicketUtils.newObjectParameter(repositoryName, Long.toString(ticket.number))));
 
 				add(controls);
 			} else {
@@ -512,8 +512,8 @@ public class TicketPage extends RepositoryPage {
 				 */
 				Fragment controls = new Fragment("controls", "closedControlsFragment", TicketPage.this);
 
-				String editHref = urlFor(EditTicketPage.class, params).toString();
-				controls.add(new ExternalLink("editLink", editHref, getString("gb.edit")));
+				controls.add(new BookmarkablePageLink<Void>("editLink", EditTicketPage.class,
+						WicketUtils.newObjectParameter(repositoryName, Long.toString(ticket.number))));
 
 				add(controls);
 			}
@@ -646,7 +646,7 @@ public class TicketPage extends RepositoryPage {
 		/*
 		 * COMMENTS & STATUS CHANGES (DISCUSSION TAB)
 		 */
-		if (comments.size() == 0) {
+		if (discussion.isEmpty()) {
 			add(new Label("discussion").setVisible(false));
 		} else {
 			Fragment discussionFragment = new Fragment("discussion", "discussionFragment", TicketPage.this);
@@ -702,6 +702,7 @@ public class TicketPage extends RepositoryPage {
 						frag.add(status);
 						addUserAttributions(frag, entry, avatarWidth);
 						addDateAttributions(frag, entry);
+						addCommentPermalink(frag, entry);
 						item.add(frag);
 					} else {
 						/*
@@ -721,6 +722,7 @@ public class TicketPage extends RepositoryPage {
 						frag.add(new Label("comment", safeComment).setEscapeModelStrings(false));
 						addUserAttributions(frag, entry, avatarWidth);
 						addDateAttributions(frag, entry);
+						addCommentPermalink(frag, entry);
 						item.add(frag);
 					}
 				}
@@ -805,8 +807,7 @@ public class TicketPage extends RepositoryPage {
 				// current revision
 				MarkupContainer panel = createPatchsetPanel("panel", repository, user);
 				patchsetFrag.add(panel);
-				addUserAttributions(patchsetFrag, currentRevision, avatarWidth);
-				addUserAttributions(panel, currentRevision, 0);
+				addUserAttributions(panel, currentRevision, avatarWidth);
 				addDateAttributions(panel, currentRevision);
 			} else {
 				// current revision
@@ -1062,8 +1063,9 @@ public class TicketPage extends RepositoryPage {
 	protected void addDateAttributions(MarkupContainer container, Change entry) {
 		container.add(WicketUtils.createDateLabel("changeDate", entry.date, GitBlitWebSession
 				.get().getTimezone(), getTimeUtils(), false));
+	}
 
-		// set the id attribute
+	private void addCommentPermalink(MarkupContainer container, Change entry) {
 		if (entry.hasComment()) {
 			container.setOutputMarkupId(true);
 			container.add(new AttributeModifier("id", Model.of(entry.getId())));

@@ -18,6 +18,7 @@ package com.gitblit.wicket.pages;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.data.DataView;
@@ -62,10 +63,13 @@ public class ProjectsPage extends RootPage {
 
 	private void setup(PageParameters params) {
 		setupPage("", "");
+		WebMarkupContainer projectsPanel = new WebMarkupContainer("projectsPanel");
+		add(projectsPanel);
 		// check to see if we should display a login message
 		boolean authenticateView = app().settings().getBoolean(Keys.web.authenticateViewPages, true);
 		if (authenticateView && !GitBlitWebSession.get().isLoggedIn()) {
-			add(new Label("projectsPanel"));
+			info("Please log in to view projects.");
+			projectsPanel.setVisible(false);
 			return;
 		}
 
@@ -113,7 +117,7 @@ public class ProjectsPage extends RootPage {
 				counter++;
 			}
 		};
-		add(dataView);
+		projectsPanel.add(dataView);
 	}
 
 	@Override

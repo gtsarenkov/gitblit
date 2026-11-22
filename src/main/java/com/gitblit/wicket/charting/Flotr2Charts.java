@@ -37,14 +37,12 @@ public class Flotr2Charts extends Charts {
 		ServletContext servletContext = WebApplication.get().getServletContext();
 		String contextPath = servletContext.getContextPath();
 
-		response.render(JavaScriptHeaderItem.forUrl(contextPath + "/bootstrap/js/jquery.js"));
 		response.render(JavaScriptHeaderItem.forUrl(contextPath + "/flotr2/flotr2.min.js"));
 		response.render(CssHeaderItem.forUrl(contextPath + "/flotr2/flotr2.custom.css"));
 
 		// prepare draw chart function
 		StringBuilder sb = new StringBuilder();
 
-		line(sb, "$( document ).ready(function() {");
 		line(sb, "try {");
 		// add charts to header
 		for (Chart chart : charts) {
@@ -56,8 +54,6 @@ public class Flotr2Charts extends Charts {
 		line(sb, "    window.console.log(exception);");
 		line(sb, "  }");
 		line(sb, "}");
-		// end draw chart function
-		line(sb, "});");
 		response.render(OnDomReadyHeaderItem.forScript(sb.toString()));
 	}
 

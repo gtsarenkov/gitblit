@@ -113,12 +113,12 @@ public class CommentPanel extends BasePanel {
 		markdownPreview = new Label("markdownPreview", markdownPreviewModel);
 		markdownPreview.setEscapeModelStrings(false);
 		markdownPreview.setOutputMarkupId(true);
-		add(markdownPreview);
+		form.add(markdownPreview);
 
 		markdownEditor = new MarkdownTextArea("markdownEditor", markdownPreviewModel, markdownPreview);
 		markdownEditor.setRepository(repositoryName);
 		WicketUtils.setInputPlaceholder(markdownEditor, getString("gb.leaveComment"));
-		add(markdownEditor);
+		form.add(markdownEditor);
 	}
 
 	public void setRepository(String repositoryName) {

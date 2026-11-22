@@ -36,6 +36,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.pages.RedirectPage;
@@ -97,6 +98,7 @@ public abstract class BasePage extends SessionPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		String context = getRequest().getContextPath();
+		response.render(JavaScriptHeaderItem.forReference(getApplication().getJavaScriptLibrarySettings().getJQueryReference()));
 		for (String stylesheet : List.of("/bootstrap/css/bootstrap.css", "/bootstrap/css/iconic.css",
 				"/fontawesome/css/font-awesome.min.css", "/octicons/octicons.css",
 				"/gitblit.css", "/bootstrap-fixes.css")) {
@@ -112,7 +114,6 @@ public abstract class BasePage extends SessionPage {
 
 	private void addCommonScripts() {
 		String context = getRequest().getContextPath();
-		addBottomScriptUrl(context + "/bootstrap/js/jquery.js");
 		addBottomScriptUrl(context + "/bootstrap/js/bootstrap.js");
 		addBottomScriptUrl(context + "/gitblit/js/collapsible-table.js");
 		addBottomScriptUrl(context + "/gitblit/js/dialogs.js");

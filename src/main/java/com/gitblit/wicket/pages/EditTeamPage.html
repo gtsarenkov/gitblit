@@ -34,9 +34,9 @@
 		
 		<!-- access permissions tab -->
 		<div class="tab-pane" id="permissions">
-		<table class="plain">
+		<table class="permission-settings">
 			<tbody class="settings">
-				<tr><th><wicket:message key="gb.teamMembers"></wicket:message></th><td style="padding:2px;"><span wicket:id="users"></span></td></tr>
+				<tr><th><wicket:message key="gb.teamMembers"></wicket:message></th><td style="padding:2px;"><div wicket:id="users" class="gitblit-palette"></div></td></tr>
 				<tr><td colspan="2"><hr></hr></td></tr>
 				<tr><th><wicket:message key="gb.repositoryPermissions"></wicket:message></th><td style="padding:2px;"><span wicket:id="repositories"></span></td></tr>
 			</tbody>
@@ -48,8 +48,8 @@
 			<table class="plain">
 				<tbody class="settings">
 				<tr><td colspan="2" style="padding-top:10px;"><h3><wicket:message key="gb.hookScripts"></wicket:message> &nbsp;<small><wicket:message key="gb.hookScriptsDescription"></wicket:message></small></h3></td></tr>	
-				<tr><th><wicket:message key="gb.preReceiveScripts"></wicket:message><p></p><span wicket:id="inheritedPreReceive"></span></th><td style="padding:2px;"><span wicket:id="preReceiveScripts"></span></td></tr>
-					<tr><th><wicket:message key="gb.postReceiveScripts"></wicket:message><p></p><span wicket:id="inheritedPostReceive"></span></th><td style="padding:2px;"><span wicket:id="postReceiveScripts"></span></td></tr>
+				<tr><th><wicket:message key="gb.preReceiveScripts"></wicket:message><p></p><span wicket:id="inheritedPreReceive"></span></th><td style="padding:2px;"><div wicket:id="preReceiveScripts" class="gitblit-palette"></div></td></tr>
+					<tr><th><wicket:message key="gb.postReceiveScripts"></wicket:message><p></p><span wicket:id="inheritedPostReceive"></span></th><td style="padding:2px;"><div wicket:id="postReceiveScripts" class="gitblit-palette"></div></td></tr>
 				</tbody>
 			</table>
 		</div>

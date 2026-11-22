@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -155,9 +156,9 @@ public class SummaryPage extends RepositoryPage {
 			add(new Label("readme").setVisible(false));
 		}
 
-		if (metrics == null || metrics.isEmpty()) {
-			add(new Label("commitsChart").setVisible(false));
-		} else {
+		boolean showCommitsChart = metrics != null && !metrics.isEmpty();
+		add(new WebMarkupContainer("commitsChart").setVisible(showCommitsChart));
+		if (showCommitsChart) {
 			Charts charts = createCharts(metrics);
 			add(new HeaderContributor<>(charts));
 		}
